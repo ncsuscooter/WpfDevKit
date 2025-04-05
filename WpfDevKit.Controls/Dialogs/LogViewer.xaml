@@ -1,0 +1,73 @@
+﻿<UserControl x:Class="WpfDevKit.Controls.Dialogs.LogViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:fdg="clr-namespace:WpfDevKit.Controls.FilterDataGrid"
+             xmlns:beh="clr-namespace:WpfDevKit.Controls.Behaviors"
+             xmlns:conv="clr-namespace:WpfDevKit.Controls.Converters"
+             xmlns:local="clr-namespace:WpfDevKit.Controls.Dialogs"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=local:DialogBase}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
+            <CheckBox Margin="5" Name="ID"          Content="ID"          IsChecked="True"  />
+            <CheckBox Margin="5" Name="Timestamp"   Content="Timestamp"   IsChecked="True"  />
+            <CheckBox Margin="5" Name="Machine"     Content="Machine"     IsChecked="False" />
+            <CheckBox Margin="5" Name="User"        Content="User"        IsChecked="False" />
+            <CheckBox Margin="5" Name="Application" Content="Application" IsChecked="False" />
+            <CheckBox Margin="5" Name="Version"     Content="Version"     IsChecked="False" />
+            <CheckBox Margin="5" Name="Class"       Content="Class"       IsChecked="False" />
+            <CheckBox Margin="5" Name="Method"      Content="Method"      IsChecked="False" />
+            <CheckBox Margin="5" Name="Thread"      Content="Thread"      IsChecked="True"  />
+            <CheckBox Margin="5" Name="Category"    Content="Category"    IsChecked="True"  />
+            <CheckBox Margin="5" Name="Message"     Content="Message"     IsChecked="True"  />
+            <CheckBox Margin="5" Name="Attributes"  Content="Attributes"  IsChecked="True"  />
+            <CheckBox Margin="5" Name="Level"       Content="Level"       IsChecked="False" />
+        </StackPanel>
+        <DataGrid Grid.Row="1" Margin="5 0 5 5" EnableRowVirtualization="False" ItemsSource="{Binding Path=Logs}" Style="{StaticResource CategorialDataGrid}" beh:ItemsControlBehaviors.IsAutoScroll="True">
+            <DataGrid.Resources>
+                <conv:StringToBrushConverter x:Key="CategoryToBrush" />
+            </DataGrid.Resources>
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="DataGridCell">
+                                <Grid Background="{TemplateBinding Background}">
+                                    <ContentPresenter VerticalAlignment="Center" />
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Foreground" Value="White" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="False">
+                            <Setter Property="Foreground" Value="{Binding Path=Category, Converter={StaticResource CategoryToBrush}}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.CellStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Width="Auto" Header="ID"          Binding="{Binding Index,              Mode=OneWay}" Visibility="{Binding Source={x:Reference ID},          Path=IsChecked, Converter={StaticResource BooleanToVisibility}}" fdg:FilterBehavior.IsEnabled="True" />
+                <DataGridTextColumn Width="Auto" Header="Timestamp"   Binding="{Binding Timestamp,          Mode=OneWay}" Visibility="{Binding Source={x:Reference Timestamp},   Path=IsChecked, Converter={StaticResource BooleanToVisibility}}" fdg:FilterBehavior.IsEnabled="True" />
+                <DataGridTextColumn Width="Auto" Header="Machine"     Binding="{Binding MachineName,        Mode=OneWay}" Visibility="{Binding Source={x:Reference Machine},     Path=IsChecked, Converter={StaticResource BooleanToVisibility}}" fdg:FilterBehavior.IsEnabled="True" />
+                <DataGridTextColumn Width="Auto" Header="User"        Binding="{Binding UserName,           Mode=OneWay}" Visibility="{Binding Source={x:Reference User},        Path=IsChecked, Converter={StaticResource BooleanToVisibility}}" fdg:FilterBehavior.IsEnabled="True" />
+                <DataGridTextColumn Width="Auto" Header="Application" Binding="{Binding ApplicationName,    Mode=OneWay}" Visibility="{Binding Source={x:Reference Application}, Path=IsChecked, Converter={StaticResource BooleanToVisibility}}" fdg:FilterBehavior.IsEnabled="True" />
+                <DataGridTextColumn Width="Auto" Header="Version"     Binding="{Binding ApplicationVersion, Mode=OneWay}" Visibility="{Binding Source={x:Reference Version},     Path=IsChecked, Converter={StaticResource BooleanToVisibility}}" fdg:FilterBehavior.IsEnabled="True" />
+                <DataGridTextColumn Width="Auto" Header="Class"       Binding="{Binding ClassName,          Mode=OneWay}" Visibility="{Binding Source={x:Reference Class},       Path=IsChecked, Converter={StaticResource BooleanToVisibility}}" fdg:FilterBehavior.IsEnabled="True" />
+                <DataGridTextColumn Width="Auto" Header="Method"      Binding="{Binding MethodName,         Mode=OneWay}" Visibility="{Binding Source={x:Reference Method},      Path=IsChecked, Converter={StaticResource BooleanToVisibility}}" fdg:FilterBehavior.IsEnabled="True" />
+                <DataGridTextColumn Width="Auto" Header="Thread"      Binding="{Binding ThreadId,           Mode=OneWay}" Visibility="{Binding Source={x:Reference Thread},      Path=IsChecked, Converter={StaticResource BooleanToVisibility}}" fdg:FilterBehavior.IsEnabled="True" />
+                <DataGridTextColumn Width="Auto" Header="Category"    Binding="{Binding Category,           Mode=OneWay}" Visibility="{Binding Source={x:Reference Category},    Path=IsChecked, Converter={StaticResource BooleanToVisibility}}" fdg:FilterBehavior.IsEnabled="True" />
+                <DataGridTextColumn Width="3*"   Header="Message"     Binding="{Binding Message,            Mode=OneWay}" Visibility="{Binding Source={x:Reference Message},     Path=IsChecked, Converter={StaticResource BooleanToVisibility}}" fdg:FilterBehavior.IsEnabled="True" ElementStyle="{StaticResource WrapTextBlock}" />
+                <DataGridTextColumn Width="2*"   Header="Attributes"  Binding="{Binding Attributes,         Mode=OneWay}" Visibility="{Binding Source={x:Reference Attributes},  Path=IsChecked, Converter={StaticResource BooleanToVisibility}}" fdg:FilterBehavior.IsEnabled="True" ElementStyle="{StaticResource WrapTextBlock}" />
+                <DataGridTextColumn Width="Auto" Header="Level"       Binding="{Binding ExceptionLevel,     Mode=OneWay}" Visibility="{Binding Source={x:Reference Level},       Path=IsChecked, Converter={StaticResource BooleanToVisibility}}" fdg:FilterBehavior.IsEnabled="True" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

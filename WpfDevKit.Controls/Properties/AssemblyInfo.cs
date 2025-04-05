@@ -1,0 +1,16 @@
+﻿using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Windows;
+
+[assembly: AssemblyTitle("WpfDevKit.Controls")]
+[assembly: AssemblyDescription("Reusable WPF Controls for MVVM")]
+[assembly: AssemblyConfiguration("Development")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("WpfDevKit.Controls")]
+[assembly: AssemblyCopyright("")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: ComVisible(false)]
+[assembly: ThemeInfo(ResourceDictionaryLocation.None, ResourceDictionaryLocation.SourceAssembly)]

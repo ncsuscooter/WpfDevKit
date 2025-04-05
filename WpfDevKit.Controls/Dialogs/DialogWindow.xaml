@@ -1,0 +1,61 @@
+﻿<Window x:Class="WpfDevKit.Controls.Dialogs.DialogWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:beh="clr-namespace:WpfDevKit.Controls.Behaviors"
+        xmlns:local="clr-namespace:WpfDevKit.Controls.Dialogs"
+        mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=local:DialogBase}"
+        FontSize="16"
+        ShowInTaskbar="False"
+        SourceInitialized="WindowSourceInitialized"
+        Title="{Binding  Path=Title,  Mode=TwoWay}"
+        Height="{Binding Path=Height, Mode=TwoWay}"
+        Width="{Binding  Path=Width,  Mode=TwoWay}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Visibility="{Binding Path=IsMessageBarVisible, Converter={StaticResource BooleanToVisibility}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Image   Grid.Column="0" 
+                     Margin="5"
+                     Height="64"
+                     Width="64"
+                     Stretch="Uniform"
+                     RenderOptions.BitmapScalingMode="HighQuality"
+                     Source="{Binding Path=ImageSource, FallbackValue={StaticResource DefaultImage}}" />
+            <TextBox Grid.Column="1"
+                     Margin="5"
+                     MaxHeight="64"
+                     beh:TextBoxBehaviors.IsLabel="True"
+                     MaxLines="2"
+                     VerticalScrollBarVisibility="Auto"
+                     Text="{Binding Path=Message, FallbackValue='Message'}" 
+                     FontSize="{Binding Path=MessageFontSize, FallbackValue=48}"
+                     FontWeight="{Binding Path=MessageFontWeight, FallbackValue='Bold', Converter={StaticResource StringToFontWeight}}" />
+        </Grid>
+        <ContentControl Grid.Row="1" Content="{Binding}" />
+        <local:LogViewer Grid.Row="1" Visibility="{Binding Path=IsMessageLogVisible, Converter={StaticResource BooleanToVisibility}}" />
+        <Border Grid.Row="2"
+                BorderThickness="0.75"
+                BorderBrush="DimGray"
+                Background="LightGray"
+                Visibility="{Binding IsButtonBarVisible, Converter={StaticResource BooleanToVisibility}}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Yes"    Width="80" Margin="5" Visibility="{Binding Path=IsYesNoVisible,  Converter={StaticResource BooleanToVisibility}}" Command="{Binding Path=Command}" CommandParameter="Yes" />
+                    <Button Content="No"     Width="80" Margin="5" Visibility="{Binding Path=IsYesNoVisible,  Converter={StaticResource BooleanToVisibility}}" Command="{Binding Path=Command}" CommandParameter="No" />
+                    <Button Content="OK"     Width="80" Margin="5" Visibility="{Binding Path=IsOkVisible,     Converter={StaticResource BooleanToVisibility}}" Command="{Binding Path=Command}" CommandParameter="Ok" />
+                    <Button Content="Close"  Width="80" Margin="5" Visibility="{Binding Path=IsCloseVisible,  Converter={StaticResource BooleanToVisibility}}" Command="{Binding Path=Command}" CommandParameter="Close" />
+                    <Button Content="Cancel" Width="80" Margin="5" Visibility="{Binding Path=IsCancelVisible, Converter={StaticResource BooleanToVisibility}}" Command="{Binding Path=Command}" CommandParameter="Cancel" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

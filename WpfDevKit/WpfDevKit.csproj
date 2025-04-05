@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{816A63DB-D784-4B20-8779-C360B287C979}</ProjectGuid>
+    <OutputType>library</OutputType>
+    <RootNamespace>WpfDevKit</RootNamespace>
+    <AssemblyName>WpfDevKit</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\WpfDevKit.App\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Dependency Injection\Interfaces\IOptions.cs" />
+    <Compile Include="Dependency Injection\Extensions\ServiceCollectionExtensions.cs" />
+    <Compile Include="Hosting\ServiceHost.cs" />
+    <Compile Include="Hosting\ServiceHostBuilder.cs" />
+    <Compile Include="Interfaces\ICommandFactory.cs" />
+    <Compile Include="Logging\Interfaces\ILogMessage.cs" />
+    <Compile Include="Logging\Interfaces\IUserLogProvider.cs" />
+    <Compile Include="Dependency Injection\Interfaces\IServiceCollection.cs" />
+    <Compile Include="Dependency Injection\Options.cs" />
+    <Compile Include="Dependency Injection\ServiceProvider.cs" />
+    <Compile Include="Dependency Injection\ServiceCollection.cs" />
+    <Compile Include="Dependency Injection\ServiceDescriptor.cs" />
+    <Compile Include="Dependency Injection\TServiceLifetime.cs" />
+    <Compile Include="Dependency Injection\Extensions\ServiceProviderExtensions.cs" />
+    <Compile Include="Logging\LogProviderCollection.cs" />
+    <Compile Include="Logging\Interfaces\ILogProviderCollection.cs" />
+    <Compile Include="Controls\Dialogs\Enums\TDialogButtons.cs" />
+    <Compile Include="Controls\Dialogs\Enums\TDialogImage.cs" />
+    <Compile Include="Controls\Dialogs\Enums\TDialogResult.cs" />
+    <Compile Include="Controls\Dialogs\Interfaces\IDialogContext.cs" />
+    <Compile Include="Controls\Dialogs\Interfaces\IDialogService.cs" />
+    <Compile Include="Controls\Dialogs\Interfaces\IDialogWindow.cs" />
+    <Compile Include="Resolvable\Attributes\ResolvableAttribute.cs" />
+    <Compile Include="Resolvable\ResolvableFactory.cs" />
+    <Compile Include="Interfaces\IResolvableFactory.cs" />
+    <Compile Include="Mvvm\CommandBase.cs" />
+    <Compile Include="Interfaces\IObservable.cs" />
+    <Compile Include="Mvvm\ObservableBase.cs" />
+    <Compile Include="Mvvm\PageBase.cs" />
+    <Compile Include="Extensions\EnumExtensions.cs" />
+    <Compile Include="Extensions\TimeSpanExtensions.cs" />
+    <Compile Include="Logging\Enums\TLogCategory.cs" />
+    <Compile Include="Logging\Enums\TLogElement.cs" />
+    <Compile Include="Logging\Extensions\LogServiceExtensions.cs" />
+    <Compile Include="Logging\Interfaces\ILogMetrics.cs" />
+    <Compile Include="Logging\Interfaces\ILogProvider.cs" />
+    <Compile Include="Logging\Interfaces\ILogService.cs" />
+    <Compile Include="Logging\LogBackgroundService.cs" />
+    <Compile Include="Logging\LogMessage.cs" />
+    <Compile Include="Logging\LogMetrics.cs" />
+    <Compile Include="Logging\LogQueue.cs" />
+    <Compile Include="Logging\LogService.cs" />
+    <Compile Include="Logging\Providers\Options\ConsoleLogProviderOptions.cs" />
+    <Compile Include="Logging\Providers\Options\MemoryLogProviderOptions.cs" />
+    <Compile Include="Logging\Providers\Options\UserLogProviderOptions.cs" />
+    <Compile Include="Logging\Providers\ConsoleLogProvider.cs" />
+    <Compile Include="Logging\Providers\MemoryLogProvider.cs" />
+    <Compile Include="Logging\Providers\UserLogProvider.cs" />
+    <Compile Include="Resolvable\Extensions\ServiceCollectionExtensions.cs" />
+    <Compile Include="Services\BusyService.cs" />
+    <Compile Include="Services\ConnectivityService.cs" />
+    <Compile Include="Services\Options\ConnectivityServiceOptions.cs" />
+    <Compile Include="Interfaces\IBusyService.cs" />
+    <Compile Include="Hosting\BackgroundService.cs" />
+    <Compile Include="Hosting\Interfaces\IBackgroundService.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\ICollectionSynchronizationService.cs" />
+    <Compile Include="Interfaces\IConnectivityService.cs" />
+    <Compile Include="Interfaces\IContextService.cs" />
+    <Compile Include="Utilities\ExponentialRetry.cs" />
+    <Compile Include="Utilities\StartStopRegistration.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
