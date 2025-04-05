@@ -7,14 +7,43 @@ using WpfDevKit.Interfaces;
 
 namespace WpfDevKit.Mvvm
 {
+    /// <summary>
+    /// Default implementation of <see cref="IResolvableFactory"/> that resolves
+    /// and creates instances of classes using constructor and property injection.
+    /// Supports dynamic parameters and attributes for fine-grained control.
+    /// </summary>
     internal class ResolvableFactory : IResolvableFactory
     {
         private readonly IServiceProvider serviceProvider;
         private static readonly ConcurrentDictionary<Type, ConstructorInfo> constructorCache = new ConcurrentDictionary<Type, ConstructorInfo>();
         private static readonly ConcurrentDictionary<Type, List<PropertyInfo>> injectablePropertiesCache = new ConcurrentDictionary<Type, List<PropertyInfo>>();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResolvableFactory"/> class
+        /// using the specified service provider.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider used to resolve dependencies.</param>
         public ResolvableFactory(IServiceProvider serviceProvider) => this.serviceProvider = serviceProvider;
+
+        /// <summary>
+        /// Creates an instance of the specified class type, resolving dependencies
+        /// via constructor and property injection.
+        /// </summary>
+        /// <typeparam name="TClass">The type of class to instantiate.</typeparam>
+        /// <param name="parameters">Optional parameters to assist with constructor resolution.</param>
+        /// <returns>A fully constructed instance of <typeparamref name="TClass"/>.</returns>
         public TClass Create<TClass>(params object[] parameters) where TClass : class => (TClass)Create(typeof(TClass), parameters);
+
+        /// <summary>
+        /// Creates an instance of the specified type using the most suitable constructor
+        /// and resolves any [Resolvable]-decorated properties after instantiation.
+        /// </summary>
+        /// <param name="type">The type to create. Must be a non-abstract class.</param>
+        /// <param name="parameters">Optional parameters used to assist with constructor resolution.</param>
+        /// <returns>A new instance of the specified type.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the provided <paramref name="type"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown if the provided <paramref name="type"/> is not a class.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if no public constructor is found or dependencies cannot be resolved.</exception>
         public object Create(Type type, params object[] parameters)
         {
             if (type == null)

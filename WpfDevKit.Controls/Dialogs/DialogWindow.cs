@@ -42,9 +42,24 @@ namespace WpfDevKit.Controls.Dialogs
         [StructLayout(LayoutKind.Sequential)]
         private struct RECT
         {
+            /// <summary>
+            /// Gets or sets the left position of the dialog window.
+            /// </summary>
             public int Left;
+
+            /// <summary>
+            /// Gets or sets the top position of the dialog window.
+            /// </summary>
             public int Top;
+
+            /// <summary>
+            /// Gets or sets the right position of the dialog window.
+            /// </summary>
             public int Right;
+
+            /// <summary>
+            /// Gets or sets the bottom position of the dialog window.
+            /// </summary>
             public int Bottom;
         }
 

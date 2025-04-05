@@ -8,30 +8,47 @@ using System.Windows.Media;
 namespace WpfDevKit.Controls.Converters
 {
     /// <summary>
-    /// A markup extension that converts a string (or binding) to a <see cref="Brush"/> using the application's resource dictionary.
+    /// A markup extension that provides a <see cref="Brush"/> by resolving a string key or binding
+    /// against a resource dictionary. Falls back to a default brush if no match is found.
     /// </summary>
     [MarkupExtensionReturnType(typeof(Brush))]
     public class BrushForExtension : MarkupExtension
     {
         /// <summary>
-        /// The key or binding used to look up the brush.
+        /// Gets or sets the key or binding used to look up the brush.
+        /// This can be a string representing a resource key, or a <see cref="Binding"/> for dynamic resolution.
         /// </summary>
         public object Value { get; set; }
 
         /// <summary>
-        /// A fallback brush if no resource is found.
+        /// Gets or sets the fallback brush to use when no brush is found in the provided or application resources.
         /// </summary>
         public Brush Fallback { get; set; } = Brushes.Black;
 
         /// <summary>
-        /// Optional dictionary to search before falling back to application resources.
+        /// Gets or sets an optional <see cref="ResourceDictionary"/> to search for brushes
+        /// before falling back to application-level resources.
         /// </summary>
         public ResourceDictionary BrushMap { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BrushForExtension"/> class.
+        /// </summary>
         public BrushForExtension() { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BrushForExtension"/> class
+        /// with the specified key or binding.
+        /// </summary>
+        /// <param name="value">The resource key or <see cref="Binding"/> used to resolve the brush.</param>
         public BrushForExtension(object value) => Value = value;
 
+        /// <summary>
+        /// Returns the appropriate brush based on the specified key or binding.
+        /// If a <see cref="Binding"/> is provided, wraps it with a converter to resolve the brush at runtime.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider used during XAML processing.</param>
+        /// <returns>A resolved <see cref="Brush"/> from resources or the <see cref="Fallback"/> value.</returns>
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
             // Handle bindings
@@ -62,10 +79,25 @@ namespace WpfDevKit.Controls.Converters
             return Fallback;
         }
 
+        /// <summary>
+        /// A private value converter used when the extension is initialized with a <see cref="Binding"/>.
+        /// Converts string keys to brushes using the same logic as <see cref="ProvideValue"/>.
+        /// </summary>
         private class InlineStringToBrushConverter : IValueConverter
         {
+            /// <summary>
+            /// Gets or sets the fallback brush to use when resolution fails.
+            /// </summary>
             public Brush Fallback { get; set; }
+
+            /// <summary>
+            /// Gets or sets an optional dictionary for key-to-brush mapping.
+            /// </summary>
             public ResourceDictionary BrushMap { get; set; }
+
+            /// <summary>
+            /// Attempts to convert a string key into a <see cref="Brush"/> using the provided resources.
+            /// </summary>
             public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
             {
                 if (value is string key)
@@ -77,6 +109,10 @@ namespace WpfDevKit.Controls.Converters
                 }
                 return Fallback;
             }
+
+            /// <summary>
+            /// Not supported. This converter is one-way only.
+            /// </summary>
             public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
                 throw new NotSupportedException();
         }
