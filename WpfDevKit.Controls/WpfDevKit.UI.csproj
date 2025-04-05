@@ -102,7 +102,7 @@
     <Compile Include="Services\CollectionSynchronizationService.cs" />
     <Compile Include="Services\ContextService.cs" />
     <Compile Include="Core\CommandBase.cs" />
-    <Compile Include="Core\IObservable.cs" />
+    <Compile Include="Interfaces\IObservable.cs" />
     <Compile Include="Core\ObservableBase.cs" />
     <Compile Include="Core\PageBase.cs" />
     <Compile Include="Dialogs\IDialogContext.cs" />
@@ -125,9 +125,9 @@
     <Resource Include="Images\OK.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WpfDevKit\WpfDevKit.Core.csproj">
+    <ProjectReference Include="..\WpfDevKit\WpfDevKit.Net.csproj">
       <Project>{816a63db-d784-4b20-8779-c360b287c979}</Project>
-      <Name>WpfDevKit.Core</Name>
+      <Name>WpfDevKit.Net</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

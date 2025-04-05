@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35913.81
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfDevKit.Core", "WpfDevKit\WpfDevKit.Core.csproj", "{816A63DB-D784-4B20-8779-C360B287C979}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfDevKit.Net", "WpfDevKit\WpfDevKit.Net.csproj", "{816A63DB-D784-4B20-8779-C360B287C979}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfDevKit.UI", "WpfDevKit.Controls\WpfDevKit.UI.csproj", "{573A978C-3447-48CF-BD02-A83A606EA1E1}"
 EndProject

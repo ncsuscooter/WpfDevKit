@@ -83,9 +83,9 @@
       <Project>{573a978c-3447-48cf-bd02-a83a606ea1e1}</Project>
       <Name>WpfDevKit.UI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WpfDevKit\WpfDevKit.Core.csproj">
+    <ProjectReference Include="..\WpfDevKit\WpfDevKit.Net.csproj">
       <Project>{816a63db-d784-4b20-8779-c360b287c979}</Project>
-      <Name>WpfDevKit.Core</Name>
+      <Name>WpfDevKit.Net</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
