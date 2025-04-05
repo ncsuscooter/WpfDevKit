@@ -1,6 +1,5 @@
 ﻿using System;
 using WpfDevKit.DependencyInjection;
-using WpfDevKit.DependencyInjection.Interfaces;
 
 namespace WpfDevKit.Hosting
 {

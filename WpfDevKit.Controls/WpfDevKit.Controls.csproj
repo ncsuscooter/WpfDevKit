@@ -37,7 +37,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\WpfDevKit.App\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
@@ -101,6 +101,19 @@
     </Compile>
     <Compile Include="Services\CollectionSynchronizationService.cs" />
     <Compile Include="Services\ContextService.cs" />
+    <Compile Include="UI\Core\CommandBase.cs" />
+    <Compile Include="UI\Core\IObservable.cs" />
+    <Compile Include="UI\Core\ObservableBase.cs" />
+    <Compile Include="UI\Core\PageBase.cs" />
+    <Compile Include="UI\Dialogs\IDialogContext.cs" />
+    <Compile Include="UI\Dialogs\IDialogService.cs" />
+    <Compile Include="UI\Dialogs\IDialogWindow.cs" />
+    <Compile Include="UI\Dialogs\TDialogButtons.cs" />
+    <Compile Include="UI\Dialogs\TDialogImage.cs" />
+    <Compile Include="UI\Dialogs\TDialogResult.cs" />
+    <Compile Include="UI\Interfaces\ICollectionSynchronizationService.cs" />
+    <Compile Include="UI\Interfaces\ICommandFactory.cs" />
+    <Compile Include="UI\Interfaces\IContextService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Alert.png" />

@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using WpfDevKit.Logging.Extensions;
-using WpfDevKit.Logging.Interfaces;
 
 namespace WpfDevKit.Logging
 {

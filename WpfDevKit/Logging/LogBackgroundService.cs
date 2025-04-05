@@ -3,8 +3,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using WpfDevKit.Hosting;
-using WpfDevKit.Logging.Extensions;
-using WpfDevKit.Logging.Interfaces;
 
 namespace WpfDevKit.Logging
 {

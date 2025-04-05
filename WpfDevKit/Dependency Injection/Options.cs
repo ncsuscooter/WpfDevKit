@@ -1,6 +1,4 @@
-﻿using WpfDevKit.DependencyInjection.Interfaces;
-
-namespace WpfDevKit.DependencyInjection
+﻿namespace WpfDevKit.DependencyInjection
 {
     /// <summary>
     /// Provides access to configured <typeparamref name="TOptions"/> instances.

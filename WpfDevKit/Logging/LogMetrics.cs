@@ -6,8 +6,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using WpfDevKit.Logging.Enums;
-using WpfDevKit.Logging.Interfaces;
 using WpfDevKit.Utilities;
 
 namespace WpfDevKit.Logging

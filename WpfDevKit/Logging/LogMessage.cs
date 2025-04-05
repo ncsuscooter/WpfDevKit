@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using WpfDevKit.Logging.Enums;
-using WpfDevKit.Logging.Interfaces;
 
 namespace WpfDevKit.Logging
 {
