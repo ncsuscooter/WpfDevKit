@@ -101,19 +101,19 @@
     </Compile>
     <Compile Include="Services\CollectionSynchronizationService.cs" />
     <Compile Include="Services\ContextService.cs" />
-    <Compile Include="UI\Core\CommandBase.cs" />
-    <Compile Include="UI\Core\IObservable.cs" />
-    <Compile Include="UI\Core\ObservableBase.cs" />
-    <Compile Include="UI\Core\PageBase.cs" />
-    <Compile Include="UI\Dialogs\IDialogContext.cs" />
-    <Compile Include="UI\Dialogs\IDialogService.cs" />
-    <Compile Include="UI\Dialogs\IDialogWindow.cs" />
-    <Compile Include="UI\Dialogs\TDialogButtons.cs" />
-    <Compile Include="UI\Dialogs\TDialogImage.cs" />
-    <Compile Include="UI\Dialogs\TDialogResult.cs" />
-    <Compile Include="UI\Interfaces\ICollectionSynchronizationService.cs" />
-    <Compile Include="UI\Interfaces\ICommandFactory.cs" />
-    <Compile Include="UI\Interfaces\IContextService.cs" />
+    <Compile Include="Core\CommandBase.cs" />
+    <Compile Include="Core\IObservable.cs" />
+    <Compile Include="Core\ObservableBase.cs" />
+    <Compile Include="Core\PageBase.cs" />
+    <Compile Include="Dialogs\IDialogContext.cs" />
+    <Compile Include="Dialogs\IDialogService.cs" />
+    <Compile Include="Dialogs\IDialogWindow.cs" />
+    <Compile Include="Dialogs\TDialogButtons.cs" />
+    <Compile Include="Dialogs\TDialogImage.cs" />
+    <Compile Include="Dialogs\TDialogResult.cs" />
+    <Compile Include="Interfaces\ICollectionSynchronizationService.cs" />
+    <Compile Include="Interfaces\ICommandFactory.cs" />
+    <Compile Include="Interfaces\IContextService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Alert.png" />
@@ -125,9 +125,9 @@
     <Resource Include="Images\OK.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\WpfDevKit\WpfDevKit\WpfDevKit.csproj">
+    <ProjectReference Include="..\WpfDevKit\WpfDevKit.Core.csproj">
       <Project>{816a63db-d784-4b20-8779-c360b287c979}</Project>
-      <Name>WpfDevKit</Name>
+      <Name>WpfDevKit.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

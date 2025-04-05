@@ -55,9 +55,9 @@
     <Compile Include="Dependency Injection\ServiceProviderExtensions.cs" />
     <Compile Include="Logging\LogProviderCollection.cs" />
     <Compile Include="Logging\ILogProviderCollection.cs" />
-    <Compile Include="Core\ResolvableAttribute.cs" />
-    <Compile Include="Core\ResolvableFactory.cs" />
-    <Compile Include="Core\IResolvableFactory.cs" />
+    <Compile Include="Activation\ResolvableAttribute.cs" />
+    <Compile Include="Activation\ResolvableFactory.cs" />
+    <Compile Include="Activation\IResolvableFactory.cs" />
     <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="Extensions\TimeSpanExtensions.cs" />
     <Compile Include="Logging\TLogCategory.cs" />
@@ -77,7 +77,7 @@
     <Compile Include="Logging\ConsoleLogProvider.cs" />
     <Compile Include="Logging\MemoryLogProvider.cs" />
     <Compile Include="Logging\UserLogProvider.cs" />
-    <Compile Include="Core\ResolvableExtensions.cs" />
+    <Compile Include="Activation\ResolvableExtensions.cs" />
     <Compile Include="Busy\BusyService.cs" />
     <Compile Include="Connectivity\ConnectivityService.cs" />
     <Compile Include="Connectivity\ConnectivityServiceOptions.cs" />

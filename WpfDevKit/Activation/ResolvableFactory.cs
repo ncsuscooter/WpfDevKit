@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace WpfDevKit.Core
+namespace WpfDevKit.Activation
 {
     /// <summary>
     /// Default implementation of <see cref="IResolvableFactory"/> that resolves

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WpfDevKit.Core
+namespace WpfDevKit.Activation
 {
     /// <summary>
     /// Defines a contract for creating class instances with optional dependency resolution

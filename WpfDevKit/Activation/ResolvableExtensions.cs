@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using WpfDevKit.DependencyInjection;
 
-namespace WpfDevKit.Core
+namespace WpfDevKit.Activation
 {
     /// <summary>
     /// Provides extension methods for registering services and configuring the
