@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Windows;
 using System.Windows.Threading;
 using WpfDevKit.Busy;
@@ -36,7 +37,25 @@ namespace WpfDevKit.App
                     .AddDialogService();
                 })
                 .Build();
-
+            //host.ServiceProvider.AddLogProvider()
+            //public static IServiceProvider AddLogProvider<TOptions>(this IServiceProvider provider, ILogProvider logProvider, Action<TOptions> configure, string key = null)
+            //{
+            //    var collection = provider.GetService<ILogProviderCollection>();
+            //    collection.TryAddProvider(logProvider, key);
+            //    services.AddOptions<MemoryLogProviderOptions>();
+            //    services.AddOptions<ConsoleLogProviderOptions>();
+            //    services.AddOptions<UserLogProviderOptions>();
+            //    var collection = new LogProviderCollection(provider.GetService<ILogService>());
+            //    collection.TryAddProvider(new MemoryLogProvider(provider.GetService<IOptions<MemoryLogProviderOptions>>().Value));
+            //    collection.TryAddProvider(new ConsoleLogProvider(provider.GetService<IOptions<ConsoleLogProviderOptions>>().Value));
+            //    collection.TryAddProvider(new UserLogProvider(provider.GetService<IOptions<UserLogProviderOptions>>().Value));
+            //}
+            //public static IServiceProvider AddLogProvider<TOptions>(this IServiceProvider provider, ILogProvider logProvider, Action<TOptions> configure, string key = null)
+            //{
+            //    var collection = provider.GetService<ILogProviderCollection>();
+            //    collection.TryAddProvider(logProvider, key);
+            //    return provider;
+            //}
             await host.RunAsync();
             Current.MainWindow = new MainWindow
             {

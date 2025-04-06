@@ -8,9 +8,10 @@ namespace WpfDevKit.Logging
 {
     /// <summary>
     /// Provides extension methods for the <see cref="ILogService"/> interface to facilitate logging at different levels and task lifecycle management.
+    /// Provides extension methods for registering WpfDevKit core services.
     /// </summary>
     [DebuggerStepThrough]
-    public static class LogServiceExtensions
+    public static partial class LogServiceExtensions
     {
         /// <summary>
         /// Logs a message at the Trace log level.
