@@ -128,7 +128,7 @@
     <Resource Include="Images\OK.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WpfDevKit\WpfDevKit.NET.csproj">
+    <ProjectReference Include="..\WpfDevKit.NET\WpfDevKit.NET.csproj">
       <Project>{816a63db-d784-4b20-8779-c360b287c979}</Project>
       <Name>WpfDevKit.NET</Name>
     </ProjectReference>
