@@ -15,7 +15,6 @@ namespace WpfDevKit.UI.Core
     public abstract class PageBase : CommandBase, IDisposable
     {
         protected readonly ILogService logService;
-        protected readonly IBusyService busyService;
         protected readonly IDialogService dialogService;
 
         private IObservable selectedItem;
@@ -38,9 +37,9 @@ namespace WpfDevKit.UI.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="PageBase"/> class.
         /// </summary>
-        protected PageBase(IBusyService busyService, ICommandFactory commandFactory, IDialogService dialogService, ILogService logService) : base(commandFactory)
+        protected PageBase(IBusyService busyService, ICommandFactory commandFactory, IDialogService dialogService, ILogService logService) : base(busyService, commandFactory)
         {
-            (this.busyService, this.dialogService, this.logService) = (busyService, dialogService, logService);
+            (this.dialogService, this.logService) = (dialogService, logService);
             logService.LogDebug(type: GetType());
             busyService.IsBusyChanged += OnBusyServiceIsBusyChanged;
         }

@@ -34,7 +34,7 @@ namespace WpfDevKit.UI.Dialogs
         {
             dialogContext.DialogWindow = new DialogWindow
             {
-                Owner = null, // TODO: Pass MainWindow object here
+                Owner = DialogWindowContext.GetCurrentOwner(),
                 DataContext = dialogContext
             };
             dialogContext.DialogWindow.ShowDialog();

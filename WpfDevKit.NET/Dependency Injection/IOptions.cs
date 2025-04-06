@@ -5,7 +5,7 @@
     /// Typically used for accessing application or service configuration options.
     /// </summary>
     /// <typeparam name="TOptions">The type of options.</typeparam>
-    public interface IOptions<TOptions> where TOptions : class, new()
+    public interface IOptions<TOptions> where TOptions : class
     {
         /// <summary>
         /// Gets the configured options instance.

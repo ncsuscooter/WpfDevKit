@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using WpfDevKit.Busy;
 using WpfDevKit.DependencyInjection;
 
 namespace WpfDevKit.UI.Command
@@ -16,6 +17,7 @@ namespace WpfDevKit.UI.Command
         /// <returns>The current IServiceCollection instance for chaining.</returns>
         public static IServiceCollection AddCommandFactory(this IServiceCollection services)
         {
+            services.AddBusyService();
             services.AddSingleton<ICommandFactory, CommandFactory>();
             return services;
         }

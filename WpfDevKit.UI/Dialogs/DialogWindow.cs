@@ -16,11 +16,13 @@ namespace WpfDevKit.UI.Dialogs
         /// <summary>
         /// Handles the SourceInitialized event of the window.
         /// Repositions the dialog window to be centered over its owner window.
+        /// Resolves the <see cref="IWindowContextService"/> and pushes the window to the stack.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The event data.</param>
         private void WindowSourceInitialized(object sender, EventArgs e)
         {
+            DialogWindowContext.Push(this);
             if (Owner.WindowState == WindowState.Maximized)
             {
                 if (!GetWindowRect(new WindowInteropHelper(Owner).Handle, out RECT rect))
@@ -33,7 +35,10 @@ namespace WpfDevKit.UI.Dialogs
                 Left = Owner.Left + ((Owner.ActualWidth - ActualWidth) / 2);
                 Top = Owner.Top + ((Owner.ActualHeight - ActualHeight) / 2);
             }
+            base.OnSourceInitialized(e);
         }
+
+        private void WindowClosed(object sender, EventArgs e) => DialogWindowContext.Pop();
 
         /// <summary>
         /// Defines the RECT structure used to store window rectangle coordinates.

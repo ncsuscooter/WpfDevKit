@@ -72,10 +72,15 @@
     <Compile Include="Behaviors\ItemsControlBehaviors.cs" />
     <Compile Include="Behaviors\TextBoxBehaviors.cs" />
     <Compile Include="Collection Sync\CollectionSynchronizationExtensions.cs" />
+    <Compile Include="Commands\AsyncCommand.cs" />
+    <Compile Include="Commands\CommandBase.cs" />
+    <Compile Include="Commands\CommandExtensions.cs" />
     <Compile Include="Commands\CommandFactoryExtensions.cs" />
+    <Compile Include="Commands\IAsyncCommand.cs" />
     <Compile Include="Context Sync\ContextSynchronizationExtensions.cs" />
     <Compile Include="Converters\BrushForExtension.cs" />
     <Compile Include="Converters\StringToBrushConverter.cs" />
+    <Compile Include="Dialogs\DialogWindowContext.cs" />
     <Compile Include="Dialogs\DialogBase.cs" />
     <Compile Include="Dialogs\DialogService.cs" />
     <Compile Include="Dialogs\DialogWindow.cs" />
@@ -136,5 +141,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

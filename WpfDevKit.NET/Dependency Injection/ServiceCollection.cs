@@ -23,7 +23,7 @@ namespace WpfDevKit.DependencyInjection
         /// <typeparam name="TService">The service type.</typeparam>
         /// <typeparam name="TImplementation">The implementation type.</typeparam>
         /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
-        public IServiceCollection AddSingleton<TService, TImplementation>() where TImplementation : TService, new()
+        public IServiceCollection AddSingleton<TService, TImplementation>() where TImplementation : class, TService
         {
             EnsureNotBuilt();
             descriptors.Add(new ServiceDescriptor(typeof(TService), typeof(TImplementation), TServiceLifetime.Singleton));
@@ -63,7 +63,7 @@ namespace WpfDevKit.DependencyInjection
         /// <typeparam name="TService">The service type.</typeparam>
         /// <typeparam name="TImplementation">The implementation type.</typeparam>
         /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
-        public IServiceCollection AddTransient<TService, TImplementation>() where TImplementation : TService, new()
+        public IServiceCollection AddTransient<TService, TImplementation>() where TImplementation : class, TService
         {
             EnsureNotBuilt();
             descriptors.Add(new ServiceDescriptor(typeof(TService), typeof(TImplementation), TServiceLifetime.Transient));
@@ -100,35 +100,35 @@ namespace WpfDevKit.DependencyInjection
         /// <summary>
         /// Registers configuration options for the specified type.
         /// </summary>
-        /// <typeparam name="T">The options type.</typeparam>
+        /// <typeparam name="TOptions">The options type.</typeparam>
         /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
-        public IServiceCollection AddOptions<T>() where T : class, new() => AddOptions<T>(configure: null);
+        public IServiceCollection AddOptions<TOptions>() where TOptions : class, new() => AddOptions<TOptions>(configure: null);
 
         /// <summary>
         /// Registers configuration options for the specified type using a configuration action.
         /// </summary>
-        /// <typeparam name="T">The options type.</typeparam>
+        /// <typeparam name="TOptions">The options type.</typeparam>
         /// <param name="configure">The configuration action to apply to the options instance.</param>
         /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
-        public IServiceCollection AddOptions<T>(Action<T> configure) where T : class, new()
+        public IServiceCollection AddOptions<TOptions>(Action<TOptions> configure) where TOptions : class, new()
         {
             EnsureNotBuilt();
-            var options = new T();
+            var options = new TOptions();
             configure?.Invoke(options);
-            descriptors.Add(new ServiceDescriptor(typeof(IOptions<T>), provider => new Options<T>(options), TServiceLifetime.Singleton));
+            descriptors.Add(new ServiceDescriptor(typeof(IOptions<TOptions>), provider => new Options<TOptions>(options), TServiceLifetime.Singleton));
             return this;
         }
 
         /// <summary>
         /// Registers configuration options for the specified type using a factory method.
         /// </summary>
-        /// <typeparam name="T">The options type.</typeparam>
+        /// <typeparam name="TOptions">The options type.</typeparam>
         /// <param name="factory">The factory method used to create the options instance.</param>
         /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
-        public IServiceCollection AddOptions<T>(Func<IServiceProvider, T> factory) where T : class, new()
+        public IServiceCollection AddOptions<TOptions>(Func<IServiceProvider, TOptions> factory) where TOptions : class, new()
         {
             EnsureNotBuilt();
-            descriptors.Add(new ServiceDescriptor(typeof(IOptions<T>), provider => new Options<T>(factory(provider)), TServiceLifetime.Singleton));
+            descriptors.Add(new ServiceDescriptor(typeof(IOptions<TOptions>), provider => new Options<TOptions>(factory(provider)), TServiceLifetime.Singleton));
             return this;
         }
 

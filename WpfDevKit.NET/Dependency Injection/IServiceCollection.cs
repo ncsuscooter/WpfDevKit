@@ -19,7 +19,7 @@ namespace WpfDevKit.DependencyInjection
         /// <typeparam name="TService">The service type.</typeparam>
         /// <typeparam name="TImplementation">The implementation type.</typeparam>
         /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
-        IServiceCollection AddSingleton<TService, TImplementation>() where TImplementation : TService, new();
+        IServiceCollection AddSingleton<TService, TImplementation>() where TImplementation : class, TService;
 
         /// <summary>
         /// Registers a singleton service of the specified type with an implementation type.
@@ -43,7 +43,7 @@ namespace WpfDevKit.DependencyInjection
         /// <typeparam name="TService">The service type.</typeparam>
         /// <typeparam name="TImplementation">The implementation type.</typeparam>
         /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
-        IServiceCollection AddTransient<TService, TImplementation>() where TImplementation : TService, new();
+        IServiceCollection AddTransient<TService, TImplementation>() where TImplementation : class, TService;
 
         /// <summary>
         /// Registers a transient service of the specified type with an implementation type.
@@ -64,25 +64,25 @@ namespace WpfDevKit.DependencyInjection
         /// <summary>
         /// Registers an options instance of the specified type.
         /// </summary>
-        /// <typeparam name="T">The options type.</typeparam>
+        /// <typeparam name="TOption">The options type.</typeparam>
         /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
-        IServiceCollection AddOptions<T>() where T : class, new();
+        IServiceCollection AddOptions<TOption>() where TOption : class, new();
 
         /// <summary>
         /// Registers an options instance of the specified type with a configuration delegate.
         /// </summary>
-        /// <typeparam name="T">The options type.</typeparam>
+        /// <typeparam name="TOptions">The options type.</typeparam>
         /// <param name="configure">The delegate used to configure the options instance.</param>
         /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
-        IServiceCollection AddOptions<T>(Action<T> configure) where T : class, new();
+        IServiceCollection AddOptions<TOptions>(Action<TOptions> configure) where TOptions : class, new();
 
         /// <summary>
         /// Registers an options instance of the specified type using a factory method.
         /// </summary>
-        /// <typeparam name="T">The options type.</typeparam>
+        /// <typeparam name="TOptions">The options type.</typeparam>
         /// <param name="factory">The factory method to create the options instance.</param>
         /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
-        IServiceCollection AddOptions<T>(Func<IServiceProvider, T> factory) where T : class, new();
+        IServiceCollection AddOptions<TOptions>(Func<IServiceProvider, TOptions> factory) where TOptions : class, new();
 
         /// <summary>
         /// Builds the service provider.

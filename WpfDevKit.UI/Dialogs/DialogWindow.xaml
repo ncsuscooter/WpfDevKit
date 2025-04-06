@@ -9,6 +9,7 @@
         FontSize="16"
         ShowInTaskbar="False"
         SourceInitialized="WindowSourceInitialized"
+        Closed="WindowClosed"
         Title="{Binding  Path=Title,  Mode=TwoWay}"
         Height="{Binding Path=Height, Mode=TwoWay}"
         Width="{Binding  Path=Width,  Mode=TwoWay}">

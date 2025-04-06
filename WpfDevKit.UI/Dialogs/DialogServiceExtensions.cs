@@ -1,4 +1,8 @@
-﻿using WpfDevKit.DependencyInjection;
+﻿using System.Linq;
+using WpfDevKit.Busy;
+using WpfDevKit.DependencyInjection;
+using WpfDevKit.Logging;
+using WpfDevKit.UI.Command;
 
 namespace WpfDevKit.UI.Dialogs
 {
@@ -8,7 +12,7 @@ namespace WpfDevKit.UI.Dialogs
     public static class DialogServiceExtensions
     {
         /// <summary>
-        /// Registers WpfDevKit Controls services.
+        /// Registers the <see cref="IDialogService"/> service.
         /// </summary>
         /// <param name="services">The IServiceCollection instance.</param>
         /// <returns>The current IServiceCollection instance for chaining.</returns>

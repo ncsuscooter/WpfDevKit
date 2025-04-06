@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using WpfDevKit.Busy;
 using WpfDevKit.UI.Command;
 
 namespace WpfDevKit.UI.Core
@@ -13,6 +15,7 @@ namespace WpfDevKit.UI.Core
     public abstract class CommandBase : ObservableBase
     {
         private readonly ICommandFactory commandFactory;
+        protected readonly IBusyService busyService;
 
         /// <summary>
         /// The default message when no action is specified for the command.
@@ -22,7 +25,9 @@ namespace WpfDevKit.UI.Core
         /// <summary>
         /// Gets the command that executes <see cref="DoPerformCommandAsync"/> with a string parameter.
         /// </summary>
-        public ICommand Command => commandFactory.GetCommand<string>(s => DoPerformCommandAsync(s));
+        public ICommand Command => busyService is null ? 
+            commandFactory.CreateCommand<string>(s => DoPerformCommandAsync(s)): 
+            commandFactory.CreateAsyncCommand<string>(async (commandName, token) => await DoPerformCommandAsync(commandName));
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandBase"/> class with the specified command factory.
@@ -33,10 +38,18 @@ namespace WpfDevKit.UI.Core
         public CommandBase(ICommandFactory commandFactory) => this.commandFactory = commandFactory;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="CommandBase"/> class with the specified command factory.
+        /// Additionally accepts an instance of <see cref="IBusyService"/> to indicate use of <see cref="IAsyncCommand{T}"/> commands.
+        /// </summary>
+        /// <param name="busyService">The <see cref="IBusyService"/> used to indicate background activity.</param>
+        /// <param name="commandFactory">The <see cref="ICommandFactory"/> used to create commands.</param>
+        public CommandBase(IBusyService busyService, ICommandFactory commandFactory) => (this.busyService, this.commandFactory) = (busyService, commandFactory);
+
+        /// <summary>
         /// Abstract method that should be implemented to perform the asynchronous command action.
         /// </summary>
         /// <param name="commandName">The name of the command to be executed.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        protected abstract Task DoPerformCommandAsync(string commandName);
+        protected abstract Task DoPerformCommandAsync(string commandName, CancellationToken token = default);
     }
 }

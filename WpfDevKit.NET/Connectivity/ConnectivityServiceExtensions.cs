@@ -16,10 +16,7 @@ namespace WpfDevKit.Connectivity
         public static IServiceCollection AddConnectivityService(this IServiceCollection services, Action<ConnectivityServiceOptions> configure)
         {
             services.AddOptions(configure);
-            services.AddSingleton<IConnectivityService>(provider =>
-            {
-                return new ConnectivityService(provider.GetService<IOptions<ConnectivityServiceOptions>>().Value);
-            });
+            services.AddSingleton<IConnectivityService, ConnectivityService>();
             return services;
         }
     }
