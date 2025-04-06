@@ -1,12 +1,15 @@
 ﻿using System.Net;
 using System.Windows;
 using System.Windows.Threading;
-using WpfDevKit.Controls.Dialogs.Interfaces;
-using WpfDevKit.Controls.Extensions;
-using WpfDevKit.DependencyInjection.Extensions;
+using WpfDevKit.Busy;
+using WpfDevKit.Connectivity;
+using WpfDevKit.DependencyInjection;
 using WpfDevKit.Hosting;
-using WpfDevKit.Interfaces;
-using WpfDevKit.Logging.Interfaces;
+using WpfDevKit.Logging;
+using WpfDevKit.UI.CollectionSynchronization;
+using WpfDevKit.UI.Command;
+using WpfDevKit.UI.ContextSynchronization;
+using WpfDevKit.UI.Dialogs;
 
 namespace WpfDevKit.App
 {
@@ -18,15 +21,19 @@ namespace WpfDevKit.App
             var host = new ServiceHostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddBusyService();
-                    services.AddConnectivityService(options =>
+                    services
+                    .AddBusyService()
+                    .AddConnectivityService(options =>
                     {
                         var collection = Dns.GetHostAddresses("dbc");
                         if (collection != null && collection.Length > 0)
                             options.Host = collection[0].ToString();
-                    });
-                    services.AddLoggingService();
-                    services.AddControls();
+                    })
+                    .AddLoggingService()
+                    .AddContextSynchronization()
+                    .AddCollectionSynchronization()
+                    .AddCommandFactory()
+                    .AddDialogService();
                 })
                 .Build();
 

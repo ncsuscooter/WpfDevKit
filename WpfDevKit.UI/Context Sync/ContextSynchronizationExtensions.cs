@@ -14,7 +14,7 @@ namespace WpfDevKit.UI.ContextSynchronization
         /// </summary>
         /// <param name="services">The IServiceCollection instance.</param>
         /// <returns>The current IServiceCollection instance for chaining.</returns>
-        public static IServiceCollection AddControls(this IServiceCollection services)
+        public static IServiceCollection AddContextSynchronization(this IServiceCollection services)
         {
             services.AddSingleton<IContextSynchronizationService, ContextSynchronizationService>();
             return services;

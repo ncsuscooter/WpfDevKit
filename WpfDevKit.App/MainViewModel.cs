@@ -2,11 +2,11 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using WpfDevKit.Controls.Dialogs.Interfaces;
-using WpfDevKit.Interfaces;
-using WpfDevKit.Logging.Interfaces;
-using WpfDevKit.Logging.Extensions;
-using WpfDevKit.Mvvm;
+using WpfDevKit.Busy;
+using WpfDevKit.Logging;
+using WpfDevKit.UI.Command;
+using WpfDevKit.UI.Core;
+using WpfDevKit.UI.Dialogs;
 
 namespace WpfDevKit.App
 {
