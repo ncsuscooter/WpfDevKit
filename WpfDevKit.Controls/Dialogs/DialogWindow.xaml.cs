@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace WpfDevKit.Controls.Dialogs
+namespace WpfDevKit.UI.Dialogs
 {
     /// <summary>
     /// Interaction logic for DialogWindow.xaml

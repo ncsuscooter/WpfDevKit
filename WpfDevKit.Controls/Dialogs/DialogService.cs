@@ -3,13 +3,11 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows;
-using WpfDevKit.Controls.Dialogs.Enums;
-using WpfDevKit.Controls.Dialogs.Interfaces;
-using WpfDevKit.Interfaces;
-using WpfDevKit.Logging.Extensions;
-using WpfDevKit.Logging.Interfaces;
+using WpfDevKit.Busy;
+using WpfDevKit.Logging;
+using WpfDevKit.UI.Command;
 
-namespace WpfDevKit.Controls.Dialogs
+namespace WpfDevKit.UI.Dialogs
 {
     /// <summary>
     /// Provides functionality to display dialog windows.
@@ -36,7 +34,7 @@ namespace WpfDevKit.Controls.Dialogs
         {
             dialogContext.DialogWindow = new DialogWindow
             {
-                Owner = new Window(), // TODO: Pass MainWindow object here
+                Owner = null, // TODO: Pass MainWindow object here
                 DataContext = dialogContext
             };
             dialogContext.DialogWindow.ShowDialog();

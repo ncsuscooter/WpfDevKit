@@ -2,16 +2,15 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows;
-using WpfDevKit.Interfaces;
 
-namespace WpfDevKit.Controls.Services
+namespace WpfDevKit.UI.ContextSynchronization
 {
     /// <summary>
     /// Provides services for executing actions on the UI thread in WPF applications.
     /// This class helps ensure that UI updates and other tasks are executed on the correct thread (the UI thread).
     /// </summary>
     [DebuggerStepThrough]
-    internal class ContextService : IContextService
+    internal class ContextSynchronizationService : IContextSynchronizationService
     {
         /// <summary>
         /// Gets a value indicating whether the current thread is the UI thread.

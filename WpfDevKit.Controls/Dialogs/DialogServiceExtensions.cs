@@ -1,30 +1,19 @@
-﻿using System.Linq;
-using WpfDevKit.Controls.Dialogs;
-using WpfDevKit.Controls.Dialogs.Interfaces;
-using WpfDevKit.Controls.Services;
-using WpfDevKit.DependencyInjection.Extensions;
-using WpfDevKit.DependencyInjection.Interfaces;
-using WpfDevKit.Interfaces;
-using WpfDevKit.Logging.Interfaces;
-using WpfDevKit.Mvvm;
+﻿using WpfDevKit.DependencyInjection;
 
-namespace WpfDevKit.Controls.Extensions
+namespace WpfDevKit.UI.Dialogs
 {
     /// <summary>
-    /// Provides extension methods for registering WpfDevKit.Controls services.
+    /// Provides extension methods for registering WpfDevKit UI services.
     /// </summary>
-    public static class ServiceCollectionExtensions
+    public static class DialogServiceExtensions
     {
         /// <summary>
         /// Registers WpfDevKit Controls services.
         /// </summary>
         /// <param name="services">The IServiceCollection instance.</param>
         /// <returns>The current IServiceCollection instance for chaining.</returns>
-        public static IServiceCollection AddControls(this IServiceCollection services)
+        public static IServiceCollection AddDialogService(this IServiceCollection services)
         {
-            services.AddSingleton<ICollectionSynchronizationService, CollectionSynchronizationService>();
-            services.AddSingleton<IContextService, ContextService>();
-            services.AddSingleton<ICommandFactory, CommandFactory>();
             services.AddSingleton<IDialogService>(provider =>
             {
                 var commandFactory = provider.GetService<ICommandFactory>();

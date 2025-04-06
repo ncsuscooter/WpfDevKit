@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 
-namespace WpfDevKit.Controls.Dialogs
+namespace WpfDevKit.UI.Dialogs
 {
     /// <summary>
     /// Interaction logic for LogViewer.xaml

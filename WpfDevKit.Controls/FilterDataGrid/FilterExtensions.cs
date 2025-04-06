@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 
-namespace WpfDevKit.Controls.FilterDataGrid
+namespace WpfDevKit.UI.FilterDataGrid
 {
     /// <summary>
     /// Provides extension methods for traversing the visual and logical tree in WPF, 

@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Data;
 
-namespace WpfDevKit.Controls.FilterDataGrid
+namespace WpfDevKit.UI.FilterDataGrid
 {
     /// <summary>
     /// Provides functionality to evaluate a binding expression and retrieve the value of a property path from a source object.

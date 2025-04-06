@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Windows.Input;
 
-namespace WpfDevKit.Mvvm
+namespace WpfDevKit.UI.Command
 {
     /// <summary>
     /// Represents a command that can be executed with a parameter of type <typeparamref name="T"/>.

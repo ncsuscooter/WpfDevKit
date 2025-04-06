@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace WpfDevKit.UI.Interfaces
+namespace WpfDevKit.UI.CollectionSynchronization
 {
     /// <summary>
     /// Provides methods for synchronizing access to collections in a thread-safe manner.

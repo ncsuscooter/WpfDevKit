@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace WpfDevKit.Controls.Converters
+namespace WpfDevKit.UI.Converters
 {
     /// <summary>
     /// Converts a string to a corresponding <see cref="Brush"/> for UI display.

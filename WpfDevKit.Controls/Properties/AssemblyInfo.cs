@@ -2,11 +2,11 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 
-[assembly: AssemblyTitle("WpfDevKit.Controls")]
+[assembly: AssemblyTitle("WpfDevKit.UI")]
 [assembly: AssemblyDescription("Reusable WPF Controls for MVVM")]
 [assembly: AssemblyConfiguration("Development")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("WpfDevKit.Controls")]
+[assembly: AssemblyProduct("WpfDevKit.UI")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

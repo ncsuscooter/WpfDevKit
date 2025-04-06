@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using WpfDevKit.UI.Interfaces;
+using WpfDevKit.UI.Command;
 
 namespace WpfDevKit.UI.Core
 {

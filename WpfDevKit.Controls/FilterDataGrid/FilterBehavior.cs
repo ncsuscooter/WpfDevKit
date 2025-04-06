@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace WpfDevKit.Controls.FilterDataGrid
+namespace WpfDevKit.UI.FilterDataGrid
 {
     /// <summary>
     /// Provides attached properties and behavior for enabling filtering functionality in a <see cref="DataGrid"/>.

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 
-namespace WpfDevKit.Controls.FilterDataGrid
+namespace WpfDevKit.UI.FilterDataGrid
 {
     /// <summary>
     /// Represents an item used in filtering operations within a DataGrid, supporting hierarchical structure and checked state.

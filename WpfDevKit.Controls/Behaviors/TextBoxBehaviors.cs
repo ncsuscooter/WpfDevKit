@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace WpfDevKit.Controls.Behaviors
+namespace WpfDevKit.UI.Behaviors
 {
     /// <summary>
     /// Provides attached behavior properties for <see cref="TextBox"/> to configure label-like behavior.

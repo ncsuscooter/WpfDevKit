@@ -4,15 +4,13 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
-using WpfDevKit.Controls.Dialogs.Enums;
-using WpfDevKit.Controls.Dialogs.Interfaces;
+using WpfDevKit.Busy;
 using WpfDevKit.Extensions;
-using WpfDevKit.Interfaces;
-using WpfDevKit.Logging.Extensions;
-using WpfDevKit.Logging.Interfaces;
-using WpfDevKit.Mvvm;
+using WpfDevKit.Logging;
+using WpfDevKit.UI.Command;
+using WpfDevKit.UI.Core;
 
-namespace WpfDevKit.Controls.Dialogs
+namespace WpfDevKit.UI.Dialogs
 {
     /// <summary>
     /// Represents a base dialog window implementation with support for various configurations,
@@ -42,7 +40,7 @@ namespace WpfDevKit.Controls.Dialogs
         private IDialogWindow dialogWindow;
         private IReadOnlyCollection<ILogMessage> logs;
         private TDialogResult dialogResult = TDialogResult.None;
-        private Uri imageSource = new Uri("/Images/Default.png", UriKind.Relative);
+        private Uri imageSource = new Uri("Images/Default.png", UriKind.Relative);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DialogBase"/> class.
@@ -216,7 +214,7 @@ namespace WpfDevKit.Controls.Dialogs
         {
             set
             {
-                var path = "UI/Images/";
+                var path = "Images/";
                 switch (value)
                 {
                     case TDialogImage.Information:
@@ -255,13 +253,21 @@ namespace WpfDevKit.Controls.Dialogs
         /// <param name="propertyName">The name of the property that changed.</param>
         public override void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            logService.LogDebug(null, $"{nameof(propertyName)}='{propertyName}'");
-            if (propertyName == nameof(Message))
-                IsMessageBarVisible = !string.IsNullOrWhiteSpace(Message);
-            else if (propertyName == nameof(Logs))
-                IsMessageLogVisible = Logs.Count > 0;
-            else if (propertyName == nameof(DialogResult) && DialogWindow != null)
-                DialogWindow.DialogResult = true;
+            try
+            {
+                logService.LogTrace(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
+                if (propertyName == nameof(Message))
+                    IsMessageBarVisible = !string.IsNullOrWhiteSpace(Message);
+                else if (propertyName == nameof(Logs))
+                    IsMessageLogVisible = Logs.Count > 0;
+                else if (propertyName == nameof(DialogResult))
+                    if (DialogWindow != null)
+                        DialogWindow.DialogResult = true;
+            }
+            catch (Exception ex)
+            {
+                logService.LogError(ex, GetType());
+            }
             base.OnPropertyChanged(propertyName);
         }
 
@@ -272,7 +278,7 @@ namespace WpfDevKit.Controls.Dialogs
         /// <returns>A task representing the asynchronous operation.</returns>
         protected override async Task DoPerformCommandAsync(string commandName)
         {
-            logService.LogDebug(null, $"{nameof(commandName)}='{commandName}'", GetType());
+            logService.LogTrace(null, $"{nameof(commandName)}='{commandName}'", GetType());
             using (busyService.Busy())
             {
                 await Task.Delay(50);

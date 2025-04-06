@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 
-namespace WpfDevKit.Controls.FilterDataGrid
+namespace WpfDevKit.UI.FilterDataGrid
 {
     /// <summary>
     /// Interaction logic for FilterPopup.xaml

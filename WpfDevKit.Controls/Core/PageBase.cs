@@ -3,8 +3,8 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using WpfDevKit.Busy;
 using WpfDevKit.Logging;
+using WpfDevKit.UI.Command;
 using WpfDevKit.UI.Dialogs;
-using WpfDevKit.UI.Interfaces;
 
 namespace WpfDevKit.UI.Core
 {
@@ -53,7 +53,6 @@ namespace WpfDevKit.UI.Core
         {
             try
             {
-                #region SelectedItem
                 if (propertyName.Equals(nameof(SelectedItem)))
                 {
                     logService.LogDebug(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
@@ -62,7 +61,6 @@ namespace WpfDevKit.UI.Core
                     if (SelectedItem != null)
                         SelectedItem.PropertyChanged -= OnSelectedItemPropertyChanged;
                 }
-                #endregion
             }
             catch (Exception ex)
             {
@@ -79,14 +77,12 @@ namespace WpfDevKit.UI.Core
         {
             try
             {
-                #region SelectedItem
                 if (propertyName.Equals(nameof(SelectedItem)))
                 {
                     logService.LogDebug(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
                     if (SelectedItem != null)
                         SelectedItem.PropertyChanged += OnSelectedItemPropertyChanged;
                 }
-                #endregion
             }
             catch (Exception ex)
             {
@@ -102,7 +98,6 @@ namespace WpfDevKit.UI.Core
         {
             if (isDisposed)
                 return;
-
             logService.LogDebug(type: GetType());
             try
             {

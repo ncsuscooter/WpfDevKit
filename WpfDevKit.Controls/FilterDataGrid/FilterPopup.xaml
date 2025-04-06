@@ -1,8 +1,8 @@
-﻿<UserControl x:Class="WpfDevKit.Controls.FilterDataGrid.FilterPopup" x:Name="This"
+﻿<UserControl x:Class="WpfDevKit.UI.FilterDataGrid.FilterPopup" x:Name="This"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             xmlns:fdg="clr-namespace:WpfDevKit.Controls.FilterDataGrid"
+             xmlns:fdg="clr-namespace:WpfDevKit.UI.FilterDataGrid"
              MinWidth="{StaticResource PopupWidth}" Width="{StaticResource PopupWidth}"
              MinHeight="{StaticResource PopupHeight}" Height="{StaticResource PopupHeight}"
              Loaded="OnLoaded" Background="White">

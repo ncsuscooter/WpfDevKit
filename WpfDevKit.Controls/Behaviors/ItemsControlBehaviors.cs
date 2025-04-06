@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace WpfDevKit.Controls.Behaviors
+namespace WpfDevKit.UI.Behaviors
 {
     /// <summary>
     /// Provides attached behavior properties for <see cref="ItemsControl"/> to enable additional UI functionality.

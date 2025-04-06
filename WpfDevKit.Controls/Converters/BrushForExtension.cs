@@ -1,16 +1,18 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
 using System.Windows.Media;
 
-namespace WpfDevKit.Controls.Converters
+namespace WpfDevKit.UI.Converters
 {
     /// <summary>
     /// A markup extension that provides a <see cref="Brush"/> by resolving a string key or binding
     /// against a resource dictionary. Falls back to a default brush if no match is found.
     /// </summary>
+    [DebuggerStepThrough]
     [MarkupExtensionReturnType(typeof(Brush))]
     public class BrushForExtension : MarkupExtension
     {

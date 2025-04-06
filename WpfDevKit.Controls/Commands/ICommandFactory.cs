@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace WpfDevKit.UI.Interfaces
+namespace WpfDevKit.UI.Command
 {
     /// <summary>
     /// Provides a factory method for creating <see cref="ICommand"/> instances.

@@ -1,12 +1,12 @@
 using System;
 
-namespace WpfDevKit.UI.Interfaces
+namespace WpfDevKit.UI.ContextSynchronization
 {
     /// <summary>
     /// Provides methods to interact with the context in which actions are executed,
     /// such as ensuring synchronization and controlling the context's lifecycle.
     /// </summary>
-    public interface IContextService
+    public interface IContextSynchronizationService
     {
         /// <summary>
         /// Gets a value indicating whether the context is synchronized.

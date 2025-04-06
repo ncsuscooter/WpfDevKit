@@ -3,9 +3,8 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
-using WpfDevKit.Controls.Dialogs.Interfaces;
 
-namespace WpfDevKit.Controls.Dialogs
+namespace WpfDevKit.UI.Dialogs
 {
     /// <summary>
     /// Represents the dialog window used to display modal dialogs in WPF.

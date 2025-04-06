@@ -1,12 +1,12 @@
-﻿<UserControl x:Class="WpfDevKit.Controls.Dialogs.LogViewer"
+﻿<UserControl x:Class="WpfDevKit.UI.Dialogs.LogViewer"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:fdg="clr-namespace:WpfDevKit.Controls.FilterDataGrid"
-             xmlns:beh="clr-namespace:WpfDevKit.Controls.Behaviors"
-             xmlns:conv="clr-namespace:WpfDevKit.Controls.Converters"
-             xmlns:local="clr-namespace:WpfDevKit.Controls.Dialogs"
+             xmlns:fdg="clr-namespace:WpfDevKit.UI.FilterDataGrid"
+             xmlns:beh="clr-namespace:WpfDevKit.UI.Behaviors"
+             xmlns:conv="clr-namespace:WpfDevKit.UI.Converters"
+             xmlns:local="clr-namespace:WpfDevKit.UI.Dialogs"
              mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=local:DialogBase}">
     <Grid>
         <Grid.RowDefinitions>
