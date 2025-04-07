@@ -1,95 +1,103 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace WpfDevKit.UI.Command
 {
+    /// <summary>
+    /// Represents a non-generic asynchronous command with cancellation support.
+    /// Inherits from <see cref="AsyncCommand{Object}"/>.
+    /// </summary>
+    [DebuggerStepThrough]
     internal class AsyncCommand : AsyncCommand<object>, IAsyncCommand
     {
-        public AsyncCommand(Func<object, CancellationToken, Task> execute, Predicate<object> canExecute = null) : base(execute, canExecute)
-        {
-        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AsyncCommand"/> class.
+        /// </summary>
+        /// <param name="execute">The asynchronous operation to execute.</param>
+        /// <param name="canExecute">An optional predicate to determine if the command can execute.</param>
+        public AsyncCommand(Func<object, CancellationToken, Task> execute, Predicate<object> canExecute = null) : base(execute, canExecute) { }
     }
 
     /// <summary>
     /// Represents an asynchronous command with support for cancellation and typed parameters.
+    /// Prevents concurrent execution and integrates with WPF's command infrastructure.
     /// </summary>
     /// <typeparam name="T">The type of the command parameter.</typeparam>
-    internal class AsyncCommand<T> : IAsyncCommand<T>
+    [DebuggerStepThrough]
+    internal class AsyncCommand<T> : Command<T>, IAsyncCommand<T>
     {
-        private readonly Func<T, CancellationToken, Task> execute;
-        private readonly Predicate<T> canExecute;
+        private readonly Func<T, CancellationToken, Task> asyncExecute;
         private CancellationTokenSource cancellationTokenSource;
-        private bool isExecuting;
 
         /// <summary>
-        /// Occurs when changes occur that affect whether or not the command should execute.
+        /// Gets a value indicating whether the command is currently executing.
         /// </summary>
-        public event EventHandler CanExecuteChanged
-        {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
-        }
+        public bool IsExecuting { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CancellableAsyncCommand{T}"/> class.
+        /// Initializes a new instance of the <see cref="AsyncCommand{T}"/> class.
         /// </summary>
-        /// <param name="execute">The asynchronous action to execute with cancellation support.</param>
+        /// <param name="asyncExecute">The asynchronous action to execute with cancellation support.</param>
         /// <param name="canExecute">Optional predicate to determine if the command can execute.</param>
-        public AsyncCommand(Func<T, CancellationToken, Task> execute, Predicate<T> canExecute = null) =>
-            (this.execute, this.canExecute) = (execute ?? throw new ArgumentNullException(nameof(execute)), canExecute ?? (_ => true));
+        public AsyncCommand(Func<T, CancellationToken, Task> asyncExecute, Predicate<T> canExecute = null) : base(null, canExecute) =>
+            this.asyncExecute = asyncExecute ?? throw new ArgumentNullException(nameof(asyncExecute));
 
         /// <summary>
         /// Determines whether the command can execute with the specified parameter.
+        /// Returns <c>false</c> if the command is already executing.
         /// </summary>
-        public bool CanExecute(T parameter) =>
-            !isExecuting && (canExecute?.Invoke(parameter) ?? true);
+        /// <param name="parameter">The command parameter.</param>
+        /// <returns><c>true</c> if the command can execute; otherwise, <c>false</c>.</returns>
+        public override bool CanExecute(T parameter) => !IsExecuting && base.CanExecute(parameter);
 
         /// <summary>
         /// Executes the asynchronous command with the specified parameter.
         /// </summary>
+        /// <param name="parameter">The parameter to pass to the async delegate.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public async Task ExecuteAsync(T parameter)
         {
             if (!CanExecute(parameter))
                 return;
 
-            isExecuting = true;
+            IsExecuting = true;
             CommandManager.InvalidateRequerySuggested();
 
             using (cancellationTokenSource = new CancellationTokenSource())
             {
                 try
                 {
-                    await execute(parameter, cancellationTokenSource.Token);
+                    await asyncExecute(parameter, cancellationTokenSource.Token);
                 }
                 finally
                 {
-                    isExecuting = false;
+                    IsExecuting = false;
                     cancellationTokenSource = null;
                     CommandManager.InvalidateRequerySuggested();
                 }
             }
         }
 
+        /// <inheritdoc/>
+        public override void Execute(T parameter) => _ = ExecuteAsync(parameter); // Fire and forget
+
         /// <summary>
-        /// Requests cancellation of the currently running command.
+        /// Cancels the currently running operation, if one is active.
         /// </summary>
         public void Cancel() => cancellationTokenSource?.Cancel();
 
         /// <summary>
-        /// Disposes the current cancellation token source if active.
+        /// Disposes the active cancellation token source, if one exists.
         /// </summary>
-        public void Dispose() => cancellationTokenSource?.Dispose();
-
-        // ICommand members
-        bool ICommand.CanExecute(object parameter) => parameter is T t && CanExecute(t);
-
-        void ICommand.Execute(object parameter)
+        public void Dispose()
         {
-            if (parameter is T t)
-                _ = ExecuteAsync(t); // fire-and-forget for ICommand
+            cancellationTokenSource?.Cancel();
+            cancellationTokenSource?.Dispose();
+            cancellationTokenSource = null;
+            GC.SuppressFinalize(this);
         }
     }
-
 }

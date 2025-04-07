@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace WpfDevKit.UI.Command
@@ -8,6 +9,7 @@ namespace WpfDevKit.UI.Command
     /// Supports execution control through <see cref="CanExecute(T)"/> and command notification.
     /// </summary>
     /// <typeparam name="T">The type of the command parameter.</typeparam>
+    [DebuggerStepThrough]
     internal abstract class CommandBase<T> : ICommand
     {
         private readonly Predicate<T> canExecute;

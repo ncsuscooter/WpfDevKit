@@ -5,66 +5,40 @@ using System.Windows.Input;
 namespace WpfDevKit.UI.Command
 {
     /// <summary>
-    /// Represents a command that can be executed with a parameter of type <typeparamref name="T"/>.
-    /// Implements <see cref="ICommand"/> and allows for execution based on a condition.
+    /// Represents a non-generic synchronous command for use in data bindings.
+    /// Inherits from <see cref="Command{Object}"/>.
     /// </summary>
     [DebuggerStepThrough]
     internal class Command : Command<object>
     {
-        public Command(Action<object> action, Predicate<object> canExecute = null) : base(action, canExecute)
-        {
-        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Command"/> class.
+        /// </summary>
+        /// <param name="execute">The action to invoke when the command is executed.</param>
+        /// <param name="canExecute">An optional predicate to determine if the command can execute.</param>
+        public Command(Action<object> execute, Predicate<object> canExecute = null) : base(execute, canExecute) { }
     }
 
     /// <summary>
-    /// Represents a command that can be executed with a parameter of type <typeparamref name="T"/>.
-    /// Implements <see cref="ICommand"/> and allows for execution based on a condition.
+    /// Represents a synchronous command that executes an <see cref="Action{T}"/>.
     /// </summary>
+    /// <typeparam name="T">The type of the command parameter.</typeparam>
     [DebuggerStepThrough]
-    internal class Command<T> : ICommand
+    internal class Command<T> : CommandBase<T>
     {
         private readonly Action<T> execute;
-        private readonly Predicate<T> canExecute;
-
-        /// <summary>
-        /// Occurs when the <see cref="ICommand.CanExecute"/> changes.
-        /// </summary>
-        public event EventHandler CanExecuteChanged
-        {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Command{T}"/> class.
         /// </summary>
-        /// <param name="execute">The action to execute when the command is invoked.</param>
-        /// <param name="canExecute">An optional predicate that determines if the command can be executed.</param>
-        public Command(Action<T> execute, Predicate<T> canExecute = default) => (this.execute, this.canExecute) = (execute, canExecute);
+        /// <param name="execute">The action to invoke when the command is executed.</param>
+        /// <param name="canExecute">An optional predicate to determine if the command can execute.</param>
+        public Command(Action<T> execute, Predicate<T> canExecute = default) : base(canExecute) => this.execute = execute;
 
         /// <summary>
-        /// Determines whether the command can be executed.
+        /// Executes the command using the specified parameter.
         /// </summary>
-        /// <param name="parameter">The parameter to pass to the <see cref="CanExecute"/> predicate.</param>
-        /// <returns>True if the command can be executed; otherwise, false.</returns>
-        public bool CanExecute(T parameter) => canExecute is null || canExecute(parameter);
-
-        /// <summary>
-        /// Executes the command with the provided parameter.
-        /// </summary>
-        /// <param name="parameter">The parameter to pass to the <see cref="Execute"/> action.</param>
-        public void Execute(T parameter) => execute?.Invoke(parameter);
-
-        // ICommand implementation
-
-        /// <inheritdoc/>
-        bool ICommand.CanExecute(object parameter) => !(parameter is T t) || canExecute is null || canExecute(t);
-
-        /// <inheritdoc/>
-        void ICommand.Execute(object parameter)
-        {
-            if ((this as ICommand).CanExecute(parameter))
-                execute((T)parameter);
-        }
+        /// <param name="parameter">The parameter to pass to the action.</param>
+        public override void Execute(T parameter) => execute?.Invoke(parameter);
     }
 }
