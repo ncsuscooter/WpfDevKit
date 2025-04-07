@@ -3,7 +3,7 @@ syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 
-option csharp_namespace = "Discovery.Library.Common.Logging.gRPC";
+option csharp_namespace = "WpfDevKit.Logging.gRPC";
 
 enum TLogCategoryGrpc {
     None = 0;

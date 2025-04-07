@@ -45,6 +45,7 @@
     <Compile Include="Logging\DatabaseLogColumn.cs" />
     <Compile Include="Logging\DatabaseLogProvider.cs" />
     <Compile Include="Logging\DatabaseLogProviderOptions.cs" />
+    <Compile Include="Logging\gRPC\GrpcLogProvider.cs" />
     <Compile Include="Logging\LogServiceExtensions2.cs" />
     <Compile Include="Hosting\ServiceHost.cs" />
     <Compile Include="Hosting\ServiceHostBuilder.cs" />
@@ -104,6 +105,7 @@
     <Compile Include="Utilities\StartStopRegistration.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Logging\gRPC\Protos\Logging.proto" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
