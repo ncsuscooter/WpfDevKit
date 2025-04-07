@@ -14,13 +14,13 @@ namespace WpfDevKit.Logging
             services.AddSingleton<LogQueue, LogQueue>();
             services.AddSingleton<ILogService, LogService>();
             services.AddSingleton<ILogMetricsFactory, LogMetricsFactory>();
+            services.AddSingleton<ILogProviderCollection, LogProviderCollection>();
+            services.AddSingleton<LogBackgroundService, LogBackgroundService>();
             services.AddOptions(p => new LogOptions()
             {
                 LogMessage = (message, attributes, type) => p.GetService<ILogService>().LogTrace(message, attributes, type),
                 LogException = (exception, type) => p.GetService<ILogService>().LogTrace(exception, type)
             });
-            services.AddSingleton<ILogProviderCollection, LogProviderCollection>();
-            services.AddSingleton<LogBackgroundService, LogBackgroundService>();
             return services;
         }
     }
