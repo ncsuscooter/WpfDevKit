@@ -21,7 +21,8 @@ namespace WpfDevKit.Logging
     internal delegate void LogExceptionDelegate(Exception exception, Type type);
 
     /// <summary>
-    /// Provides configuration options for a <see cref="ILogProviderCollection"/> instance.
+    /// Provides configuration options for logging internal trace messages and exceptions.
+    /// Instance can be used by any of the logging services via dependency injection.
     /// </summary>
     internal class LogOptions
     {
