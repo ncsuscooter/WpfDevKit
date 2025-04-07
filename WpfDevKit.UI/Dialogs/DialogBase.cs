@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using WpfDevKit.Busy;
@@ -22,7 +23,6 @@ namespace WpfDevKit.UI.Dialogs
         private static readonly FontWeightConverter fontWeightConverter = new FontWeightConverter();
 
         private readonly ILogService logService;
-        private readonly IBusyService busyService;
 
         private double width = 800;
         private double height = 200;
@@ -47,8 +47,7 @@ namespace WpfDevKit.UI.Dialogs
         /// </summary>
         /// <param name="logService">The logging service used for dialog events.</param>
         /// <param name="busyService">The busy service used to indicate background activity.</param>
-        public DialogBase(ICommandFactory commandFactory, ILogService logService, IBusyService busyService) : base(commandFactory) =>
-            (this.logService, this.busyService) = (logService, busyService);
+        public DialogBase(ICommandFactory commandFactory, ILogService logService, IBusyService busyService) : base(busyService, commandFactory) => this.logService = logService;
 
         /// <summary>
         /// Gets or sets the height of the dialog window.
@@ -276,12 +275,12 @@ namespace WpfDevKit.UI.Dialogs
         /// </summary>
         /// <param name="commandName">The name of the command to execute.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        protected override async Task DoPerformCommandAsync(string commandName)
+        protected override async Task DoPerformCommandAsync(string commandName, CancellationToken cancellationToken = default)
         {
             logService.LogTrace(null, $"{nameof(commandName)}='{commandName}'", GetType());
             using (busyService.Busy())
             {
-                await Task.Delay(50);
+                await Task.Delay(50, cancellationToken);
                 switch (commandName)
                 {
                     case nameof(TDialogResult.Cancel): DialogResult = TDialogResult.Cancel; break;

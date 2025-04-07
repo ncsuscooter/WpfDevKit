@@ -5,6 +5,13 @@ using System.Windows.Input;
 
 namespace WpfDevKit.UI.Command
 {
+    internal class AsyncCommand : AsyncCommand<object>, IAsyncCommand
+    {
+        public AsyncCommand(Func<object, CancellationToken, Task> execute, Predicate<object> canExecute = null) : base(execute, canExecute)
+        {
+        }
+    }
+
     /// <summary>
     /// Represents an asynchronous command with support for cancellation and typed parameters.
     /// </summary>
@@ -19,18 +26,19 @@ namespace WpfDevKit.UI.Command
         /// <summary>
         /// Occurs when changes occur that affect whether or not the command should execute.
         /// </summary>
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler CanExecuteChanged
+        {
+            add => CommandManager.RequerySuggested += value;
+            remove => CommandManager.RequerySuggested -= value;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CancellableAsyncCommand{T}"/> class.
         /// </summary>
         /// <param name="execute">The asynchronous action to execute with cancellation support.</param>
         /// <param name="canExecute">Optional predicate to determine if the command can execute.</param>
-        public AsyncCommand(Func<T, CancellationToken, Task> execute, Predicate<T> canExecute = null)
-        {
-            this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
-            this.canExecute = canExecute ?? (_ => true);
-        }
+        public AsyncCommand(Func<T, CancellationToken, Task> execute, Predicate<T> canExecute = null) =>
+            (this.execute, this.canExecute) = (execute ?? throw new ArgumentNullException(nameof(execute)), canExecute ?? (_ => true));
 
         /// <summary>
         /// Determines whether the command can execute with the specified parameter.
@@ -47,7 +55,7 @@ namespace WpfDevKit.UI.Command
                 return;
 
             isExecuting = true;
-            RaiseCanExecuteChanged();
+            CommandManager.InvalidateRequerySuggested();
 
             using (cancellationTokenSource = new CancellationTokenSource())
             {
@@ -59,7 +67,7 @@ namespace WpfDevKit.UI.Command
                 {
                     isExecuting = false;
                     cancellationTokenSource = null;
-                    RaiseCanExecuteChanged();
+                    CommandManager.InvalidateRequerySuggested();
                 }
             }
         }
@@ -70,9 +78,9 @@ namespace WpfDevKit.UI.Command
         public void Cancel() => cancellationTokenSource?.Cancel();
 
         /// <summary>
-        /// Raises the <see cref="CanExecuteChanged"/> event.
+        /// Disposes the current cancellation token source if active.
         /// </summary>
-        public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        public void Dispose() => cancellationTokenSource?.Dispose();
 
         // ICommand members
         bool ICommand.CanExecute(object parameter) => parameter is T t && CanExecute(t);
@@ -82,11 +90,6 @@ namespace WpfDevKit.UI.Command
             if (parameter is T t)
                 _ = ExecuteAsync(t); // fire-and-forget for ICommand
         }
-
-        /// <summary>
-        /// Disposes the current cancellation token source if active.
-        /// </summary>
-        public void Dispose() => cancellationTokenSource?.Dispose();
     }
 
 }

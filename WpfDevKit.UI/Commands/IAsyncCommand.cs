@@ -4,8 +4,14 @@ using System.Windows.Input;
 
 namespace WpfDevKit.UI.Command
 {
+    /// <inheritdoc/>
+    public interface IAsyncCommand : IAsyncCommand<object>
+    {
+
+    }
+
     /// <summary>
-    /// Defines a command that executes an asynchronous operation with a typed parameter.
+    /// Defines a command that executes an asynchronous operation with a parameter of type <typeparamref name="T"/>.
     /// </summary>
     /// <typeparam name="T">The type of parameter passed to the command.</typeparam>
     public interface IAsyncCommand<T> : ICommand, IDisposable
@@ -23,11 +29,6 @@ namespace WpfDevKit.UI.Command
         /// <param name="parameter">The command parameter.</param>
         /// <returns><c>true</c> if the command can execute; otherwise, <c>false</c>.</returns>
         bool CanExecute(T parameter);
-
-        /// <summary>
-        /// Notifies the UI that the command's executability has changed.
-        /// </summary>
-        void RaiseCanExecuteChanged();
 
         /// <summary>
         /// Requests cancellation of the currently running command.
