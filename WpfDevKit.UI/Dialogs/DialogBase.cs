@@ -18,7 +18,7 @@ namespace WpfDevKit.UI.Dialogs
     /// button visibility, and logging.
     /// </summary>
     [DebuggerStepThrough]
-    public class DialogBase : CommandBase, IDialogContext
+    public class DialogBase : CommandPageBase, IDialogContext
     {
         private static readonly FontWeightConverter fontWeightConverter = new FontWeightConverter();
 

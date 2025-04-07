@@ -100,7 +100,11 @@ namespace WpfDevKit.Logging
         /// Adds an unhandled exception to the collection of unhandled exceptions.
         /// </summary>
         /// <param name="ex">The exception to add.</param>
-        public void IncrementUnhandled(Exception ex) => ExecuteIfInternalOrThrow(() => unhandledExceptions.Add(ex));
+        public void IncrementUnhandled(Exception ex) => ExecuteIfInternalOrThrow(() =>
+        {
+            Debug.WriteLine(ex);
+            unhandledExceptions.Add(ex);
+        });
 
         /// <summary>
         /// Increments the count of logs for a specified category.

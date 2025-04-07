@@ -10,9 +10,9 @@ namespace WpfDevKit.UI.Core
 {
     /// <summary>
     /// Provides a base class for pages that support commands and handle selected item changes.
-    /// Inherits from <see cref="CommandBase"/> and implements <see cref="IDisposable"/>.
+    /// Inherits from <see cref="CommandPageBase"/> and implements <see cref="IDisposable"/>.
     /// </summary>
-    public abstract class PageBase : CommandBase, IDisposable
+    public abstract class PageBase : CommandPageBase, IDisposable
     {
         protected readonly ILogService logService;
         protected readonly IDialogService dialogService;

@@ -1,5 +1,7 @@
-﻿using System.Windows;
+﻿using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace WpfDevKit.UI.Behaviors
 {
@@ -60,6 +62,58 @@ namespace WpfDevKit.UI.Behaviors
                     if (textBox.SelectionLength > 0)
                         textBox.SelectionLength = 0;
                 });
+        }
+
+        #endregion
+
+        #region Mask
+
+        public static readonly DependencyProperty MaskProperty =
+            DependencyProperty.RegisterAttached("Mask", typeof(string), typeof(TextBoxBehaviors), new PropertyMetadata(MaskPropertyChanged));
+        public static string GetMask(TextBox d) => (string)d.GetValue(MaskProperty);
+        public static void SetMask(TextBox d, string value) => d.SetValue(MaskProperty, value);
+        private static void MaskPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (!(d is TextBox textBox))
+                return;
+            // ^-?[0-9]*\.?[0-9]*$
+            // ^(2[0-3]|[0-1]?[0-9]):([0-5]?[0-9]):([0-5]?[0-9])$
+            var regex = new Regex(e.NewValue as string, RegexOptions.IgnorePatternWhitespace);
+            bool IsMatch(string input) => regex.IsMatch(textBox.Text.Remove(textBox.SelectionStart, textBox.SelectionLength).Insert(textBox.CaretIndex, input));
+            void PreviewTextInput(object sender, TextCompositionEventArgs args) => args.Handled = !IsMatch(args.Text);
+            void PreviewKeyDown(object sender, KeyEventArgs args)
+            {
+                if (args.Key == Key.Space)
+                    args.Handled = !IsMatch(" ");
+            }
+            ;
+            void Pasting(object sender, DataObjectPastingEventArgs args)
+            {
+                if (args.DataObject.GetDataPresent(typeof(string)))
+                {
+                    if (!IsMatch((string)args.DataObject.GetData(typeof(string))))
+                        args.CancelCommand();
+                }
+                else
+                {
+                    args.CancelCommand();
+                }
+            }
+            ;
+            textBox.PreviewTextInput -= PreviewTextInput;
+            textBox.PreviewKeyDown -= PreviewKeyDown;
+            DataObject.RemovePastingHandler(textBox, Pasting);
+            if (e.NewValue == null)
+            {
+                textBox.ClearValue(MaskProperty);
+            }
+            else
+            {
+                textBox.SetValue(MaskProperty, e.NewValue);
+                textBox.PreviewTextInput += PreviewTextInput;
+                textBox.PreviewKeyDown += PreviewKeyDown;
+                DataObject.AddPastingHandler(textBox, Pasting);
+            }
         }
 
         #endregion

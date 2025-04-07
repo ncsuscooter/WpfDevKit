@@ -69,9 +69,14 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Behaviors\CollectionViewSourceBehaviors.cs" />
+    <Compile Include="Behaviors\DataGridBehaviors.cs" />
     <Compile Include="Behaviors\ItemsControlBehaviors.cs" />
     <Compile Include="Behaviors\TextBoxBehaviors.cs" />
     <Compile Include="Collection Sync\CollectionSynchronizationExtensions.cs" />
+    <Compile Include="Collection View\CollectionViewExtensions.cs" />
+    <Compile Include="Collection View\CollectionViewService.cs" />
+    <Compile Include="Collection View\ICollectionViewService.cs" />
     <Compile Include="Commands\AsyncCommand.cs" />
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\CommandExtensions.cs" />
@@ -80,6 +85,8 @@
     <Compile Include="Context Sync\ContextSynchronizationExtensions.cs" />
     <Compile Include="Converters\BrushForExtension.cs" />
     <Compile Include="Converters\StringToBrushConverter.cs" />
+    <Compile Include="Core\IOpenDialogHandler.cs" />
+    <Compile Include="Core\IConfirmNavigation.cs" />
     <Compile Include="Dialogs\DialogWindowContext.cs" />
     <Compile Include="Dialogs\DialogBase.cs" />
     <Compile Include="Dialogs\DialogService.cs" />
@@ -94,6 +101,7 @@
       <DependentUpon>LogViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\DialogServiceExtensions.cs" />
+    <Compile Include="Extensions\DependencyObjectExtensions.cs" />
     <Compile Include="FilterDataGrid\BindingEvaluator.cs" />
     <Compile Include="FilterDataGrid\FilterBehavior.cs" />
     <Compile Include="FilterDataGrid\FilterExtensions.cs" />
@@ -109,7 +117,7 @@
     </Compile>
     <Compile Include="Collection Sync\CollectionSynchronizationService.cs" />
     <Compile Include="Context Sync\ContextSynchronizationService.cs" />
-    <Compile Include="Core\CommandBase.cs" />
+    <Compile Include="Core\CommandPageBase.cs" />
     <Compile Include="Core\IObservable.cs" />
     <Compile Include="Core\ObservableBase.cs" />
     <Compile Include="Core\PageBase.cs" />

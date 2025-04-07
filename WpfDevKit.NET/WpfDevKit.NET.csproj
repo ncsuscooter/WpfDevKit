@@ -33,6 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
     </Reference>
@@ -41,6 +42,9 @@
     <Compile Include="Busy\BusyServiceExtensions.cs" />
     <Compile Include="Connectivity\ConnectivityServiceExtensions.cs" />
     <Compile Include="Dependency Injection\IOptions.cs" />
+    <Compile Include="Logging\DatabaseLogColumn.cs" />
+    <Compile Include="Logging\DatabaseLogProvider.cs" />
+    <Compile Include="Logging\DatabaseLogProviderOptions.cs" />
     <Compile Include="Logging\LogServiceExtensions2.cs" />
     <Compile Include="Hosting\ServiceHost.cs" />
     <Compile Include="Hosting\ServiceHostBuilder.cs" />
@@ -88,6 +92,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Connectivity\IConnectivityService.cs" />
+    <Compile Include="Remote File Access\RemoteFileConnectionExtensions.cs" />
+    <Compile Include="Remote File Access\IRemoteFileConnectionFactory.cs" />
+    <Compile Include="Remote File Access\RemoteFileConnectionFactory.cs" />
+    <Compile Include="Remote File Access\TForceCond.cs" />
+    <Compile Include="Remote File Access\RemoteFileConnectionExceptions.cs" />
+    <Compile Include="Remote File Access\Imports.cs" />
+    <Compile Include="Remote File Access\RemoteFileConnection.cs" />
+    <Compile Include="Remote File Access\USE_INFO_2.cs" />
     <Compile Include="Utilities\ExponentialRetry.cs" />
     <Compile Include="Utilities\StartStopRegistration.cs" />
   </ItemGroup>

@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+option csharp_namespace = "Discovery.Library.Common.Logging.gRPC";
+
+enum TLogCategoryGrpc {
+    None = 0;
+    Trace = 1;
+    Debug = 2;
+    Info = 3;
+    StartStop = 4;
+    Warning = 5;
+    Error = 6;
+    Fatal = 7;
+}
+message LogMessageGrpc {
+    int64 index = 1;
+    google.protobuf.Timestamp timestamp = 2;
+    string machine_name = 3;
+    string user_name = 4;
+    string application_name = 5;
+    string application_version = 6;
+    string class_name = 7;
+    string method_name = 8;
+    int32 thread_id = 9;
+    TLogCategoryGrpc category = 10;
+    string message = 11;
+    string attributes = 12;
+    google.protobuf.Int32Value exception_level = 13;
+    string exception_stack_trace = 14;
+}
+message SubscribeRequestGrpc {
+    string requestGuid = 1;
+    repeated TLogCategoryGrpc categories = 2;
+}
+service SubscriberGrpc {
+    rpc Subscribe (SubscribeRequestGrpc) returns (stream LogMessageGrpc);
+}
