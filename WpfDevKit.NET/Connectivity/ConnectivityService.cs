@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using WpfDevKit.Utilities;
 
 namespace WpfDevKit.Connectivity
 {

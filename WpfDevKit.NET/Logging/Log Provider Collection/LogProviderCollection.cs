@@ -11,13 +11,13 @@ namespace WpfDevKit.Logging
     {
         private readonly List<(ILogProvider Provider, string Key)> providers = new List<(ILogProvider, string)>();
         private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
-        private readonly LogOptions options;
+        private readonly InternalLogger options;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogProviderCollection"/> class.
         /// </summary>
         /// <param name="LogProviderCollectionOptions">The options used for service configuration.</param>
-        public LogProviderCollection(LogOptions options) => this.options = options;
+        public LogProviderCollection(InternalLogger options) => this.options = options;
 
         /// <summary>
         /// Attempts to add a logging provider to the manager if it is not already present.

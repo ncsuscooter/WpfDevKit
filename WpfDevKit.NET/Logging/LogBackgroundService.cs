@@ -14,7 +14,7 @@ namespace WpfDevKit.Logging
     {
         private readonly ILogProviderCollection logProviderCollection;
         private readonly LogQueue logQueue;
-        private readonly LogOptions options;
+        private readonly InternalLogger options;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogBackgroundService"/> class.
@@ -22,7 +22,7 @@ namespace WpfDevKit.Logging
         /// <param name="logProviderManager">The manager used to resolve logging providers.</param>
         /// <param name="queue">The queue that holds the log messages to be processed.</param>
         /// <param name="options">The options for configuring the log background service.</param>
-        public LogBackgroundService(ILogProviderCollection logProviderCollection, LogQueue logQueue, LogOptions options) => 
+        public LogBackgroundService(ILogProviderCollection logProviderCollection, LogQueue logQueue, InternalLogger options) => 
             (this.logProviderCollection, this.logQueue, this.options) = (logProviderCollection, logQueue, options);
 
         /// <summary>

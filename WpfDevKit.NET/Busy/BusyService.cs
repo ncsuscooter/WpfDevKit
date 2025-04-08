@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using WpfDevKit.Utilities;
 
 namespace WpfDevKit.Busy
 {

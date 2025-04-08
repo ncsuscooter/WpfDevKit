@@ -13,16 +13,17 @@ namespace WpfDevKit.Activation
     /// </summary>
     internal class ResolvableFactory : IResolvableFactory
     {
+        private readonly InternalLogger logger;
         private readonly IServiceProvider serviceProvider;
         private static readonly ConcurrentDictionary<Type, ConstructorInfo> constructorCache = new ConcurrentDictionary<Type, ConstructorInfo>();
-        private static readonly ConcurrentDictionary<Type, List<PropertyInfo>> injectablePropertiesCache = new ConcurrentDictionary<Type, List<PropertyInfo>>();
+        private static readonly ConcurrentDictionary<Type, List<PropertyInfo>> propertiesCache = new ConcurrentDictionary<Type, List<PropertyInfo>>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ResolvableFactory"/> class
         /// using the specified service provider.
         /// </summary>
         /// <param name="serviceProvider">The service provider used to resolve dependencies.</param>
-        public ResolvableFactory(IServiceProvider serviceProvider) => this.serviceProvider = serviceProvider;
+        public ResolvableFactory(IServiceProvider serviceProvider) => (this.serviceProvider, logger) = (serviceProvider, serviceProvider.GetService<InternalLogger>());
 
         /// <summary>
         /// Creates an instance of the specified class type, resolving dependencies
@@ -77,11 +78,11 @@ namespace WpfDevKit.Activation
             }
 
             var result = constructor.Invoke(args);
-            var injectableProps = injectablePropertiesCache.GetOrAdd(type, t => t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                                                                                 .Where(p => p.IsDefined(typeof(ResolvableAttribute), inherit: true) && p.CanWrite)
-                                                                                 .ToList());
+            var props = propertiesCache.GetOrAdd(type, t => t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                                                             .Where(p => p.IsDefined(typeof(ResolvableAttribute), inherit: true) && p.CanWrite)
+                                                             .ToList());
 
-            foreach (var prop in injectableProps)
+            foreach (var prop in props)
             {
                 var service = serviceProvider.GetService(prop.PropertyType);
                 if (service != null)
@@ -90,8 +91,7 @@ namespace WpfDevKit.Activation
                 }
                 else
                 {
-                    // Optional enhancement: log or throw if service is missing
-                    System.Diagnostics.Debug.WriteLine($"[Inject] Warning: No service found for property {prop.Name} ({prop.PropertyType.Name}) on {type.Name}.");
+                    logger?.LogMessage?.Invoke($"[Inject] Warning: No service found for property", $"Property Name: {prop.Name} - Property Type: {prop.PropertyType.Name} Service: {type.Name}.", default);
                 }
             }
 

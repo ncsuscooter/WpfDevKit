@@ -1,8 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using WpfDevKit.Extensions;
-using WpfDevKit.Utilities;
 
 namespace WpfDevKit.Logging
 {

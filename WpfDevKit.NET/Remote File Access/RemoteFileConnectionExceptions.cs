@@ -7,7 +7,7 @@ namespace WpfDevKit.RemoteFileAccess
     /// Represents a base exception for remote share connection failures.
     /// </summary>
     [DebuggerStepThrough]
-    internal abstract class RemoteConnectionException : ApplicationException
+    public abstract class RemoteConnectionException : ApplicationException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RemoteConnectionException"/> class.
@@ -23,7 +23,7 @@ namespace WpfDevKit.RemoteFileAccess
     /// Thrown when a remote file connection fails to open.
     /// </summary>
     [DebuggerStepThrough]
-    internal class OpenRemoteConnectionException : RemoteConnectionException
+    public sealed class OpenRemoteConnectionException : RemoteConnectionException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenRemoteConnectionException"/> class.
@@ -36,7 +36,7 @@ namespace WpfDevKit.RemoteFileAccess
     /// Thrown when a remote file connection fails to close.
     /// </summary>
     [DebuggerStepThrough]
-    internal class CloseRemoteConnectionException : RemoteConnectionException
+    public sealed class CloseRemoteConnectionException : RemoteConnectionException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CloseRemoteConnectionException"/> class.

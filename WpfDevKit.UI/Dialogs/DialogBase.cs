@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using WpfDevKit.Busy;
-using WpfDevKit.Extensions;
 using WpfDevKit.Logging;
 using WpfDevKit.UI.Command;
 using WpfDevKit.UI.Core;

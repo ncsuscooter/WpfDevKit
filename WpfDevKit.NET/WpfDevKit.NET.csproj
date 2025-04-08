@@ -48,7 +48,7 @@
     <Compile Include="Logging\gRPC\GrpcLogProvider.cs" />
     <Compile Include="Logging\Log Metrics\ILogMetricsFactory.cs" />
     <Compile Include="Logging\Log Metrics\LogMetricsFactory.cs" />
-    <Compile Include="Logging\LogOptions.cs" />
+    <Compile Include="InternalLogger.cs" />
     <Compile Include="Logging\LogServiceExtensions2.cs" />
     <Compile Include="Hosting\ServiceHost.cs" />
     <Compile Include="Hosting\ServiceHostBuilder.cs" />
@@ -60,14 +60,14 @@
     <Compile Include="Dependency Injection\ServiceCollection.cs" />
     <Compile Include="Dependency Injection\ServiceDescriptor.cs" />
     <Compile Include="Dependency Injection\TServiceLifetime.cs" />
-    <Compile Include="Dependency Injection\ServiceProviderExtensions.cs" />
+    <Compile Include="ServiceProviderExtensions.cs" />
     <Compile Include="Logging\Log Provider Collection\LogProviderCollection.cs" />
     <Compile Include="Logging\Log Provider Collection\ILogProviderCollection.cs" />
     <Compile Include="Activation\ResolvableAttribute.cs" />
     <Compile Include="Activation\ResolvableFactory.cs" />
     <Compile Include="Activation\IResolvableFactory.cs" />
-    <Compile Include="Extensions\EnumExtensions.cs" />
-    <Compile Include="Extensions\TimeSpanExtensions.cs" />
+    <Compile Include="EnumExtensions.cs" />
+    <Compile Include="TimeSpanExtensions.cs" />
     <Compile Include="Logging\TLogCategory.cs" />
     <Compile Include="Logging\TLogElement.cs" />
     <Compile Include="Logging\LogServiceExtensions1.cs" />
@@ -104,8 +104,8 @@
     <Compile Include="Remote File Access\Imports.cs" />
     <Compile Include="Remote File Access\RemoteFileConnection.cs" />
     <Compile Include="Remote File Access\USE_INFO_2.cs" />
-    <Compile Include="Utilities\ExponentialRetry.cs" />
-    <Compile Include="Utilities\StartStopRegistration.cs" />
+    <Compile Include="ExponentialRetry.cs" />
+    <Compile Include="StartStopRegistration.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Logging\gRPC\Protos\Logging.proto" />
