@@ -52,8 +52,9 @@ namespace WpfDevKit.DependencyInjection
                 return array;
             }
 
-            var singleDescriptor = descriptors.FirstOrDefault(x => x.ServiceType == serviceType) ??
-                throw new InvalidOperationException($"Service of type {serviceType.Name} is not registered.");
+            var singleDescriptor = descriptors.FirstOrDefault(x => x.ServiceType == serviceType);
+            if (singleDescriptor == null)
+                return default;
 
             if (singleDescriptor.Lifetime == TServiceLifetime.Singleton)
             {

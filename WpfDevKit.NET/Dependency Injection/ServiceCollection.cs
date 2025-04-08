@@ -140,6 +140,7 @@ namespace WpfDevKit.DependencyInjection
         /// <returns>A configured <see cref="IServiceProvider"/> instance.</returns>
         public IServiceProvider Build()
         {
+            EnsureNotBuilt();
             IsBuilt = true;
             var copy = descriptors.ToList();
             descriptors.Clear();
@@ -156,7 +157,7 @@ namespace WpfDevKit.DependencyInjection
         private void EnsureNotBuilt()
         {
             if (IsBuilt)
-                throw new InvalidOperationException("Cannot register new services after the service provider has been built.");
+                throw new InvalidOperationException("Cannot register new services or build a new service provider after the service provider has been built.");
         }
 
         /// <summary>
