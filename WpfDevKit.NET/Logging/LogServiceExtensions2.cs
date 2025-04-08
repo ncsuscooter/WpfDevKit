@@ -16,7 +16,7 @@ namespace WpfDevKit.Logging
             services.AddSingleton<ILogMetricsFactory, LogMetricsFactory>();
             services.AddSingleton<ILogProviderCollection, LogProviderCollection>();
             services.AddSingleton<LogBackgroundService, LogBackgroundService>();
-            services.AddOptions(p => new InternalLogger()
+            services.AddSingleton<InternalLogger>(p => new InternalLogger()
             {
                 LogMessage = (message, attributes, type) => p.GetService<ILogService>().LogTrace(message, attributes, type),
                 LogException = (exception, type) => p.GetService<ILogService>().LogTrace(exception, type)

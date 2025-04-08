@@ -31,7 +31,7 @@ namespace WpfDevKit.App
         public bool IsEnabled => !busyService.IsBusy;
         public bool IsBusy => busyService.IsBusy;
 
-        protected override async Task DoPerformCommandAsync(string commandName)
+        protected override async Task DoPerformCommandAsync(string commandName, CancellationToken cancellationToken = default)
         {
             try
             {

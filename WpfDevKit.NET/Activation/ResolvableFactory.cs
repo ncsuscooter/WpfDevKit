@@ -13,17 +13,16 @@ namespace WpfDevKit.Activation
     /// </summary>
     internal class ResolvableFactory : IResolvableFactory
     {
-        private readonly InternalLogger logger;
-        private readonly IServiceProvider serviceProvider;
         private static readonly ConcurrentDictionary<Type, ConstructorInfo> constructorCache = new ConcurrentDictionary<Type, ConstructorInfo>();
         private static readonly ConcurrentDictionary<Type, List<PropertyInfo>> propertiesCache = new ConcurrentDictionary<Type, List<PropertyInfo>>();
+        private readonly IServiceProvider serviceProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ResolvableFactory"/> class
         /// using the specified service provider.
         /// </summary>
         /// <param name="serviceProvider">The service provider used to resolve dependencies.</param>
-        public ResolvableFactory(IServiceProvider serviceProvider) => (this.serviceProvider, logger) = (serviceProvider, serviceProvider.GetService<InternalLogger>());
+        public ResolvableFactory(IServiceProvider serviceProvider) => this.serviceProvider = serviceProvider;
 
         /// <summary>
         /// Creates an instance of the specified class type, resolving dependencies
@@ -77,6 +76,7 @@ namespace WpfDevKit.Activation
                 throw new InvalidOperationException($"Unable to resolve constructor parameter '{paramType.Name}' for type '{type.Name}'.");
             }
 
+            var logger = serviceProvider.GetService<InternalLogger>();
             var result = constructor.Invoke(args);
             var props = propertiesCache.GetOrAdd(type, t => t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                                                              .Where(p => p.IsDefined(typeof(ResolvableAttribute), inherit: true) && p.CanWrite)
