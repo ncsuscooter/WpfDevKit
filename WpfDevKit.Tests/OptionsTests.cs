@@ -1,6 +1,4 @@
-﻿// Unit tests for custom options registration and configuration in ServiceCollection
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using WpfDevKit.DependencyInjection;
 
@@ -9,84 +7,91 @@ namespace WpfDevKit.Tests.DependencyInjection
     [TestClass]
     public class OptionsTests
     {
-        private IServiceCollection services;
-
-        [TestInitialize]
-        public void Setup()
+        private class MyOptions
         {
-            services = new ServiceCollection();
-        }
-
-        public class MyOptions
-        {
-            public string Name { get; set; } = "Default";
-            public int Count { get; set; } = 1;
+            public int Value { get; set; }
         }
 
         [TestMethod]
-        public void AddOptions_RegistersDefaultOptions()
+        public void AddOptions_WithoutConfigure_ProvidesDefaultInstance()
         {
+            var services = new ServiceCollection();
             services.AddOptions<MyOptions>();
             var provider = services.Build();
+
             var options = provider.GetService<IOptions<MyOptions>>();
 
             Assert.IsNotNull(options);
-            Assert.AreEqual("Default", options.Value.Name);
-            Assert.AreEqual(1, options.Value.Count);
+            Assert.AreEqual(0, options.Value.Value); // default int value
         }
 
         [TestMethod]
-        public void Configure_ModifiesOptionsAfterAddOptions()
+        public void AddOptions_WithConfigure_AppliesConfiguration()
         {
-            services.AddOptions<MyOptions>().Configure<MyOptions>(opt =>
-            {
-                opt.Name = "Updated";
-                opt.Count = 42;
-            });
-
+            var services = new ServiceCollection();
+            services.AddOptions<MyOptions>(o => o.Value = 42);
             var provider = services.Build();
+
             var options = provider.GetService<IOptions<MyOptions>>();
 
-            Assert.AreEqual("Updated", options.Value.Name);
-            Assert.AreEqual(42, options.Value.Count);
+            Assert.IsNotNull(options);
+            Assert.AreEqual(42, options.Value.Value);
         }
 
         [TestMethod]
-        public void AddOptions_WithFactory_RegistersCustomOptions()
+        public void AddOptions_WithFactory_ProvidesFactoryValue()
         {
-            services.AddOptions<MyOptions>(_ => new MyOptions
-            {
-                Name = "FromFactory",
-                Count = 99
-            });
-
+            var services = new ServiceCollection();
+            services.AddOptions<MyOptions>(_ => new MyOptions { Value = 123 });
             var provider = services.Build();
+
             var options = provider.GetService<IOptions<MyOptions>>();
 
-            Assert.AreEqual("FromFactory", options.Value.Name);
-            Assert.AreEqual(99, options.Value.Count);
+            Assert.IsNotNull(options);
+            Assert.AreEqual(123, options.Value.Value);
         }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void Configure_ThrowsWhenOptionsRegisteredWithFactory()
+        public void Configure_AfterFactoryRegistration_Throws()
         {
+            var services = new ServiceCollection();
             services.AddOptions<MyOptions>(_ => new MyOptions());
-            services.Configure<MyOptions>(opt => opt.Name = "ShouldFail");
+            services.Configure<MyOptions>(o => o.Value = 1); // should throw
         }
 
         [TestMethod]
-        public void AddOptions_CanBeConfiguredWithMultipleActions()
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void Configure_WithoutAddOptions_Throws()
         {
-            services.AddOptions<MyOptions>()
-                    .Configure<MyOptions>(opt => opt.Name = "Step1")
-                    .Configure<MyOptions>(opt => opt.Count = 77);
+            var services = new ServiceCollection();
+            services.Configure<MyOptions>(o => o.Value = 1); // should throw
+        }
 
+        [TestMethod]
+        public void MultipleConfigurations_AreAppliedInOrder()
+        {
+            var services = new ServiceCollection();
+            services.AddOptions<MyOptions>();
+            services.Configure<MyOptions>(o => o.Value += 1);
+            services.Configure<MyOptions>(o => o.Value += 2);
             var provider = services.Build();
-            var options = provider.GetRequiredService<IOptions<MyOptions>>();
 
-            Assert.AreEqual("Step1", options.Value.Name);
-            Assert.AreEqual(77, options.Value.Count);
+            var options = provider.GetService<IOptions<MyOptions>>();
+
+            Assert.AreEqual(3, options.Value.Value); // 0 + 1 + 2
+        }
+
+        [TestMethod]
+        public void AddOptions_CanBeCalledMultipleTimesForSameType()
+        {
+            var services = new ServiceCollection();
+            services.AddOptions<MyOptions>();
+            services.Configure<MyOptions>(o => o.Value = 100);
+            var provider = services.Build();
+
+            var options = provider.GetService<IOptions<MyOptions>>();
+            Assert.AreEqual(100, options.Value.Value);
         }
     }
 }

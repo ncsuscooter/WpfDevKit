@@ -12,7 +12,6 @@ namespace WpfDevKit.DependencyInjection
     internal class ServiceCollection : IServiceCollection
     {
         private readonly List<ServiceDescriptor> descriptors = new List<ServiceDescriptor>();
-        private readonly Dictionary<Type, List<Delegate>> configureActions = new Dictionary<Type, List<Delegate>>();
 
         /// <inheritdoc/>
         public bool IsBuilt { get; private set; }
@@ -122,7 +121,7 @@ namespace WpfDevKit.DependencyInjection
         /// Thrown when attempting to add options after the service provider has been built.
         /// </exception>
         public IServiceCollection AddOptions<TOptions>(Func<IServiceProvider, TOptions> factory) where TOptions : class, new() => 
-            AddSingleton<IOptions<TOptions>>(factory);
+            AddSingleton<IOptions<TOptions>>(provider => new Options<TOptions>(factory(provider)));
 
         /// <inheritdoc/>
         /// <exception cref="InvalidOperationException">
@@ -131,12 +130,12 @@ namespace WpfDevKit.DependencyInjection
         public IServiceCollection Configure<TOptions>(Action<TOptions> configure) where TOptions : class
         {
             EnsureNotBuilt();
-            // Check if options already registered via factory
-            if (descriptors.Any(d => d.ServiceType == typeof(IOptions<TOptions>) && d.Factory != null))
+            var collection = descriptors.Where(d => d.ServiceType == typeof(IOptions<TOptions>)).ToList();
+            if (collection == null || collection.Count == 0)
+                throw new InvalidOperationException($"Cannot configure options for '{typeof(TOptions).Name}' because it is not registered as a service.");
+            var descriptor = collection.FirstOrDefault(d => d.Factory == null) ??
                 throw new InvalidOperationException($"Cannot configure options for '{typeof(TOptions).Name}' because it is registered using a factory.");
-            if (!configureActions.TryGetValue(typeof(TOptions), out var _))
-                configureActions[typeof(TOptions)] = new List<Delegate>();
-            configureActions[typeof(TOptions)].Add(configure);
+            descriptor.OptionConfigurators.Add(instance => configure((TOptions)instance));
             return this;
         }
 
@@ -153,10 +152,8 @@ namespace WpfDevKit.DependencyInjection
             {
                 if (item.ServiceType.IsGenericType && item.ServiceType.GetGenericTypeDefinition() == typeof(IOptions<>) && item.Factory == null)
                 {
-                    //if (item.Factory != null)
-                    //    throw new InvalidOperationException($"Cannot configure options for '{item.ServiceType.Name}' because it is registered using a factory.");
                     var optionsType = item.ServiceType.GetGenericArguments()[0];
-                    var optionsInstance = item.Factory?.Invoke(null) ?? Activator.CreateInstance(optionsType);
+                    var optionsInstance = Activator.CreateInstance(optionsType);
                     foreach (var config in item.OptionConfigurators)
                         config.DynamicInvoke(optionsInstance);
                     item.OptionConfigurators.Clear();
