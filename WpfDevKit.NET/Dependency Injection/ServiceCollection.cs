@@ -13,31 +13,18 @@ namespace WpfDevKit.DependencyInjection
     {
         private readonly List<ServiceDescriptor> descriptors = new List<ServiceDescriptor>();
 
-        /// <summary>
-        /// Gets a value indicating whether the service provider has been built.
-        /// Once built, no additional services can be registered.
-        /// </summary>
+        /// <inheritdoc/>
         public bool IsBuilt { get; private set; }
 
-        /// <summary>
-        /// Registers a singleton service with a default constructor.
-        /// </summary>
-        /// <typeparam name="TService">The service type.</typeparam>
-        /// <typeparam name="TImplementation">The implementation type.</typeparam>
-        /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
-        public IServiceCollection AddSingleton<TService, TImplementation>() where TImplementation : class, TService
-        {
-            EnsureNotBuilt();
-            descriptors.Add(new ServiceDescriptor(typeof(TService), typeof(TImplementation), TServiceLifetime.Singleton));
-            return this;
-        }
+        /// <inheritdoc/>
+        public IServiceCollection AddSingleton<TImplementation>() where TImplementation : class =>
+            AddSingleton(typeof(TImplementation), typeof(TImplementation));
 
-        /// <summary>
-        /// Registers a singleton service with a default constructor.
-        /// </summary>
-        /// <param name="serviceType">The service type.</typeparam>
-        /// <param name="implementationType">The implementation type.</typeparam>
-        /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
+        /// <inheritdoc/>
+        public IServiceCollection AddSingleton<TService, TImplementation>() where TImplementation : class, TService => 
+            AddSingleton(typeof(TService), typeof(TImplementation));
+
+        /// <inheritdoc/>
         public IServiceCollection AddSingleton(Type serviceType, Type implementationType)
         {
             EnsureNotBuilt();
@@ -46,12 +33,7 @@ namespace WpfDevKit.DependencyInjection
             return this;
         }
 
-        /// <summary>
-        /// Registers a singleton service using a factory method.
-        /// </summary>
-        /// <typeparam name="TService">The service type.</typeparam>
-        /// <param name="factory">The factory method used to create the service instance.</param>
-        /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
+        /// <inheritdoc/>
         public IServiceCollection AddSingleton<TService>(Func<IServiceProvider, object> factory)
         {
             EnsureNotBuilt();
@@ -59,25 +41,15 @@ namespace WpfDevKit.DependencyInjection
             return this;
         }
 
-        /// <summary>
-        /// Registers a transient service with a default constructor.
-        /// </summary>
-        /// <typeparam name="TService">The service type.</typeparam>
-        /// <typeparam name="TImplementation">The implementation type.</typeparam>
-        /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
-        public IServiceCollection AddTransient<TService, TImplementation>() where TImplementation : class, TService
-        {
-            EnsureNotBuilt();
-            descriptors.Add(new ServiceDescriptor(typeof(TService), typeof(TImplementation), TServiceLifetime.Transient));
-            return this;
-        }
+        /// <inheritdoc/>
+        public IServiceCollection AddTransient<TImplementation>() where TImplementation : class =>
+            AddSingleton(typeof(TImplementation), typeof(TImplementation));
 
-        /// <summary>
-        /// Registers a transient service with a default constructor.
-        /// </summary>
-        /// <param name="serviceType">The service type.</typeparam>
-        /// <param name="implementationType">The implementation type.</typeparam>
-        /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
+        /// <inheritdoc/>
+        public IServiceCollection AddTransient<TService, TImplementation>() where TImplementation : class, TService => 
+            AddTransient(typeof(TService), typeof(TImplementation));
+
+        /// <inheritdoc/>
         public IServiceCollection AddTransient(Type serviceType, Type implementationType)
         {
             EnsureNotBuilt();
@@ -86,12 +58,7 @@ namespace WpfDevKit.DependencyInjection
             return this;
         }
 
-        /// <summary>
-        /// Registers a transient service using a factory method.
-        /// </summary>
-        /// <typeparam name="TService">The service type.</typeparam>
-        /// <param name="factory">The factory method used to create the service instance.</param>
-        /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
+        /// <inheritdoc/>
         public IServiceCollection AddTransient<TService>(Func<IServiceProvider, object> factory)
         {
             EnsureNotBuilt();
@@ -99,19 +66,10 @@ namespace WpfDevKit.DependencyInjection
             return this;
         }
 
-        /// <summary>
-        /// Registers configuration options for the specified type.
-        /// </summary>
-        /// <typeparam name="TOptions">The options type.</typeparam>
-        /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
+        /// <inheritdoc/>
         public IServiceCollection AddOptions<TOptions>() where TOptions : class, new() => AddOptions<TOptions>(configure: null);
 
-        /// <summary>
-        /// Registers configuration options for the specified type using a configuration action.
-        /// </summary>
-        /// <typeparam name="TOptions">The options type.</typeparam>
-        /// <param name="configure">The configuration action to apply to the options instance.</param>
-        /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
+        /// <inheritdoc/>
         public IServiceCollection AddOptions<TOptions>(Action<TOptions> configure) where TOptions : class, new()
         {
             EnsureNotBuilt();
@@ -121,12 +79,7 @@ namespace WpfDevKit.DependencyInjection
             return this;
         }
 
-        /// <summary>
-        /// Registers configuration options for the specified type using a factory method.
-        /// </summary>
-        /// <typeparam name="TOptions">The options type.</typeparam>
-        /// <param name="factory">The factory method used to create the options instance.</param>
-        /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
+        /// <inheritdoc/>
         public IServiceCollection AddOptions<TOptions>(Func<IServiceProvider, TOptions> factory) where TOptions : class, new()
         {
             EnsureNotBuilt();
@@ -134,10 +87,7 @@ namespace WpfDevKit.DependencyInjection
             return this;
         }
 
-        /// <summary>
-        /// Builds the service provider from the registered descriptors.
-        /// </summary>
-        /// <returns>A configured <see cref="IServiceProvider"/> instance.</returns>
+        /// <inheritdoc/>
         public IServiceProvider Build()
         {
             EnsureNotBuilt();

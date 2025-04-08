@@ -13,8 +13,8 @@ namespace WpfDevKit.Activation
     /// </summary>
     internal class ResolvableFactory : IResolvableFactory
     {
-        private static readonly ConcurrentDictionary<Type, ConstructorInfo> constructorCache = new ConcurrentDictionary<Type, ConstructorInfo>();
-        private static readonly ConcurrentDictionary<Type, List<PropertyInfo>> propertiesCache = new ConcurrentDictionary<Type, List<PropertyInfo>>();
+        private readonly ConcurrentDictionary<Type, ConstructorInfo> constructorCache = new ConcurrentDictionary<Type, ConstructorInfo>();
+        private readonly ConcurrentDictionary<Type, List<PropertyInfo>> propertiesCache = new ConcurrentDictionary<Type, List<PropertyInfo>>();
         private readonly IServiceProvider provider;
 
         /// <summary>
@@ -29,9 +29,9 @@ namespace WpfDevKit.Activation
         /// via constructor and property injection.
         /// </summary>
         /// <typeparam name="TClass">The type of class to instantiate.</typeparam>
-        /// <param name="parameters">Optional parameters to assist with constructor resolution.</param>
+        /// <param name="args">Optional parameters to assist with constructor resolution.</param>
         /// <returns>A fully constructed instance of <typeparamref name="TClass"/>.</returns>
-        public TClass Create<TClass>(params object[] parameters) where TClass : class => (TClass)Create(typeof(TClass), parameters);
+        public TClass Create<TClass>(params object[] args) where TClass : class => (TClass)Create(typeof(TClass), args);
 
         /// <summary>
         /// Creates an instance of the specified type using the most suitable constructor
@@ -48,22 +48,70 @@ namespace WpfDevKit.Activation
             if (type == null) throw new ArgumentNullException(nameof(type));
             if (!type.IsClass) throw new ArgumentException("Type must be a class", nameof(type));
 
-            var constructor = constructorCache.GetOrAdd(type, ResolveConstructor);
+            var constructor = constructorCache.GetOrAdd(type, ResolveConstructor(type, args));
             var parameters = constructor.GetParameters();
             var arguments = new object[parameters.Length];
+            var usedArgs = new HashSet<int>();
 
             for (int i = 0; i < parameters.Length; i++)
             {
-                var paramType = parameters[i].ParameterType;
-                var match = args?.FirstOrDefault(a => paramType.IsInstanceOfType(a));
+                var param = parameters[i];
+                bool resolved = false;
 
-                if (match != null)
+                // 1. Try match by position
+                if (args != null && i < args.Length)
                 {
-                    arguments[i] = match;
+                    var arg = args[i];
+                    if ((arg == null && !param.ParameterType.IsValueType) ||
+                        (arg != null && param.ParameterType.IsInstanceOfType(arg)))
+                    {
+                        arguments[i] = arg;
+                        usedArgs.Add(i);
+                        resolved = true;
+                    }
                 }
-                else
+
+                // 2. Try match by unused argument type
+                if (!resolved && args != null)
                 {
-                    arguments[i] = provider.GetRequiredService(paramType);
+                    for (int j = 0; j < args.Length; j++)
+                    {
+                        if (usedArgs.Contains(j)) continue;
+                        var arg = args[j];
+                        if ((arg == null && !param.ParameterType.IsValueType) ||
+                            (arg != null && param.ParameterType.IsInstanceOfType(arg)))
+                        {
+                            arguments[i] = arg;
+                            usedArgs.Add(j);
+                            resolved = true;
+                            break;
+                        }
+                    }
+                }
+
+                // 3. Try DI
+                if (!resolved)
+                {
+                    var service = provider.GetService(param.ParameterType);
+                    if (service != null)
+                    {
+                        arguments[i] = service;
+                        resolved = true;
+                    }
+                }
+
+                // 4. Try default
+                if (!resolved && param.HasDefaultValue)
+                {
+                    arguments[i] = param.DefaultValue;
+                    resolved = true;
+                }
+
+                // 5. Fail if unresolved
+                if (!resolved)
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot resolve parameter '{param.Name}' of type '{param.ParameterType.Name}'.");
                 }
             }
 
@@ -92,17 +140,68 @@ namespace WpfDevKit.Activation
         /// Resolves the best-fit constructor for a type, preferring the one with the most resolvable parameters.
         /// </summary>
         /// <param name="type">The type for which to resolve a constructor.</param>
+        /// <param name="args">Parameters used to assist with constructor resolution.</param>
         /// <returns>The selected constructor.</returns>
         /// <exception cref="InvalidOperationException">Thrown if no suitable constructor is found.</exception>
-        private ConstructorInfo ResolveConstructor(Type type) => type
+        private ConstructorInfo ResolveConstructor(Type type, object[] args) => type
             .GetConstructors()
-            .OrderByDescending(c => c.GetParameters().Length)
-            .FirstOrDefault(ctor =>
+            .Select(ctor => new
             {
-                var parameters = ctor.GetParameters();
-                return parameters.Length == 0 || parameters.All(p => provider.GetService(p.ParameterType) != null);
+                Constructor = ctor,
+                Score = ScoreConstructor(ctor, args)
             })
-            ?? throw new InvalidOperationException($"No suitable public constructor found for {type.Name}.");
+            .Where(x => x.Score >= 0)
+            .OrderByDescending(x => x.Score)
+            .ThenByDescending(x => x.Constructor.GetParameters().Length)
+            .Select(x => x.Constructor)
+            .FirstOrDefault() ?? throw new InvalidOperationException($"No suitable constructor found for {type.Name}.");
+
+        /// <summary>
+        /// Computes a weighted score for a given constructor based on how well its parameters
+        /// can be resolved using the provided arguments, the service provider, or optional values.
+        /// </summary>
+        /// <param name="ctor">The constructor to evaluate.</param>
+        /// <param name="args">Optional user-supplied arguments used to assist with parameter resolution.</param>
+        /// <returns>
+        /// A non-negative integer representing the suitability of the constructor.
+        /// Returns -1 if the constructor has any parameters that cannot be resolved.
+        /// </returns>
+        private int ScoreConstructor(ConstructorInfo ctor, object[] args)
+        {
+            int score = 0;
+            foreach (var param in ctor.GetParameters())
+            {
+                bool matched = false;
+
+                if (args != null)
+                {
+                    foreach (var arg in args)
+                    {
+                        if (arg == null && !param.ParameterType.IsValueType)
+                        {
+                            matched = true;
+                            break;
+                        }
+                        if (arg != null && param.ParameterType.IsInstanceOfType(arg))
+                        {
+                            matched = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (matched)
+                    score += 2;
+                else if (provider.GetService(param.ParameterType) != null)
+                    score += 3;
+                else if (param.IsOptional)
+                    score += 1;
+                else
+                    return -1; // Cannot satisfy this constructor
+            }
+            return score;
+        }
+
 
         /// <summary>
         /// Resolves the public setters for an instance type marked with the <see cref="ResolvableAttribute"/> for dependency injection via properties.

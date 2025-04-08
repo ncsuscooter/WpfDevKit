@@ -14,6 +14,13 @@ namespace WpfDevKit.DependencyInjection
         bool IsBuilt { get; }
 
         /// <summary>
+        /// Registers a singleton service of the specified implementation type.
+        /// </summary>
+        /// <typeparam name="TImplementation">The implementation type.</typeparam>
+        /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
+        IServiceCollection AddSingleton<TImplementation>() where TImplementation : class;
+
+        /// <summary>
         /// Registers a singleton service of the specified type with an implementation type.
         /// </summary>
         /// <typeparam name="TService">The service type.</typeparam>
@@ -36,6 +43,13 @@ namespace WpfDevKit.DependencyInjection
         /// <param name="factory">The factory method to create the service instance.</param>
         /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
         IServiceCollection AddSingleton<TService>(Func<IServiceProvider, object> factory);
+
+        /// <summary>
+        /// Registers a transient service of the specified implementation type.
+        /// </summary>
+        /// <typeparam name="TImplementation">The implementation type.</typeparam>
+        /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
+        IServiceCollection AddTransient<TImplementation>() where TImplementation : class;
 
         /// <summary>
         /// Registers a transient service of the specified type with an implementation type.
