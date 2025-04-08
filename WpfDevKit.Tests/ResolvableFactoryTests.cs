@@ -204,6 +204,21 @@ namespace WpfDevKit.Tests.Activation
             Assert.AreEqual("fallback", result.Value);
         }
 
+        [TestMethod]
+        public void Create_WithDifferentManualArgs_AvoidsConstructorCacheConflict()
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton<IDependency, Dependency>();
+            var provider = services.Build();
+            var factory = new ResolvableFactory(provider);
+
+            var first = factory.Create<MultiConstructorClass>("manual"); // manual param, should use string ctor
+            var second = factory.Create<MultiConstructorClass>();        // dependency param, should use IDependency ctor
+
+            Assert.AreEqual("manual", first.Source);
+            Assert.AreEqual("resolved", second.Source);
+        }
+
         public class NoDependencyClass { }
 
         public interface IDependency { string Name { get; } }

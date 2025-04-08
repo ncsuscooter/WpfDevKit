@@ -13,8 +13,8 @@ namespace WpfDevKit.Activation
     /// </summary>
     internal class ResolvableFactory : IResolvableFactory
     {
-        private readonly ConcurrentDictionary<Type, ConstructorInfo> constructorCache = new ConcurrentDictionary<Type, ConstructorInfo>();
-        private readonly ConcurrentDictionary<Type, List<PropertyInfo>> propertiesCache = new ConcurrentDictionary<Type, List<PropertyInfo>>();
+        //private readonly ConcurrentDictionary<ConstructorCacheKey, ConstructorInfo> constructorCache = new ConcurrentDictionary<ConstructorCacheKey, ConstructorInfo>();
+        //private readonly ConcurrentDictionary<Type, List<PropertyInfo>> propertiesCache = new ConcurrentDictionary<Type, List<PropertyInfo>>();
         private readonly IServiceProvider provider;
 
         /// <summary>
@@ -48,7 +48,8 @@ namespace WpfDevKit.Activation
             if (type == null) throw new ArgumentNullException(nameof(type));
             if (!type.IsClass) throw new ArgumentException("Type must be a class", nameof(type));
 
-            var constructor = constructorCache.GetOrAdd(type, ResolveConstructor(type, args));
+            //var cacheKey = new ConstructorCacheKey(type, args);
+            var constructor = ResolveConstructor(type, args); //constructorCache.GetOrAdd(cacheKey, _ => ResolveConstructor(type, args));
             var parameters = constructor.GetParameters();
             var arguments = new object[parameters.Length];
             var usedArgs = new HashSet<int>();
@@ -116,7 +117,7 @@ namespace WpfDevKit.Activation
             }
 
             var result = constructor.Invoke(arguments);
-            var properties = propertiesCache.GetOrAdd(type, ResolveProperties);
+            var properties = ResolveProperties(type); //propertiesCache.GetOrAdd(type, ResolveProperties);
 
             foreach (var prop in properties)
             {
@@ -143,18 +144,14 @@ namespace WpfDevKit.Activation
         /// <param name="args">Parameters used to assist with constructor resolution.</param>
         /// <returns>The selected constructor.</returns>
         /// <exception cref="InvalidOperationException">Thrown if no suitable constructor is found.</exception>
-        private ConstructorInfo ResolveConstructor(Type type, object[] args) => type
-            .GetConstructors()
-            .Select(ctor => new
-            {
-                Constructor = ctor,
-                Score = ScoreConstructor(ctor, args)
-            })
-            .Where(x => x.Score >= 0)
-            .OrderByDescending(x => x.Score)
-            .ThenByDescending(x => x.Constructor.GetParameters().Length)
-            .Select(x => x.Constructor)
-            .FirstOrDefault() ?? throw new InvalidOperationException($"No suitable constructor found for {type.Name}.");
+        private ConstructorInfo ResolveConstructor(Type type, object[] args) =>
+            type.GetConstructors()
+                .Select(ctor => new { Constructor = ctor, Score = ScoreConstructor(ctor, args) })
+                .Where(x => x.Score >= 0)
+                .OrderByDescending(x => x.Score)
+                .ThenByDescending(x => x.Constructor.GetParameters().Length)
+                .Select(x => x.Constructor)
+                .FirstOrDefault() ?? throw new InvalidOperationException($"No suitable constructor found for {type.Name}.");
 
         /// <summary>
         /// Computes a weighted score for a given constructor based on how well its parameters
@@ -166,7 +163,7 @@ namespace WpfDevKit.Activation
         /// A non-negative integer representing the suitability of the constructor.
         /// Returns -1 if the constructor has any parameters that cannot be resolved.
         /// </returns>
-        private int ScoreConstructor(ConstructorInfo ctor, object[] args)
+        private int ScoreConstructor_old(ConstructorInfo ctor, object[] args)
         {
             int score = 0;
             foreach (var param in ctor.GetParameters())
@@ -202,15 +199,122 @@ namespace WpfDevKit.Activation
             return score;
         }
 
+        private int ScoreConstructor(ConstructorInfo ctor, object[] args)
+        {
+            int score = 0;
+            var parameters = ctor.GetParameters();
+            var usedArgs = new HashSet<int>();
+
+            foreach (var param in parameters)
+            {
+                bool matched = false;
+
+                // Match by unused args
+                if (args != null)
+                {
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        if (usedArgs.Contains(i)) continue;
+                        var arg = args[i];
+
+                        if ((arg == null && !param.ParameterType.IsValueType) ||
+                            (arg != null && param.ParameterType.IsInstanceOfType(arg)))
+                        {
+                            score += 5; // highest priority: direct match
+                            usedArgs.Add(i);
+                            matched = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!matched && provider.GetService(param.ParameterType) != null)
+                {
+                    score += 3; // mid priority: service match
+                    matched = true;
+                }
+
+                if (!matched && param.HasDefaultValue)
+                {
+                    score += 1; // lowest priority: optional param
+                    matched = true;
+                }
+
+                if (!matched)
+                    return -1; // cannot resolve this param
+            }
+
+            return score;
+        }
+
+
 
         /// <summary>
         /// Resolves the public setters for an instance type marked with the <see cref="ResolvableAttribute"/> for dependency injection via properties.
         /// </summary>
         /// <param name="type">The type for which to resolve properties.</param>
         /// <returns>The collection of properties.</returns>
-        private List<PropertyInfo> ResolveProperties(Type type) => type
-            .GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-            .Where(p => p.IsDefined(typeof(ResolvableAttribute), inherit: true) && p.CanWrite)
-            .ToList();
+        private List<PropertyInfo> ResolveProperties(Type type) => 
+            type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(p => p.IsDefined(typeof(ResolvableAttribute), inherit: true) && p.CanWrite)
+                .ToList();
+        //private readonly struct ConstructorCacheKey : IEquatable<ConstructorCacheKey>
+        //{
+        //    public Type TargetType { get; }
+        //    public string Signature { get; }
+
+        //    public ConstructorCacheKey(Type type, object[] args)
+        //    {
+        //        TargetType = type;
+
+        //        // Serialize more details about the input args and DI context
+        //        var argTypes = args?.Select(a => a?.GetType()?.FullName ?? "null") ?? Enumerable.Empty<string>();
+        //        var services = type
+        //            .GetConstructors()
+        //            .SelectMany(c => c.GetParameters())
+        //            .Select(p => p.ParameterType.FullName + ":" + (p.IsOptional ? "optional" : "required"))
+        //            .Distinct()
+        //            .OrderBy(x => x);
+
+        //        Signature = string.Join("|", argTypes.Concat(services));
+        //    }
+
+        //    public bool Equals(ConstructorCacheKey other) =>
+        //        TargetType == other.TargetType && Signature == other.Signature;
+
+        //    public override bool Equals(object obj) =>
+        //        obj is ConstructorCacheKey other && Equals(other);
+
+        //    public override int GetHashCode()
+        //    {
+        //        int hash = TargetType.GetHashCode();
+        //        hash = (hash * 397) ^ (Signature?.GetHashCode() ?? 0);
+        //        return hash;
+        //    }
+        //}
+        //private readonly struct ConstructorCacheKey2 : IEquatable<ConstructorCacheKey2>
+        //{
+        //    public Type TargetType { get; }
+        //    public Type[] ArgTypes { get; }
+        //    public ConstructorCacheKey2(Type targetType, object[] args) => 
+        //        (TargetType, ArgTypes) = (targetType, args?.Select(a => a?.GetType() ?? typeof(object)).ToArray() ?? Type.EmptyTypes);
+        //    public bool Equals(ConstructorCacheKey2 other)
+        //    {
+        //        if (TargetType != other.TargetType || ArgTypes.Length != other.ArgTypes.Length)
+        //            return false;
+        //        for (int i = 0; i < ArgTypes.Length; i++)
+        //            if (ArgTypes[i] != other.ArgTypes[i])
+        //                return false;
+        //        return true;
+        //    }
+        //    public override bool Equals(object obj) => obj is ConstructorCacheKey2 other && Equals(other);
+        //    public override int GetHashCode()
+        //    {
+        //        int hash = TargetType.GetHashCode();
+        //        foreach (var type in ArgTypes)
+        //            hash = (hash * 397) ^ (type?.GetHashCode() ?? 0);
+        //        return hash;
+        //    }
+        //}
     }
 }

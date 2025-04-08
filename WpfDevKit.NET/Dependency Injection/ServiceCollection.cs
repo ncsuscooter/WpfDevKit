@@ -12,19 +12,35 @@ namespace WpfDevKit.DependencyInjection
     internal class ServiceCollection : IServiceCollection
     {
         private readonly List<ServiceDescriptor> descriptors = new List<ServiceDescriptor>();
+        private readonly Dictionary<Type, List<Delegate>> configureActions = new Dictionary<Type, List<Delegate>>();
 
         /// <inheritdoc/>
         public bool IsBuilt { get; private set; }
 
         /// <inheritdoc/>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to register services after the service provider has been built.
+        /// </exception>
         public IServiceCollection AddSingleton<TImplementation>() where TImplementation : class =>
             AddSingleton(typeof(TImplementation), typeof(TImplementation));
 
         /// <inheritdoc/>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to register services after the service provider has been built.
+        /// </exception>
         public IServiceCollection AddSingleton<TService, TImplementation>() where TImplementation : class, TService => 
             AddSingleton(typeof(TService), typeof(TImplementation));
 
         /// <inheritdoc/>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to register services after the service provider has been built.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if <paramref name="serviceType"/> or <paramref name="implementationType"/> is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if <paramref name="implementationType"/> does not implement or inherit from <paramref name="serviceType"/>.
+        /// </exception>
         public IServiceCollection AddSingleton(Type serviceType, Type implementationType)
         {
             EnsureNotBuilt();
@@ -34,6 +50,9 @@ namespace WpfDevKit.DependencyInjection
         }
 
         /// <inheritdoc/>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to register services after the service provider has been built.
+        /// </exception>
         public IServiceCollection AddSingleton<TService>(Func<IServiceProvider, object> factory)
         {
             EnsureNotBuilt();
@@ -42,14 +61,29 @@ namespace WpfDevKit.DependencyInjection
         }
 
         /// <inheritdoc/>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to register services after the service provider has been built.
+        /// </exception>
         public IServiceCollection AddTransient<TImplementation>() where TImplementation : class =>
-            AddSingleton(typeof(TImplementation), typeof(TImplementation));
+            AddTransient(typeof(TImplementation), typeof(TImplementation));
 
         /// <inheritdoc/>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to register services after the service provider has been built.
+        /// </exception>
         public IServiceCollection AddTransient<TService, TImplementation>() where TImplementation : class, TService => 
             AddTransient(typeof(TService), typeof(TImplementation));
 
         /// <inheritdoc/>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to register services after the service provider has been built.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if <paramref name="serviceType"/> or <paramref name="implementationType"/> is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if <paramref name="implementationType"/> does not implement or inherit from <paramref name="serviceType"/>.
+        /// </exception>
         public IServiceCollection AddTransient(Type serviceType, Type implementationType)
         {
             EnsureNotBuilt();
@@ -59,6 +93,9 @@ namespace WpfDevKit.DependencyInjection
         }
 
         /// <inheritdoc/>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to register services after the service provider has been built.
+        /// </exception>
         public IServiceCollection AddTransient<TService>(Func<IServiceProvider, object> factory)
         {
             EnsureNotBuilt();
@@ -67,32 +104,70 @@ namespace WpfDevKit.DependencyInjection
         }
 
         /// <inheritdoc/>
-        public IServiceCollection AddOptions<TOptions>() where TOptions : class, new() => AddOptions<TOptions>(configure: null);
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to add options after the service provider has been built.
+        /// </exception>
+        public IServiceCollection AddOptions<TOptions>() where TOptions : class, new() => 
+            AddSingleton<IOptions<TOptions>>();
 
         /// <inheritdoc/>
-        public IServiceCollection AddOptions<TOptions>(Action<TOptions> configure) where TOptions : class, new()
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to add options after the service provider has been built.
+        /// </exception>
+        public IServiceCollection AddOptions<TOptions>(Action<TOptions> configure) where TOptions : class, new() => 
+            AddSingleton<IOptions<TOptions>>().Configure(configure);
+
+        /// <inheritdoc/>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to add options after the service provider has been built.
+        /// </exception>
+        public IServiceCollection AddOptions<TOptions>(Func<IServiceProvider, TOptions> factory) where TOptions : class, new() => 
+            AddSingleton<IOptions<TOptions>>(factory);
+
+        /// <inheritdoc/>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the options were registered using a factory method.
+        /// </exception>
+        public IServiceCollection Configure<TOptions>(Action<TOptions> configure) where TOptions : class
         {
             EnsureNotBuilt();
-            var options = new TOptions();
-            configure?.Invoke(options);
-            descriptors.Add(new ServiceDescriptor(typeof(IOptions<TOptions>), provider => new Options<TOptions>(options), TServiceLifetime.Singleton));
+            // Check if options already registered via factory
+            if (descriptors.Any(d => d.ServiceType == typeof(IOptions<TOptions>) && d.Factory != null))
+                throw new InvalidOperationException($"Cannot configure options for '{typeof(TOptions).Name}' because it is registered using a factory.");
+            if (!configureActions.TryGetValue(typeof(TOptions), out var _))
+                configureActions[typeof(TOptions)] = new List<Delegate>();
+            configureActions[typeof(TOptions)].Add(configure);
             return this;
         }
 
         /// <inheritdoc/>
-        public IServiceCollection AddOptions<TOptions>(Func<IServiceProvider, TOptions> factory) where TOptions : class, new()
-        {
-            EnsureNotBuilt();
-            descriptors.Add(new ServiceDescriptor(typeof(IOptions<TOptions>), provider => new Options<TOptions>(factory(provider)), TServiceLifetime.Singleton));
-            return this;
-        }
-
-        /// <inheritdoc/>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to create an instance of <see cref="IOptions{TOptions}"/> services after the service provider has been built.
+        /// </exception>
         public IServiceProvider Build()
         {
             EnsureNotBuilt();
             IsBuilt = true;
-            var copy = descriptors.ToList();
+            var copy = new List<ServiceDescriptor>();
+            foreach (var item in descriptors)
+            {
+                if (item.ServiceType.IsGenericType && item.ServiceType.GetGenericTypeDefinition() == typeof(IOptions<>) && item.Factory == null)
+                {
+                    //if (item.Factory != null)
+                    //    throw new InvalidOperationException($"Cannot configure options for '{item.ServiceType.Name}' because it is registered using a factory.");
+                    var optionsType = item.ServiceType.GetGenericArguments()[0];
+                    var optionsInstance = item.Factory?.Invoke(null) ?? Activator.CreateInstance(optionsType);
+                    foreach (var config in item.OptionConfigurators)
+                        config.DynamicInvoke(optionsInstance);
+                    item.OptionConfigurators.Clear();
+                    var wrapped = Activator.CreateInstance(typeof(Options<>).MakeGenericType(optionsType), optionsInstance);
+                    copy.Add(new ServiceDescriptor(item.ServiceType, _ => wrapped, TServiceLifetime.Singleton));
+                }
+                else
+                {
+                    copy.Add(item);
+                }
+            }
             descriptors.Clear();
             return new ServiceProvider(copy);
         }
@@ -119,7 +194,7 @@ namespace WpfDevKit.DependencyInjection
         /// Thrown if <paramref name="serviceType"/> or <paramref name="implementationType"/> is null.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if <paramref name="implementationType"/> does not implement or inherit from <paramref name="serviceType"/> or does not have a public parameterless constructor.
+        /// Thrown if <paramref name="implementationType"/> does not implement or inherit from <paramref name="serviceType"/>.
         /// </exception>
         private void EnsureTypeCriteria(Type serviceType, Type implementationType)
         {
@@ -129,8 +204,6 @@ namespace WpfDevKit.DependencyInjection
                 throw new ArgumentNullException(nameof(implementationType));
             if (!serviceType.IsAssignableFrom(implementationType))
                 throw new InvalidOperationException($"{implementationType.Name} must implement or inherit from {serviceType.Name}");
-            if (implementationType.GetConstructors().All(ctor => ctor.GetParameters().Length > 0))
-                throw new InvalidOperationException($"{implementationType.Name} doesn't have a public parameterless constructor");
         }
     }
 }

@@ -99,6 +99,15 @@ namespace WpfDevKit.DependencyInjection
         IServiceCollection AddOptions<TOptions>(Func<IServiceProvider, TOptions> factory) where TOptions : class, new();
 
         /// <summary>
+        /// Adds a configuration delegate to be applied to an options instance of type <typeparamref name="TOptions"/>.
+        /// This method cannot be used if the options were registered via a factory.
+        /// </summary>
+        /// <typeparam name="TOptions">The options type.</typeparam>
+        /// <param name="configure">The configuration delegate.</param>
+        /// <returns>The updated service collection.</returns>
+        IServiceCollection Configure<TOptions>(Action<TOptions> configure) where TOptions : class;
+
+        /// <summary>
         /// Builds the service provider.
         /// </summary>
         /// <returns>The built <see cref="IServiceProvider"/> instance.</returns>

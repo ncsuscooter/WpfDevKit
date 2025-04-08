@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace WpfDevKit.DependencyInjection
@@ -33,6 +34,11 @@ namespace WpfDevKit.DependencyInjection
         /// Gets the factory used to create the service instance.
         /// </summary>
         public Func<IServiceProvider, object> Factory { get; }
+
+        /// <summary>
+        /// Gets the collection of configurators used to configure the service instance. Typically used for <see cref="IOptions{TOptions}"/>
+        /// </summary>
+        public List<Action<object>> OptionConfigurators { get; } = new List<Action<object>>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServiceDescriptor"/> class with an implementation type.
