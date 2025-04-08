@@ -101,7 +101,7 @@
       <DependentUpon>LogViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\DialogServiceExtensions.cs" />
-    <Compile Include="Extensions\DependencyObjectExtensions.cs" />
+    <Compile Include="DependencyObjectExtensions.cs" />
     <Compile Include="FilterDataGrid\BindingEvaluator.cs" />
     <Compile Include="FilterDataGrid\FilterBehavior.cs" />
     <Compile Include="FilterDataGrid\FilterExtensions.cs" />
