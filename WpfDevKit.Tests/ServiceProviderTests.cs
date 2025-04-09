@@ -413,6 +413,167 @@ namespace WpfDevKit.Tests.DependencyInjection
             Assert.AreEqual(2, allServices.Count);
         }
 
+        [TestMethod]
+        public void EmptyEnumerableResolution_ReturnsEmptyArray()
+        {
+            var services = new ServiceCollection();
+            var provider = services.Build();
+
+            var result = provider.GetServices<IServiceGet>();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
+        }
+
+        [TestMethod]
+        public void EnumerableInjection_WithMultipleInterfaces_WorksCorrectly()
+        {
+            var services = new ServiceCollection();
+            services.AddTransient<IServiceGet, ServiceAGet>();
+            services.AddTransient<IServiceGet, ServiceBGet>();
+            services.AddTransient<IMarker, MarkerA>();
+            services.AddTransient<IMarker, MarkerB>();
+            services.AddTransient<ConsumesMultipleEnumerables>();
+            var provider = services.Build();
+
+            var consumer = provider.GetService<ConsumesMultipleEnumerables>();
+
+            Assert.AreEqual(2, consumer.Services.Count());
+            Assert.AreEqual(2, consumer.Markers.Count());
+        }
+
+        [TestMethod]
+        public void OptionsRegisteredTwiceWithConfigure_CombinesConfigurators()
+        {
+            var services = new ServiceCollection();
+            services.AddOptions<MyOptionsCount>();
+            services.Configure<MyOptionsCount>(o => o.Count += 10);
+            services.Configure<MyOptionsCount>(o => o.Count *= 2);
+            var provider = services.Build();
+
+            var result = provider.GetService<IOptions<MyOptionsCount>>();
+
+            Assert.AreEqual(20, result.Value.Count); // (0 + 10) * 2
+        }
+
+        [TestMethod]
+        public void TransientService_InEnumerable_GetsDifferentInstancesEachTime()
+        {
+            var services = new ServiceCollection();
+            services.AddTransient<IServiceGet, ServiceAGet>();
+            services.AddTransient<IServiceGet, ServiceBGet>();
+            services.AddTransient<UsesEnumerable>();
+            var provider = services.Build();
+
+            var first = provider.GetService<UsesEnumerable>().Services.ToList();
+            var second = provider.GetService<UsesEnumerable>().Services.ToList();
+
+            Assert.AreEqual(first.Count, second.Count);
+            for (int i = 0; i < first.Count; i++)
+            {
+                Assert.AreNotSame(first[i], second[i]);
+            }
+        }
+
+        public interface IMarker { string Label(); }
+        public class MarkerA : IMarker { public string Label() => "A"; }
+        public class MarkerB : IMarker { public string Label() => "B"; }
+
+        public class ConsumesMultipleEnumerables
+        {
+            public IEnumerable<IServiceGet> Services { get; }
+            public IEnumerable<IMarker> Markers { get; }
+
+            public ConsumesMultipleEnumerables(IEnumerable<IServiceGet> services, IEnumerable<IMarker> markers)
+            {
+                Services = services;
+                Markers = markers;
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void CircularDependency_ThrowsException()
+        {
+            var services = new ServiceCollection();
+            services.AddTransient<A>();
+            services.AddTransient<B>();
+            var provider = services.Build();
+
+            // A depends on B, B depends on A → should throw
+            provider.GetService<A>();
+        }
+
+        public class A { public A(B b) { } }
+        public class B { public B(A a) { } }
+
+        [TestMethod]
+        public void DeepDependencyChain_ResolvesCorrectly()
+        {
+            var services = new ServiceCollection();
+            services.AddTransient<Level1>();
+            services.AddTransient<Level2>();
+            services.AddTransient<Level3>();
+            services.AddTransient<Level4>();
+            var provider = services.Build();
+
+            var l1 = provider.GetService<Level1>();
+
+            Assert.IsNotNull(l1);
+            Assert.IsNotNull(l1.L2.L3.L4);
+        }
+
+        public class Level1 { public Level2 L2; public Level1(Level2 l2) => L2 = l2; }
+        public class Level2 { public Level3 L3; public Level2(Level3 l3) => L3 = l3; }
+        public class Level3 { public Level4 L4; public Level3(Level4 l4) => L4 = l4; }
+        public class Level4 { }
+
+        [TestMethod]
+        public void SingletonContainingTransient_ResolvesFreshEachTime()
+        {
+            var services = new ServiceCollection();
+            services.AddTransient<TransientDep>();
+            services.AddSingleton<SingletonWithTransient>();
+            var provider = services.Build();
+
+            var a = provider.GetService<SingletonWithTransient>();
+            var b = provider.GetService<SingletonWithTransient>();
+
+            Assert.AreSame(a, b); // singleton is same
+            Assert.AreSame(a.Inner, b.Inner); // transient resolved once during singleton creation
+        }
+
+        public class TransientDep { }
+        public class SingletonWithTransient
+        {
+            public TransientDep Inner;
+            public SingletonWithTransient(TransientDep inner) => Inner = inner;
+        }
+
+        [TestMethod]
+        public void EnumerableAndSingletonMixedDependencies_ResolvedTogether()
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton<ISub, Sub1>();
+            services.AddSingleton<ISub, Sub2>();
+            services.AddSingleton<MainConsumer>();
+            var provider = services.Build();
+
+            var consumer = provider.GetService<MainConsumer>();
+
+            Assert.AreEqual(2, consumer.All.Count());
+            Assert.IsTrue(consumer.All.Any(x => x.GetName() == "Sub1"));
+        }
+
+        public interface ISub { string GetName(); }
+        public class Sub1 : ISub { public string GetName() => "Sub1"; }
+        public class Sub2 : ISub { public string GetName() => "Sub2"; }
+
+        public class MainConsumer
+        {
+            public IEnumerable<ISub> All;
+            public MainConsumer(IEnumerable<ISub> all) => All = all;
+        }
 
 
         #region Test Interfaces and Classes
