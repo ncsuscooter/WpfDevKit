@@ -413,6 +413,83 @@ namespace WpfDevKit.Tests.DependencyInjection
             Assert.AreEqual(2, allServices.Count);
         }
 
+        [TestMethod]
+        public void EmptyEnumerableResolution_ReturnsEmptyArray()
+        {
+            var services = new ServiceCollection();
+            var provider = services.Build();
+
+            var result = provider.GetServices<IServiceGet>();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count());
+        }
+
+        [TestMethod]
+        public void EnumerableInjection_WithMultipleInterfaces_WorksCorrectly()
+        {
+            var services = new ServiceCollection();
+            services.AddTransient<IServiceGet, ServiceAGet>();
+            services.AddTransient<IServiceGet, ServiceBGet>();
+            services.AddTransient<IMarker, MarkerA>();
+            services.AddTransient<IMarker, MarkerB>();
+            services.AddTransient<ConsumesMultipleEnumerables>();
+            var provider = services.Build();
+
+            var consumer = provider.GetService<ConsumesMultipleEnumerables>();
+
+            Assert.AreEqual(2, consumer.Services.Count());
+            Assert.AreEqual(2, consumer.Markers.Count());
+        }
+
+        [TestMethod]
+        public void OptionsRegisteredTwiceWithConfigure_CombinesConfigurators()
+        {
+            var services = new ServiceCollection();
+            services.AddOptions<MyOptionsCount>();
+            services.Configure<MyOptionsCount>(o => o.Count += 10);
+            services.Configure<MyOptionsCount>(o => o.Count *= 2);
+            var provider = services.Build();
+
+            var result = provider.GetService<IOptions<MyOptionsCount>>();
+
+            Assert.AreEqual(20, result.Value.Count); // (0 + 10) * 2
+        }
+
+        [TestMethod]
+        public void TransientService_InEnumerable_GetsDifferentInstancesEachTime()
+        {
+            var services = new ServiceCollection();
+            services.AddTransient<IServiceGet, ServiceAGet>();
+            services.AddTransient<IServiceGet, ServiceBGet>();
+            services.AddTransient<UsesEnumerable>();
+            var provider = services.Build();
+
+            var first = provider.GetService<UsesEnumerable>().Services.ToList();
+            var second = provider.GetService<UsesEnumerable>().Services.ToList();
+
+            Assert.AreEqual(first.Count, second.Count);
+            for (int i = 0; i < first.Count; i++)
+            {
+                Assert.AreNotSame(first[i], second[i]);
+            }
+        }
+
+        public interface IMarker { string Label(); }
+        public class MarkerA : IMarker { public string Label() => "A"; }
+        public class MarkerB : IMarker { public string Label() => "B"; }
+
+        public class ConsumesMultipleEnumerables
+        {
+            public IEnumerable<IServiceGet> Services { get; }
+            public IEnumerable<IMarker> Markers { get; }
+
+            public ConsumesMultipleEnumerables(IEnumerable<IServiceGet> services, IEnumerable<IMarker> markers)
+            {
+                Services = services;
+                Markers = markers;
+            }
+        }
 
 
         #region Test Interfaces and Classes
