@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using WpfDevKit.DependencyInjection;
 using WpfDevKit.Activation;
+using System.Linq;
 
 namespace WpfDevKit.Tests.DependencyInjection
 {
@@ -175,6 +176,103 @@ namespace WpfDevKit.Tests.DependencyInjection
             Assert.IsNull(instance.Text);
         }
 
+        [TestMethod]
+        public void Singleton_ReturnsSameInstance()
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton<IService, ServiceImpl1>();
+            var provider = services.Build();
+
+            var a = provider.GetService<IService>();
+            var b = provider.GetService<IService>();
+
+            Assert.AreSame(a, b);
+        }
+
+        [TestMethod]
+        public void Transient_ReturnsDifferentInstances()
+        {
+            var services = new ServiceCollection();
+            services.AddTransient<IService, ServiceImpl1>();
+            var provider = services.Build();
+
+            var a = provider.GetService<IService>();
+            var b = provider.GetService<IService>();
+
+            Assert.AreNotSame(a, b);
+        }
+
+        [TestMethod]
+        public void FactoryRegistration_ProducesInstance()
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton<IService>(_ => new ServiceImpl1());
+            var provider = services.Build();
+
+            var instance = provider.GetService<IService>();
+            Assert.IsNotNull(instance);
+        }
+
+        [TestMethod]
+        public void EnumerableResolution_ReturnsAllImplementations()
+        {
+            var services = new ServiceCollection();
+            services.AddTransient<IService, ServiceImpl1>();
+            services.AddTransient<IService, ServiceImpl2>();
+            var provider = services.Build();
+
+            var all = provider.GetServices<IService>();
+
+            Assert.AreEqual(2, all.Count());
+        }
+
+        [TestMethod]
+        public void UnregisteredService_ReturnsNull()
+        {
+            var services = new ServiceCollection();
+            var provider = services.Build();
+
+            var service = provider.GetService<IService>();
+
+            Assert.IsNull(service);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void RequiredService_ThrowsWhenMissing()
+        {
+            var services = new ServiceCollection();
+            var provider = services.Build();
+
+            provider.GetRequiredService<IService>(); // should throw
+        }
+
+        [TestMethod]
+        public void SelfRegisteredType_ResolvesSuccessfully()
+        {
+            var services = new ServiceCollection();
+            services.AddTransient<ServiceImpl1>();
+            var provider = services.Build();
+
+            var instance = provider.GetService<ServiceImpl1>();
+
+            Assert.IsNotNull(instance);
+        }
+
+        [TestMethod]
+        public void NestedResolution_ResolvesDependenciesCorrectly()
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton<IService, ServiceImpl1>();
+            services.AddTransient<DependentService>();
+            var provider = services.Build();
+
+            var result = provider.GetService<DependentService>();
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Service);
+        }
+
         public interface ITestService { }
         public class TestService : ITestService
         {
@@ -214,6 +312,16 @@ namespace WpfDevKit.Tests.DependencyInjection
             {
                 Text = text;
             }
+        }
+
+        public interface IService { }
+        public class ServiceImpl1 : IService { }
+        public class ServiceImpl2 : IService { }
+
+        public class DependentService
+        {
+            public IService Service { get; }
+            public DependentService(IService service) => Service = service;
         }
     }
 }
