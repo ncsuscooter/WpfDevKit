@@ -8,7 +8,7 @@ namespace WpfDevKit.DependencyInjection
     /// <summary>
     /// Provides a collection for registering service descriptors and building a service provider.
     /// </summary>
-    [DebuggerStepThrough]
+    //[DebuggerStepThrough]
     internal class ServiceCollection : IServiceCollection
     {
         private readonly List<ServiceDescriptor> descriptors = new List<ServiceDescriptor>();
@@ -155,7 +155,7 @@ namespace WpfDevKit.DependencyInjection
             var copy = new List<ServiceDescriptor>();
             foreach (var item in descriptors)
             {
-                if (!dups.Add(item.ServiceType) && !warn.Add(item.ServiceType))
+                if (!dups.Add(item.ServiceType) && warn.Add(item.ServiceType))
                     Debug.WriteLine($"[DI WARNING] ServiceType '{item.ServiceType.FullName}' registered multiple times.");
                 if (item.ServiceType.IsGenericType && item.ServiceType.GetGenericTypeDefinition() == typeof(IOptions<>) && item.Factory == null)
                 {
