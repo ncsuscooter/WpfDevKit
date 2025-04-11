@@ -143,13 +143,20 @@ namespace WpfDevKit.DependencyInjection
         /// <exception cref="InvalidOperationException">
         /// Thrown when attempting to create an instance of <see cref="IOptions{TOptions}"/> services after the service provider has been built.
         /// </exception>
+        /// <remarks>
+        /// This method will emit a warning to the console if the same <c>ServiceType</c> is registered multiple times.
+        /// </remarks>
         public IServiceProvider Build()
         {
             EnsureNotBuilt();
             IsBuilt = true;
+            var dups = new HashSet<Type>();
+            var warn = new HashSet<Type>();
             var copy = new List<ServiceDescriptor>();
             foreach (var item in descriptors)
             {
+                if (!dups.Add(item.ServiceType) && !warn.Add(item.ServiceType))
+                    Debug.WriteLine($"[DI WARNING] ServiceType '{item.ServiceType.FullName}' registered multiple times.");
                 if (item.ServiceType.IsGenericType && item.ServiceType.GetGenericTypeDefinition() == typeof(IOptions<>) && item.Factory == null)
                 {
                     var optionsType = item.ServiceType.GetGenericArguments()[0];
