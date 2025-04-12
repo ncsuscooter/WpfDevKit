@@ -12,6 +12,17 @@ namespace WpfDevKit.Tests.DependencyInjection
             public int Value { get; set; }
         }
 
+        private class OtherOptions
+        {
+            public string Name { get; set; }
+        }
+
+        public class ComplexOptions
+        {
+            public int Value { get; set; }
+            public string Message { get; set; } = "default";
+        }
+
         private class NoDefaultCtorOptions
         {
             public string Name { get; set; }
@@ -28,7 +39,7 @@ namespace WpfDevKit.Tests.DependencyInjection
             var options = provider.GetService<IOptions<MyOptions>>();
 
             Assert.IsNotNull(options);
-            Assert.AreEqual(0, options.Value.Value); // default int value
+            Assert.AreEqual(0, options.Value.Value);
         }
 
         [TestMethod]
@@ -63,7 +74,7 @@ namespace WpfDevKit.Tests.DependencyInjection
         {
             var services = new ServiceCollection();
             services.AddOptions<MyOptions>(_ => new MyOptions());
-            services.Configure<MyOptions>(o => o.Value = 1); // should throw
+            services.Configure<MyOptions>(o => o.Value = 1);
         }
 
         [TestMethod]
@@ -71,7 +82,7 @@ namespace WpfDevKit.Tests.DependencyInjection
         public void Configure_WithoutAddOptions_Throws()
         {
             var services = new ServiceCollection();
-            services.Configure<MyOptions>(o => o.Value = 1); // should throw
+            services.Configure<MyOptions>(o => o.Value = 1);
         }
 
         [TestMethod]
@@ -84,20 +95,7 @@ namespace WpfDevKit.Tests.DependencyInjection
             var provider = services.Build();
 
             var options = provider.GetService<IOptions<MyOptions>>();
-
-            Assert.AreEqual(3, options.Value.Value); // 0 + 1 + 2
-        }
-
-        [TestMethod]
-        public void AddOptions_CanBeCalledMultipleTimesForSameType()
-        {
-            var services = new ServiceCollection();
-            services.AddOptions<MyOptions>();
-            services.Configure<MyOptions>(o => o.Value = 100);
-            var provider = services.Build();
-
-            var options = provider.GetService<IOptions<MyOptions>>();
-            Assert.AreEqual(100, options.Value.Value);
+            Assert.AreEqual(3, options.Value.Value);
         }
 
         private class Dependency { public int GetValue() => 42; }
@@ -117,11 +115,6 @@ namespace WpfDevKit.Tests.DependencyInjection
             var options = provider.GetService<IOptions<MyOptions>>();
 
             Assert.AreEqual(42, options.Value.Value);
-        }
-
-        private class OtherOptions
-        {
-            public string Name { get; set; }
         }
 
         [TestMethod]
@@ -145,7 +138,7 @@ namespace WpfDevKit.Tests.DependencyInjection
         {
             var services = new ServiceCollection();
             services.AddOptions<MyOptions>();
-            services.AddOptions<MyOptions>(); // Should throw
+            services.AddOptions<MyOptions>();
         }
 
         [TestMethod]
@@ -154,7 +147,7 @@ namespace WpfDevKit.Tests.DependencyInjection
         {
             var services = new ServiceCollection();
             services.AddOptions<MyOptions>();
-            services.AddOptions<MyOptions>(_ => new MyOptions()); // Should throw
+            services.AddOptions<MyOptions>(_ => new MyOptions());
         }
 
         [TestMethod]
@@ -163,7 +156,7 @@ namespace WpfDevKit.Tests.DependencyInjection
         {
             var services = new ServiceCollection();
             services.AddOptions<MyOptions>(_ => new MyOptions());
-            services.Configure<MyOptions>(o => o.Value = 10); // Should throw
+            services.Configure<MyOptions>(o => o.Value = 10);
         }
 
         [TestMethod]
@@ -177,7 +170,7 @@ namespace WpfDevKit.Tests.DependencyInjection
             var provider = services.Build();
             var options = provider.GetService<IOptions<MyOptions>>();
 
-            Assert.AreEqual(5, options.Value.Value); // 0 + 2 + 3
+            Assert.AreEqual(5, options.Value.Value);
         }
 
         [TestMethod]
@@ -188,7 +181,7 @@ namespace WpfDevKit.Tests.DependencyInjection
             services.AddOptions<MyOptions>();
             var provider = services.Build();
 
-            services.Configure<MyOptions>(o => o.Value = 99); // should throw
+            services.Configure<MyOptions>(o => o.Value = 99);
         }
 
         [TestMethod]
@@ -202,7 +195,7 @@ namespace WpfDevKit.Tests.DependencyInjection
             var provider = services.Build();
             var options = provider.GetService<IOptions<MyOptions>>();
 
-            Assert.AreEqual(50, options.Value.Value); // 5 * 10
+            Assert.AreEqual(50, options.Value.Value);
         }
 
         [TestMethod]
@@ -211,7 +204,7 @@ namespace WpfDevKit.Tests.DependencyInjection
         {
             var services = new ServiceCollection();
             services.AddOptions<MyOptions>(_ => new MyOptions { Value = 10 });
-            services.Configure<MyOptions>(o => o.Value += 1); // should throw
+            services.Configure<MyOptions>(o => o.Value += 1);
         }
 
         [TestMethod]
@@ -239,6 +232,32 @@ namespace WpfDevKit.Tests.DependencyInjection
             var result = provider.GetService<IOptions<NoDefaultCtorOptions>>();
 
             Assert.AreEqual("Hello", result.Value.Name);
+        }
+
+        [TestMethod]
+        public void Configure_IsAppliedOnlyToMatchingOptionType()
+        {
+            var services = new ServiceCollection();
+            services.AddOptions<ComplexOptions>();
+            services.Configure<ComplexOptions>(o => o.Value = 999);
+            services.AddOptions<MyOptions>();
+            var provider = services.Build();
+
+            var complex = provider.GetService<IOptions<ComplexOptions>>();
+            var other = provider.GetService<IOptions<MyOptions>>();
+
+            Assert.AreEqual(999, complex.Value.Value);
+            Assert.AreEqual(0, other.Value.Value);
+        }
+
+        [TestMethod]
+        public void Factory_CannotBeConfiguredLater()
+        {
+            var services = new ServiceCollection();
+            services.AddOptions<ComplexOptions>(_ => new ComplexOptions { Message = "from factory" });
+
+            Assert.ThrowsException<InvalidOperationException>(() =>
+                services.Configure<ComplexOptions>(o => o.Message = "should fail"));
         }
     }
 }
