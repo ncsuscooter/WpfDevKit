@@ -96,7 +96,7 @@ namespace WpfDevKit.DependencyInjection
         /// <typeparam name="TOptions">The options type.</typeparam>
         /// <param name="factory">The factory method to create the options instance.</param>
         /// <returns>The current <see cref="IServiceCollection"/> instance.</returns>
-        IServiceCollection AddOptions<TOptions>(Func<IServiceProvider, TOptions> factory) where TOptions : class, new();
+        IServiceCollection AddOptions<TOptions>(Func<IServiceProvider, TOptions> factory) where TOptions : class;
 
         /// <summary>
         /// Adds a configuration delegate to be applied to an options instance of type <typeparamref name="TOptions"/>.

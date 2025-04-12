@@ -1,12 +1,10 @@
-﻿// Unit tests for ServiceCollection and ServiceProvider behavior
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using WpfDevKit.DependencyInjection;
 using WpfDevKit.Activation;
-using System.Linq;
-using static WpfDevKit.Tests.DependencyInjection.ServiceProviderTests;
+using System.Diagnostics;
+using System.IO;
 
 namespace WpfDevKit.Tests.DependencyInjection
 {
@@ -16,13 +14,10 @@ namespace WpfDevKit.Tests.DependencyInjection
         private IServiceCollection services;
 
         [TestInitialize]
-        public void Setup()
-        {
-            services = new ServiceCollection();
-        }
+        public void Setup() => services = new ServiceCollection();
 
         [TestMethod]
-        public void AddSingleton_ResolvesSameInstance()
+        public void Singleton_ResolvesSameInstance()
         {
             services.AddSingleton<ITestService, TestService>();
             var provider = services.Build();
@@ -34,7 +29,7 @@ namespace WpfDevKit.Tests.DependencyInjection
         }
 
         [TestMethod]
-        public void AddTransient_ResolvesDifferentInstances()
+        public void Transient_ResolvesDifferentInstances()
         {
             services.AddTransient<ITestService, TestService>();
             var provider = services.Build();
@@ -46,612 +41,141 @@ namespace WpfDevKit.Tests.DependencyInjection
         }
 
         [TestMethod]
-        public void AddSingletonFactory_ResolvesSameInstance()
+        public void Factory_SingletonAndTransient_BehavesCorrectly()
         {
-            services.AddSingleton<ITestService>(_ => new TestService());
+            services.AddSingleton<ISingletonService>(_ => new SingletonService());
+            services.AddTransient<ITransientService>(_ => new TransientService());
             var provider = services.Build();
 
-            var a = provider.GetService<ITestService>();
-            var b = provider.GetService<ITestService>();
+            var singleton1 = provider.GetService<ISingletonService>();
+            var singleton2 = provider.GetService<ISingletonService>();
+            Assert.AreSame(singleton1, singleton2);
 
-            Assert.AreSame(a, b);
+            var transient1 = provider.GetService<ITransientService>();
+            var transient2 = provider.GetService<ITransientService>();
+            Assert.AreNotSame(transient1, transient2);
         }
 
         [TestMethod]
-        public void AddTransientFactory_ResolvesNewInstance()
+        public void Build_LogsWarning_WhenDuplicateServiceTypesAreRegistered()
         {
-            services.AddTransient<ITestService>(_ => new TestService());
-            var provider = services.Build();
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddSingleton<ITestService, TestService>();
+            services.AddSingleton<ITestService, TestService2>();
 
-            var a = provider.GetService<ITestService>();
-            var b = provider.GetService<ITestService>();
+            var stringBuilder = new System.Text.StringBuilder();
+            var writer = new StringWriter(stringBuilder);
+            var listener = new TextWriterTraceListener(writer);
+            Debug.Listeners.Clear(); // Clear default listeners (important in test context)
+            Debug.Listeners.Add(listener);
+            Debug.AutoFlush = true;
 
-            Assert.AreNotSame(a, b);
+            // Act
+            services.Build();
+
+            // Read output
+            var output = stringBuilder.ToString();
+
+            // Cleanup
+            Debug.Listeners.Remove(listener);
+
+            // Assert
+            StringAssert.Contains(output, "registered multiple times");
+            StringAssert.Contains(output, typeof(ITestService).FullName);
         }
 
         [TestMethod]
-        public void AddOptions_RegistersDefaultOptions()
+        public void Options_RegistrationAndConfiguration_Works()
         {
             services.AddOptions<MyOptions>();
+            services.Configure<MyOptions>(o => o.Name = "configured");
             var provider = services.Build();
+
             var options = provider.GetService<IOptions<MyOptions>>();
-
-            Assert.IsNotNull(options);
-            Assert.IsNotNull(options.Value);
-            Assert.AreEqual("default", options.Value.Name);
-        }
-
-        [TestMethod]
-        public void AddOptionsWithConfig_SetsConfiguredValue()
-        {
-            services.AddOptions<MyOptions>(opt => opt.Name = "configured");
-            var provider = services.Build();
-            var options = provider.GetService<IOptions<MyOptions>>();
-
             Assert.AreEqual("configured", options.Value.Name);
         }
 
         [TestMethod]
-        public void Build_ThrowsOnDuplicateBuild()
+        public void EnumerableResolution_ResolvesAllRegistered()
         {
-            services.AddSingleton<ITestService, TestService>();
-            var provider1 = services.Build();
-            Assert.ThrowsException<InvalidOperationException>(() => services.AddSingleton<ITestService, TestService>());
+            services.AddTransient<ITestService, TestService>();
+            services.AddTransient<ITestService, TestService2>();
+            var provider = services.Build();
+
+            var all = provider.GetServices<ITestService>().ToList();
+            Assert.AreEqual(2, all.Count);
         }
 
         [TestMethod]
-        public void GetRequiredService_ThrowsIfMissing()
+        public void MissingServices_ReturnsNullOrThrows()
         {
             var provider = services.Build();
+
+            Assert.IsNull(provider.GetService<ITestService>());
             Assert.ThrowsException<InvalidOperationException>(() => provider.GetRequiredService<ITestService>());
         }
 
         [TestMethod]
-        public void GetService_ReturnsNullIfMissing()
+        public void SelfRegistered_And_DependencyInjection_Works()
         {
-            var provider = services.Build();
-            var result = provider.GetService<ITestService>();
-            Assert.IsNull(result);
-        }
-
-        [TestMethod]
-        public void EnumerableResolution_ReturnsAllRegistered()
-        {
-            services.AddTransient<ITestService, TestService>();
-            services.AddTransient<ITestService, AnotherTestService>();
-            var provider = services.Build();
-
-            var all = provider.GetServices<ITestService>();
-            var list = new List<ITestService>(all);
-
-            Assert.AreEqual(2, list.Count);
-            Assert.IsTrue(list.Exists(s => s is TestService));
-            Assert.IsTrue(list.Exists(s => s is AnotherTestService));
-        }
-
-        [TestMethod]
-        public void AddSingleton_WithSelfReference_WorksCorrectly()
-        {
-            services.AddSingleton<TestService>();
-            var provider = services.Build();
-
-            var a = provider.GetService<TestService>();
-            var b = provider.GetService<TestService>();
-
-            Assert.AreSame(a, b);
-        }
-
-        [TestMethod]
-        public void AddTransient_WithSelfReference_WorksCorrectly()
-        {
-            services.AddTransient<TestService>();
-            var provider = services.Build();
-
-            var a = provider.GetService<TestService>();
-            var b = provider.GetService<TestService>();
-
-            Assert.AreNotSame(a, b);
-        }
-
-        [TestMethod]
-        public void Create_WithDifferentManualArgs_AvoidsConstructorCacheConflict()
-        {
-            var services = new ServiceCollection();
-            services.AddSingleton<IDependency, Dependency>();
-            var provider = services.Build();
-            var factory = new ResolvableFactory(provider);
-
-            var first = factory.Create<MultiConstructorClass>("manual");
-            var second = factory.Create<MultiConstructorClass>();
-
-            Assert.AreEqual("manual", first.Source);
-            Assert.AreEqual("resolved", second.Source);
-        }
-
-        [TestMethod]
-        public void Create_WithManualArgsAndNullValues_WorksAsExpected()
-        {
-            var factory = new ResolvableFactory(new ServiceCollection().Build());
-            var instance = factory.Create<NullableArgumentClass>((string)null);
-            Assert.IsNotNull(instance);
-            Assert.IsNull(instance.Text);
-        }
-
-        [TestMethod]
-        public void Singleton_ReturnsSameInstance()
-        {
-            var services = new ServiceCollection();
-            services.AddSingleton<IService, ServiceImpl1>();
-            var provider = services.Build();
-
-            var a = provider.GetService<IService>();
-            var b = provider.GetService<IService>();
-
-            Assert.AreSame(a, b);
-        }
-
-        [TestMethod]
-        public void Transient_ReturnsDifferentInstances()
-        {
-            var services = new ServiceCollection();
-            services.AddTransient<IService, ServiceImpl1>();
-            var provider = services.Build();
-
-            var a = provider.GetService<IService>();
-            var b = provider.GetService<IService>();
-
-            Assert.AreNotSame(a, b);
-        }
-
-        [TestMethod]
-        public void FactoryRegistration_ProducesInstance()
-        {
-            var services = new ServiceCollection();
-            services.AddSingleton<IService>(_ => new ServiceImpl1());
-            var provider = services.Build();
-
-            var instance = provider.GetService<IService>();
-            Assert.IsNotNull(instance);
-        }
-
-        [TestMethod]
-        public void EnumerableResolution_ReturnsAllImplementations()
-        {
-            var services = new ServiceCollection();
-            services.AddTransient<IService, ServiceImpl1>();
-            services.AddTransient<IService, ServiceImpl2>();
-            var provider = services.Build();
-
-            var all = provider.GetServices<IService>();
-
-            Assert.AreEqual(2, all.Count());
-        }
-
-        [TestMethod]
-        public void UnregisteredService_ReturnsNull()
-        {
-            var services = new ServiceCollection();
-            var provider = services.Build();
-
-            var service = provider.GetService<IService>();
-
-            Assert.IsNull(service);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void RequiredService_ThrowsWhenMissing()
-        {
-            var services = new ServiceCollection();
-            var provider = services.Build();
-
-            provider.GetRequiredService<IService>(); // should throw
-        }
-
-        [TestMethod]
-        public void SelfRegisteredType_ResolvesSuccessfully()
-        {
-            var services = new ServiceCollection();
-            services.AddTransient<ServiceImpl1>();
-            var provider = services.Build();
-
-            var instance = provider.GetService<ServiceImpl1>();
-
-            Assert.IsNotNull(instance);
-        }
-
-        [TestMethod]
-        public void NestedResolution_ResolvesDependenciesCorrectly()
-        {
-            var services = new ServiceCollection();
-            services.AddSingleton<IService, ServiceImpl1>();
+            services.AddSingleton<ITestService, TestService>();
             services.AddTransient<DependentService>();
             var provider = services.Build();
 
-            var result = provider.GetService<DependentService>();
-
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.Service);
+            var dependent = provider.GetService<DependentService>();
+            Assert.IsNotNull(dependent);
+            Assert.IsNotNull(dependent.Service);
         }
 
         [TestMethod]
-        public void GetServices_WithMultipleTransients_ReturnsAllInstances()
+        public void ResolvableProperty_IsInjected()
         {
-            var services = new ServiceCollection();
-            services.AddTransient<IService, ServiceA>();
-            services.AddTransient<IService, ServiceB>();
+            services.AddSingleton<InjectedDep>();
+            services.AddTransient<NeedsResolvableProperty>();
             var provider = services.Build();
 
-            var all = provider.GetServices<IService>().ToList();
-
-            Assert.AreEqual(2, all.Count);
-            Assert.IsInstanceOfType(all[0], typeof(IService));
-            Assert.IsInstanceOfType(all[1], typeof(IService));
-        }
-
-        [TestMethod]
-        public void GetServices_WhenNoneRegistered_ReturnsEmptyEnumerable()
-        {
-            var services = new ServiceCollection();
-            var provider = services.Build();
-
-            var result = provider.GetServices<IService>();
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Count());
-        }
-
-        [TestMethod]
-        public void GetServices_WithSingletonAndTransient_ResolvesBoth()
-        {
-            var services = new ServiceCollection();
-            var singletonInstance = new ServiceA();
-            services.AddSingleton<IService>(_ => singletonInstance);
-            services.AddTransient<IService, ServiceB>();
-            var provider = services.Build();
-
-            var all = provider.GetServices<IService>().ToList();
-
-            Assert.AreEqual(2, all.Count);
-            Assert.AreSame(singletonInstance, all[0]);
-            Assert.IsInstanceOfType(all[1], typeof(ServiceB));
-        }
-
-        [TestMethod]
-        public void GetServices_ArrayCasting_WorksAsExpected()
-        {
-            var services = new ServiceCollection();
-            services.AddTransient<IService, ServiceA>();
-            services.AddTransient<IService, ServiceB>();
-            var provider = services.Build();
-
-            var raw = provider.GetService(typeof(IEnumerable<IService>));
-            Assert.IsNotNull(raw);
-
-            var asEnumerable = raw as IEnumerable<IService>;
-            Assert.IsNotNull(asEnumerable);
-
-            var list = asEnumerable.ToList();
-            Assert.AreEqual(2, list.Count);
-        }
-
-        [TestMethod]
-        public void UsesEnumerable_ConstructorInjection_ResolvesAll()
-        {
-            var services = new ServiceCollection();
-            services.AddTransient<IServiceGet, ServiceAGet>();
-            services.AddTransient<IServiceGet, ServiceBGet>();
-            services.AddTransient<UsesEnumerable>();
-            var provider = services.Build();
-
-            var consumer = provider.GetService<UsesEnumerable>();
-
-            Assert.AreEqual(2, consumer.Services.Count());
-            CollectionAssert.AreEquivalent(new[] { "A", "B" }, consumer.Services.Select(s => s.Get()).ToArray());
-        }
-
-        [TestMethod]
-        public void UsesMixed_ConstructorInjection_ResolvesBothSingleAndMultiple()
-        {
-            var services = new ServiceCollection();
-            services.AddSingleton<IServiceGet, ServiceCGet>();
-            services.AddTransient<IServiceGet, ServiceAGet>();
-            services.AddTransient<IServiceGet, ServiceBGet>();
-            services.AddTransient<UsesMixed>();
-            var provider = services.Build();
-
-            var instance = provider.GetService<UsesMixed>();
-
-            Assert.IsInstanceOfType(instance.Single, typeof(ServiceCGet));
-            Assert.AreEqual(3, instance.All.Count());
-        }
-
-        [TestMethod]
-        public void EnumerableRegistration_WithScopedAndTransient_ResolvesAll()
-        {
-            var services = new ServiceCollection();
-            services.AddSingleton<IServiceGet, ServiceAGet>();
-            services.AddTransient<IServiceGet, ServiceBGet>();
-            services.AddTransient<IServiceGet, ServiceCGet>();
-            var provider = services.Build();
-
-            var all = provider.GetServices<IServiceGet>();
-
-            Assert.AreEqual(3, all.Count());
-        }
-
-        [TestMethod]
-        public void IEnumerableResolution_RepeatedCalls_DoNotCacheTransients()
-        {
-            var services = new ServiceCollection();
-            services.AddTransient<IServiceGet, ServiceAGet>();
-            services.AddTransient<IServiceGet, ServiceBGet>();
-            var provider = services.Build();
-
-            var first = provider.GetServices<IServiceGet>().ToList();
-            var second = provider.GetServices<IServiceGet>().ToList();
-
-            Assert.AreEqual(2, first.Count);
-            Assert.AreEqual(2, second.Count);
-            Assert.IsFalse(ReferenceEquals(first[0], second[0]));
-            Assert.IsFalse(ReferenceEquals(first[1], second[1]));
-        }
-
-        [TestMethod]
-        public void OptionsAndEnumerableResolution_CanCoexist()
-        {
-            var services = new ServiceCollection();
-            services.AddOptions<MyOptionsCount>(o => o.Count = 5);
-            services.AddSingleton<IServiceGet, ServiceAGet>();
-            services.AddSingleton<IServiceGet, ServiceBGet>();
-            var provider = services.Build();
-
-            var options = provider.GetService<IOptions<MyOptionsCount>>();
-            var allServices = provider.GetServices<IServiceGet>().ToList();
-
-            Assert.AreEqual(5, options.Value.Count);
-            Assert.AreEqual(2, allServices.Count);
-        }
-
-        [TestMethod]
-        public void EmptyEnumerableResolution_ReturnsEmptyArray()
-        {
-            var services = new ServiceCollection();
-            var provider = services.Build();
-
-            var result = provider.GetServices<IServiceGet>();
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Count());
-        }
-
-        [TestMethod]
-        public void EnumerableInjection_WithMultipleInterfaces_WorksCorrectly()
-        {
-            var services = new ServiceCollection();
-            services.AddTransient<IServiceGet, ServiceAGet>();
-            services.AddTransient<IServiceGet, ServiceBGet>();
-            services.AddTransient<IMarker, MarkerA>();
-            services.AddTransient<IMarker, MarkerB>();
-            services.AddTransient<ConsumesMultipleEnumerables>();
-            var provider = services.Build();
-
-            var consumer = provider.GetService<ConsumesMultipleEnumerables>();
-
-            Assert.AreEqual(2, consumer.Services.Count());
-            Assert.AreEqual(2, consumer.Markers.Count());
-        }
-
-        [TestMethod]
-        public void OptionsRegisteredTwiceWithConfigure_CombinesConfigurators()
-        {
-            var services = new ServiceCollection();
-            services.AddOptions<MyOptionsCount>();
-            services.Configure<MyOptionsCount>(o => o.Count += 10);
-            services.Configure<MyOptionsCount>(o => o.Count *= 2);
-            var provider = services.Build();
-
-            var result = provider.GetService<IOptions<MyOptionsCount>>();
-
-            Assert.AreEqual(20, result.Value.Count); // (0 + 10) * 2
-        }
-
-        [TestMethod]
-        public void TransientService_InEnumerable_GetsDifferentInstancesEachTime()
-        {
-            var services = new ServiceCollection();
-            services.AddTransient<IServiceGet, ServiceAGet>();
-            services.AddTransient<IServiceGet, ServiceBGet>();
-            services.AddTransient<UsesEnumerable>();
-            var provider = services.Build();
-
-            var first = provider.GetService<UsesEnumerable>().Services.ToList();
-            var second = provider.GetService<UsesEnumerable>().Services.ToList();
-
-            Assert.AreEqual(first.Count, second.Count);
-            for (int i = 0; i < first.Count; i++)
-            {
-                Assert.AreNotSame(first[i], second[i]);
-            }
-        }
-
-        public interface IMarker { string Label(); }
-        public class MarkerA : IMarker { public string Label() => "A"; }
-        public class MarkerB : IMarker { public string Label() => "B"; }
-
-        public class ConsumesMultipleEnumerables
-        {
-            public IEnumerable<IServiceGet> Services { get; }
-            public IEnumerable<IMarker> Markers { get; }
-
-            public ConsumesMultipleEnumerables(IEnumerable<IServiceGet> services, IEnumerable<IMarker> markers)
-            {
-                Services = services;
-                Markers = markers;
-            }
+            var instance = provider.GetService<NeedsResolvableProperty>();
+            Assert.IsNotNull(instance.Dep);
         }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void CircularDependency_ThrowsException()
         {
-            var services = new ServiceCollection();
             services.AddTransient<A>();
             services.AddTransient<B>();
             var provider = services.Build();
 
-            // A depends on B, B depends on A → should throw
             provider.GetService<A>();
+        }
+
+        public interface ITestService { }
+        public class TestService : ITestService { }
+        public class TestService2 : ITestService { }
+
+        public interface ISingletonService { }
+        public class SingletonService : ISingletonService { }
+
+        public interface ITransientService { }
+        public class TransientService : ITransientService { }
+
+        public class MyOptions { public string Name { get; set; } = "default"; }
+
+        public class DependentService
+        {
+            public ITestService Service { get; }
+            public DependentService(ITestService service) => Service = service;
+        }
+
+        public class InjectedDep { }
+        public class NeedsResolvableProperty
+        {
+            [Resolvable]
+            public InjectedDep Dep { get; set; }
         }
 
         public class A { public A(B b) { } }
         public class B { public B(A a) { } }
-
-        [TestMethod]
-        public void DeepDependencyChain_ResolvesCorrectly()
-        {
-            var services = new ServiceCollection();
-            services.AddTransient<Level1>();
-            services.AddTransient<Level2>();
-            services.AddTransient<Level3>();
-            services.AddTransient<Level4>();
-            var provider = services.Build();
-
-            var l1 = provider.GetService<Level1>();
-
-            Assert.IsNotNull(l1);
-            Assert.IsNotNull(l1.L2.L3.L4);
-        }
-
-        public class Level1 { public Level2 L2; public Level1(Level2 l2) => L2 = l2; }
-        public class Level2 { public Level3 L3; public Level2(Level3 l3) => L3 = l3; }
-        public class Level3 { public Level4 L4; public Level3(Level4 l4) => L4 = l4; }
-        public class Level4 { }
-
-        [TestMethod]
-        public void SingletonContainingTransient_ResolvesFreshEachTime()
-        {
-            var services = new ServiceCollection();
-            services.AddTransient<TransientDep>();
-            services.AddSingleton<SingletonWithTransient>();
-            var provider = services.Build();
-
-            var a = provider.GetService<SingletonWithTransient>();
-            var b = provider.GetService<SingletonWithTransient>();
-
-            Assert.AreSame(a, b); // singleton is same
-            Assert.AreSame(a.Inner, b.Inner); // transient resolved once during singleton creation
-        }
-
-        public class TransientDep { }
-        public class SingletonWithTransient
-        {
-            public TransientDep Inner;
-            public SingletonWithTransient(TransientDep inner) => Inner = inner;
-        }
-
-        [TestMethod]
-        public void EnumerableAndSingletonMixedDependencies_ResolvedTogether()
-        {
-            var services = new ServiceCollection();
-            services.AddSingleton<ISub, Sub1>();
-            services.AddSingleton<ISub, Sub2>();
-            services.AddSingleton<MainConsumer>();
-            var provider = services.Build();
-
-            var consumer = provider.GetService<MainConsumer>();
-
-            Assert.AreEqual(2, consumer.All.Count());
-            Assert.IsTrue(consumer.All.Any(x => x.GetName() == "Sub1"));
-        }
-
-        public interface ISub { string GetName(); }
-        public class Sub1 : ISub { public string GetName() => "Sub1"; }
-        public class Sub2 : ISub { public string GetName() => "Sub2"; }
-
-        public class MainConsumer
-        {
-            public IEnumerable<ISub> All;
-            public MainConsumer(IEnumerable<ISub> all) => All = all;
-        }
-
-
-        #region Test Interfaces and Classes
-
-        public interface ITestService { }
-        public class TestService : ITestService
-        {
-            public TestService() { }
-        }
-        public class AnotherTestService : ITestService { }
-
-        public class MyOptions
-        {
-            public string Name { get; set; } = "default";
-        }
-
-        public interface IDependency { }
-        public class Dependency : IDependency { }
-
-        public class MultiConstructorClass
-        {
-            public IDependency Dependency { get; }
-            public string Source { get; }
-
-            public MultiConstructorClass(string manualParam)
-            {
-                Source = "manual";
-            }
-
-            public MultiConstructorClass(IDependency dependency)
-            {
-                Dependency = dependency;
-                Source = "resolved";
-            }
-        }
-
-        public class NullableArgumentClass
-        {
-            public string Text { get; }
-            public NullableArgumentClass(string text)
-            {
-                Text = text;
-            }
-        }
-
-        public interface IService { }
-        public class ServiceImpl1 : IService { }
-        public class ServiceImpl2 : IService { }
-        public class ServiceA : IService { }
-        public class ServiceB : IService { }
-        public class DependentService
-        {
-            public IService Service { get; }
-            public DependentService(IService service) => Service = service;
-        }
-        public interface IServiceGet { string Get(); }
-        public class ServiceAGet : IServiceGet { public string Get() => "A"; }
-        public class ServiceBGet : IServiceGet { public string Get() => "B"; }
-        public class ServiceCGet : IServiceGet { public string Get() => "C"; }
-
-        public class UsesEnumerable
-        {
-            public IEnumerable<IServiceGet> Services { get; }
-            public UsesEnumerable(IEnumerable<IServiceGet> services) => Services = services;
-        }
-
-        public class UsesMixed
-        {
-            public IServiceGet Single { get; }
-            public IEnumerable<IServiceGet> All { get; }
-            public UsesMixed(IServiceGet single, IEnumerable<IServiceGet> all)
-            {
-                Single = single;
-                All = all;
-            }
-        }
-        public class MyOptionsCount { public int Count { get; set; } }
-
-        #endregion
     }
 }

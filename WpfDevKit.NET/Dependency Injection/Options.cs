@@ -7,7 +7,7 @@ namespace WpfDevKit.DependencyInjection
     /// </summary>
     /// <typeparam name="TOptions">The options type.</typeparam>
     [DebuggerStepThrough]
-    internal class Options<TOptions> : IOptions<TOptions> where TOptions : class, new()
+    internal class Options<TOptions> : IOptions<TOptions> where TOptions : class
     {
         /// <summary>
         /// Gets the configured <typeparamref name="TOptions"/> instance.

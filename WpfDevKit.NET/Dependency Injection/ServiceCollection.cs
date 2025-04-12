@@ -104,24 +104,38 @@ namespace WpfDevKit.DependencyInjection
 
         /// <inheritdoc/>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when attempting to add options after the service provider has been built.
+        /// Thrown if the options service has already been registered.
         /// </exception>
-        public IServiceCollection AddOptions<TOptions>() where TOptions : class, new() => 
-            AddSingleton<IOptions<TOptions>>();
+        public IServiceCollection AddOptions<TOptions>() where TOptions : class, new()
+        {
+            EnsureNotBuilt();
+            var serviceType = typeof(IOptions<TOptions>);
+            if (descriptors.Any(d => d.ServiceType == serviceType))
+                throw new InvalidOperationException($"Options for '{typeof(TOptions).Name}' have already been registered.");
+            descriptors.Add(new ServiceDescriptor(serviceType, typeof(Options<TOptions>), TServiceLifetime.Singleton));
+            return this;
+        }
 
         /// <inheritdoc/>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when attempting to add options after the service provider has been built.
+        /// Thrown if the options service has already been registered.
         /// </exception>
         public IServiceCollection AddOptions<TOptions>(Action<TOptions> configure) where TOptions : class, new() => 
-            AddSingleton<IOptions<TOptions>>().Configure(configure);
+            AddOptions<TOptions>().Configure(configure);
 
         /// <inheritdoc/>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when attempting to add options after the service provider has been built.
+        /// Thrown if the options service has already been registered.
         /// </exception>
-        public IServiceCollection AddOptions<TOptions>(Func<IServiceProvider, TOptions> factory) where TOptions : class, new() => 
-            AddSingleton<IOptions<TOptions>>(provider => new Options<TOptions>(factory(provider)));
+        public IServiceCollection AddOptions<TOptions>(Func<IServiceProvider, TOptions> factory) where TOptions : class
+        {
+            EnsureNotBuilt();
+            var serviceType = typeof(IOptions<TOptions>);
+            if (descriptors.Any(d => d.ServiceType == serviceType))
+                throw new InvalidOperationException($"Options for '{typeof(TOptions).Name}' have already been registered.");
+            descriptors.Add(new ServiceDescriptor(serviceType, provider => new Options<TOptions>(factory(provider)), TServiceLifetime.Singleton));
+            return this;
+        }
 
         /// <inheritdoc/>
         /// <exception cref="InvalidOperationException">
@@ -160,6 +174,8 @@ namespace WpfDevKit.DependencyInjection
                 if (item.ServiceType.IsGenericType && item.ServiceType.GetGenericTypeDefinition() == typeof(IOptions<>) && item.Factory == null)
                 {
                     var optionsType = item.ServiceType.GetGenericArguments()[0];
+                    if (optionsType.GetConstructor(Type.EmptyTypes) == null)
+                        throw new InvalidOperationException($"Options type '{optionsType.Name}' must have a public parameterless constructor.");
                     var optionsInstance = Activator.CreateInstance(optionsType);
                     foreach (var config in item.OptionConfigurators)
                         config.DynamicInvoke(optionsInstance);
