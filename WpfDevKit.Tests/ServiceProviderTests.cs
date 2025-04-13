@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 using WpfDevKit.DependencyInjection;
-using WpfDevKit.Activation;
+using WpfDevKit.Factory;
 using System.Diagnostics;
 using System.IO;
 

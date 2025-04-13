@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using WpfDevKit.Activation;
 using WpfDevKit.DependencyInjection;
+using WpfDevKit.Factory;
 
 namespace WpfDevKit.Tests.Activation
 {
