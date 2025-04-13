@@ -39,6 +39,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Factory\IObjectFactory.cs" />
+    <Compile Include="Factory\ObjectFactory.cs" />
     <Compile Include="Busy\BusyServiceExtensions.cs" />
     <Compile Include="Connectivity\ConnectivityServiceExtensions.cs" />
     <Compile Include="Dependency Injection\IOptions.cs" />
@@ -63,9 +65,7 @@
     <Compile Include="ServiceProviderExtensions.cs" />
     <Compile Include="Logging\Log Provider Collection\LogProviderCollection.cs" />
     <Compile Include="Logging\Log Provider Collection\ILogProviderCollection.cs" />
-    <Compile Include="Activation\ResolvableAttribute.cs" />
-    <Compile Include="Activation\ResolvableFactory.cs" />
-    <Compile Include="Activation\IResolvableFactory.cs" />
+    <Compile Include="Factory\ResolvableAttribute.cs" />
     <Compile Include="EnumExtensions.cs" />
     <Compile Include="TimeSpanExtensions.cs" />
     <Compile Include="Logging\TLogCategory.cs" />
@@ -85,7 +85,7 @@
     <Compile Include="Logging\Console\ConsoleLogProvider.cs" />
     <Compile Include="Logging\Memory\MemoryLogProvider.cs" />
     <Compile Include="Logging\User\UserLogProvider.cs" />
-    <Compile Include="Activation\ResolvableExtensions.cs" />
+    <Compile Include="Factory\ResolvableExtensions.cs" />
     <Compile Include="Busy\BusyService.cs" />
     <Compile Include="Connectivity\ConnectivityService.cs" />
     <Compile Include="Connectivity\ConnectivityServiceOptions.cs" />

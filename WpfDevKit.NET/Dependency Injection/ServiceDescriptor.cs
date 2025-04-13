@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace WpfDevKit.DependencyInjection
 {
     /// <summary>
     /// Describes a service, its implementation, and its lifetime.
     /// </summary>
-    [DebuggerStepThrough]
     internal class ServiceDescriptor
     {
         /// <summary>

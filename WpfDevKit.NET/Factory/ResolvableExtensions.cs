@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using WpfDevKit.DependencyInjection;
 
-namespace WpfDevKit.Activation
+namespace WpfDevKit.Factory
 {
     /// <summary>
     /// Provides extension methods for registering services and configuring the
@@ -32,10 +32,8 @@ namespace WpfDevKit.Activation
         /// <returns>The updated service collection.</returns>
         public static IServiceCollection AddResolvableFromAssemblies(this IServiceCollection services, Assembly[] assemblies, Action<string> log = null)
         {
-            var collection = assemblies
-                .SelectMany(a => a.GetTypes())
-                .Where(t => t.IsClass && !t.IsAbstract && t.GetCustomAttribute<ResolvableAttribute>() != null)
-                .ToList();
+            var collection = assemblies.SelectMany(a => a.GetTypes())
+                                       .Where(t => t.IsClass && !t.IsAbstract && t.GetCustomAttribute<ResolvableAttribute>() != null);
             foreach (var item in collection)
             {
                 services.AddTransient(item, item);

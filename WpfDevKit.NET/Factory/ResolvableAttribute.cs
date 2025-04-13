@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WpfDevKit.Activation
+namespace WpfDevKit.Factory
 {
     /// <summary>
     /// Attribute used to mark classes or services as resolvable through the custom

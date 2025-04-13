@@ -2,16 +2,21 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using WpfDevKit.Factory;
 
 namespace WpfDevKit.DependencyInjection
 {
     /// <summary>
     /// Provides a collection for registering service descriptors and building a service provider.
     /// </summary>
-    //[DebuggerStepThrough]
     internal class ServiceCollection : IServiceCollection
     {
         private readonly List<ServiceDescriptor> descriptors = new List<ServiceDescriptor>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ServiceCollection() => AddSingleton<IObjectFactory>(p => new ObjectFactory(p));
 
         /// <inheritdoc/>
         public bool IsBuilt { get; private set; }
