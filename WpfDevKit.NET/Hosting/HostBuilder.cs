@@ -1,6 +1,4 @@
-﻿using WpfDevKit.Busy;
-using WpfDevKit.DependencyInjection;
-using WpfDevKit.Logging;
+﻿using WpfDevKit.DependencyInjection;
 
 namespace WpfDevKit.Hosting
 {
@@ -15,11 +13,6 @@ namespace WpfDevKit.Hosting
         /// Gets the collection of registered service descriptors.
         /// </summary>
         public IServiceCollection Services => services;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public HostBuilder() => Services.AddLoggingService().AddBusyService();
 
         /// <summary>
         /// Builds the service host and returns a new <see cref="IHost"/> instance.

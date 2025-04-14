@@ -111,6 +111,7 @@
   <ItemGroup>
     <None Include="Logging\gRPC\Protos\Logging.proto" />
     <None Include="packages.config" />
+    <None Include="Project_Improvement_Checklist.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
