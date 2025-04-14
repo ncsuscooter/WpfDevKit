@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using WpfDevKit.Hosting;
 
 namespace WpfDevKit.Connectivity
 {
     /// <summary>
     /// Provides methods and events for monitoring the connectivity status of a system.
     /// </summary>
-    public interface IConnectivityService
+    public interface IConnectivityService : IHostedService
     {
         /// <summary>
         /// Occurs when the connection status changes.
@@ -52,6 +53,6 @@ namespace WpfDevKit.Connectivity
         /// </summary>
         /// <param name="cancellationToken">A token used to cancel the operation if needed.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        Task MonitorAsync(CancellationToken cancellationToken);
+        Task IsConnectedAsync(CancellationToken cancellationToken);
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 
 namespace WpfDevKit.RemoteFileAccess
@@ -8,10 +7,16 @@ namespace WpfDevKit.RemoteFileAccess
     /// Provides a disposable mechanism to open and close a connection to a remote file share using native Windows APIs.
     /// </summary>
     [DebuggerStepThrough]
-    internal class RemoteFileConnection : IDisposable
+    internal class RemoteFileConnection : IRemoteFileConnection
     {
         private readonly string remotePath;
         private readonly bool isAlreadyConnected;
+
+        /// <inheritdoc/>
+        public string Path => remotePath;
+
+        /// <inheritdoc/>
+        public bool IsConnected { get; private set; }
 
         /// <summary>
         /// Initializes a new connection to the specified remote file share if it is not already connected.
@@ -39,19 +44,21 @@ namespace WpfDevKit.RemoteFileAccess
                 if (result != 0)
                     throw new OpenRemoteConnectionException(path, username, result, paramErrorIndex);
             }
+            IsConnected = true;
         }
 
         /// <summary>
         /// Closes the remote connection if it was opened by this instance.
         /// </summary>
         /// <exception cref="CloseRemoteConnectionException">Thrown if the disconnection fails.</exception>
-        public void Dispose()
+        public virtual void Dispose()
         {
             if (isAlreadyConnected)
                 return;
             var result = Imports.NetUseDel(null, remotePath, TForceCond.USE_LOTS_OF_FORCE);
             if (result != 0)
                 throw new CloseRemoteConnectionException(remotePath, result);
+            IsConnected = false;
         }
     }
 }

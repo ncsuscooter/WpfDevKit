@@ -50,6 +50,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BusyServiceTests.cs" />
+    <Compile Include="RemoteFileConnectionTests.cs" />
+    <Compile Include="ConnectivityServiceTests.cs" />
     <Compile Include="UtilityTests.cs" />
     <Compile Include="OptionsTests.cs" />
     <Compile Include="ServiceProviderTests.cs" />

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using WpfDevKit.Hosting;
 
 namespace WpfDevKit.Connectivity
 {
@@ -10,7 +11,7 @@ namespace WpfDevKit.Connectivity
     /// This service checks the connectivity status at regular intervals and raises an event when the status changes.
     /// </summary>
     [DebuggerStepThrough]
-    internal class ConnectivityService : IConnectivityService
+    internal class ConnectivityService : HostedService, IConnectivityService
     {
         private readonly ConnectivityServiceOptions options;
 
@@ -36,7 +37,11 @@ namespace WpfDevKit.Connectivity
         public void OnConnectionChanged() => ConnectionChanged?.Invoke();
 
         /// <inheritdoc/>
-        public Task MonitorAsync(CancellationToken cancellationToken) => ExponentialRetry.ExecuteAsync(async status =>
+        /// <remarks>
+        /// Monitors the connectivity status asynchronously, with the option to cancel the operation.
+        /// This method allows ongoing monitoring of the system's connection status.
+        /// </remarks>
+        protected override Task ExecuteAsync(CancellationToken cancellationToken) => ExponentialRetry.ExecuteAsync(async status =>
         {
             try
             {

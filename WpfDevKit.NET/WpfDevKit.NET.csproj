@@ -63,6 +63,7 @@
     <Compile Include="Dependency Injection\Service Collection\ServiceCollection.cs" />
     <Compile Include="Dependency Injection\ServiceDescriptor.cs" />
     <Compile Include="Dependency Injection\TServiceLifetime.cs" />
+    <Compile Include="Remote File Access\Connection\IRemoteFileConnection.cs" />
     <Compile Include="ServiceProviderExtensions.cs" />
     <Compile Include="Logging\Log Provider Collection\LogProviderCollection.cs" />
     <Compile Include="Logging\Log Provider Collection\ILogProviderCollection.cs" />
@@ -98,12 +99,12 @@
     </Compile>
     <Compile Include="Connectivity\IConnectivityService.cs" />
     <Compile Include="Remote File Access\RemoteFileConnectionExtensions.cs" />
-    <Compile Include="Remote File Access\IRemoteFileConnectionFactory.cs" />
-    <Compile Include="Remote File Access\RemoteFileConnectionFactory.cs" />
+    <Compile Include="Remote File Access\Factory\IRemoteFileConnectionFactory.cs" />
+    <Compile Include="Remote File Access\Factory\RemoteFileConnectionFactory.cs" />
     <Compile Include="Remote File Access\TForceCond.cs" />
     <Compile Include="Remote File Access\RemoteFileConnectionExceptions.cs" />
     <Compile Include="Remote File Access\Imports.cs" />
-    <Compile Include="Remote File Access\RemoteFileConnection.cs" />
+    <Compile Include="Remote File Access\Connection\RemoteFileConnection.cs" />
     <Compile Include="Remote File Access\USE_INFO_2.cs" />
     <Compile Include="ExponentialRetry.cs" />
     <Compile Include="StartStopRegistration.cs" />

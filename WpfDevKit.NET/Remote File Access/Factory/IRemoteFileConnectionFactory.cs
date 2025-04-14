@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace WpfDevKit.RemoteFileAccess
+﻿namespace WpfDevKit.RemoteFileAccess
 {
     /// <summary>
     /// Provides a factory to create instances of <see cref="IRemoteFileConnection"/> at runtime.
@@ -15,6 +13,6 @@ namespace WpfDevKit.RemoteFileAccess
         /// <param name="password">The password.</param>
         /// <param name="domain">The domain or machine name, if applicable.</param>
         /// <returns>A disposable remote connection instance.</returns>
-        IDisposable Create(string path, string username, string password, string domain = null);
+        IRemoteFileConnection Create(string path, string username, string password, string domain = null);
     }
 }

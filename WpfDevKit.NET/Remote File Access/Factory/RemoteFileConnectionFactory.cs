@@ -18,7 +18,7 @@ namespace WpfDevKit.RemoteFileAccess
         /// <param name="domain">An optional domain or machine name associated with the user. Defaults to <c>null</c>.</param>
         /// <returns>A disposable object that represents the connection to the remote file share.</returns>
         /// <exception cref="OpenRemoteConnectionException">Thrown if the remote connection could not be established.</exception>
-        public IDisposable Create(string path, string username, string password, string domain = null) =>
+        public IRemoteFileConnection Create(string path, string username, string password, string domain = null) =>
             new RemoteFileConnection(path, username, password, domain);
     }
 }
