@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UtilityTests.cs" />
     <Compile Include="OptionsTests.cs" />
     <Compile Include="ServiceProviderTests.cs" />
     <Compile Include="ResolvableFactoryTests.cs" />
