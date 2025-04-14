@@ -3,10 +3,10 @@ using System;
 using WpfDevKit.DependencyInjection;
 using WpfDevKit.Factory;
 
-namespace WpfDevKit.Tests.Activation
+namespace WpfDevKit.Tests.Factory
 {
     [TestClass]
-    public class ResolvableFactoryTests
+    public class ObjectFactoryTests
     {
         private IServiceProvider provider;
         private ObjectFactory factory;

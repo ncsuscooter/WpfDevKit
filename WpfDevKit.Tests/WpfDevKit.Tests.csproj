@@ -49,10 +49,11 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BusyServiceTests.cs" />
     <Compile Include="UtilityTests.cs" />
     <Compile Include="OptionsTests.cs" />
     <Compile Include="ServiceProviderTests.cs" />
-    <Compile Include="ResolvableFactoryTests.cs" />
+    <Compile Include="ObjectFactoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

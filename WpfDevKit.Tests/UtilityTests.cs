@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace WpfDevKit
+namespace WpfDevKit.Tests
 {
     [TestClass]
     public class UtilityTests
