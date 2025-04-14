@@ -8,7 +8,7 @@ namespace WpfDevKit.Hosting
     /// Provides a base class for implementing long-running background services that support start and stop operations.
     /// </summary>
     [DebuggerStepThrough]
-    public abstract class BackgroundService : IBackgroundService
+    public abstract class HostedService : IHostedService
     {
         private Task task;
         private CancellationTokenSource cancellationTokenSource;

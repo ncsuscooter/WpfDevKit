@@ -10,7 +10,7 @@ namespace WpfDevKit.Logging
     /// Represents a background service responsible for processing and logging log messages asynchronously.
     /// </summary>
     [DebuggerStepThrough]
-    internal class LogBackgroundService : BackgroundService
+    internal class LogBackgroundService : HostedService
     {
         private readonly ILogProviderCollection logProviderCollection;
         private readonly LogQueue logQueue;

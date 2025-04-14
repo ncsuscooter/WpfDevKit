@@ -7,7 +7,7 @@ namespace WpfDevKit.Hosting
     /// <summary>
     /// Defines a contract for long-running background services that support start, stop, and disposal operations.
     /// </summary>
-    public interface IBackgroundService : IDisposable
+    public interface IHostedService : IDisposable
     {
         /// <summary>
         /// Starts the background service asynchronously.

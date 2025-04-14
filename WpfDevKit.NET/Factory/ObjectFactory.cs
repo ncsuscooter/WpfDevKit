@@ -180,3 +180,7 @@ namespace WpfDevKit.Factory
         }
     }
 }
+
+// TODO: CACHE_CTOR_INFO
+// Constructor selection and scoring uses reflection on every Create() call.
+// Consider caching resolved ConstructorInfo (e.g., via ConcurrentDictionary<Type, ConstructorInfo>) to improve performance.

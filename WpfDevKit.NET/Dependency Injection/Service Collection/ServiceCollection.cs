@@ -233,3 +233,7 @@ namespace WpfDevKit.DependencyInjection
         }
     }
 }
+
+// TODO: SUPPORT_OPEN_GENERIC_TYPES
+// Open generics like IRepository<T> → Repository<T> are not supported yet.
+// Consider extending descriptor matching to handle generic type definitions and close them at resolution time.

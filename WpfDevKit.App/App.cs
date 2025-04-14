@@ -19,7 +19,7 @@ namespace WpfDevKit.App
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) => MessageBox.Show(e.Exception.ToString());
         private async void OnApplicationStartup(object sender, StartupEventArgs e)
         {
-            var host = new ServiceHostBuilder()
+            var host = new HostBuilder()
                 .ConfigureServices(services =>
                 {
                     services

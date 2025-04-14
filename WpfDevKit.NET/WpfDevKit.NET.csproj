@@ -43,7 +43,8 @@
     <Compile Include="Factory\ObjectFactory.cs" />
     <Compile Include="Busy\BusyServiceExtensions.cs" />
     <Compile Include="Connectivity\ConnectivityServiceExtensions.cs" />
-    <Compile Include="Dependency Injection\IOptions.cs" />
+    <Compile Include="Dependency Injection\Options\IOptions.cs" />
+    <Compile Include="Hosting\Host\IHost.cs" />
     <Compile Include="Logging\Database\DatabaseLogColumn.cs" />
     <Compile Include="Logging\Database\DatabaseLogProvider.cs" />
     <Compile Include="Logging\Database\DatabaseLogProviderOptions.cs" />
@@ -52,14 +53,14 @@
     <Compile Include="Logging\Log Metrics\LogMetricsFactory.cs" />
     <Compile Include="InternalLogger.cs" />
     <Compile Include="Logging\LogServiceExtensions2.cs" />
-    <Compile Include="Hosting\ServiceHost.cs" />
-    <Compile Include="Hosting\ServiceHostBuilder.cs" />
+    <Compile Include="Hosting\Host\Host.cs" />
+    <Compile Include="Hosting\HostBuilder.cs" />
     <Compile Include="Logging\ILogMessage.cs" />
     <Compile Include="Logging\User\IUserLogProvider.cs" />
-    <Compile Include="Dependency Injection\IServiceCollection.cs" />
-    <Compile Include="Dependency Injection\Options.cs" />
+    <Compile Include="Dependency Injection\Service Collection\IServiceCollection.cs" />
+    <Compile Include="Dependency Injection\Options\Options.cs" />
     <Compile Include="Dependency Injection\ServiceProvider.cs" />
-    <Compile Include="Dependency Injection\ServiceCollection.cs" />
+    <Compile Include="Dependency Injection\Service Collection\ServiceCollection.cs" />
     <Compile Include="Dependency Injection\ServiceDescriptor.cs" />
     <Compile Include="Dependency Injection\TServiceLifetime.cs" />
     <Compile Include="ServiceProviderExtensions.cs" />
@@ -90,8 +91,8 @@
     <Compile Include="Connectivity\ConnectivityService.cs" />
     <Compile Include="Connectivity\ConnectivityServiceOptions.cs" />
     <Compile Include="Busy\IBusyService.cs" />
-    <Compile Include="Hosting\BackgroundService.cs" />
-    <Compile Include="Hosting\IBackgroundService.cs" />
+    <Compile Include="Hosting\Hosted Service\HostedService.cs" />
+    <Compile Include="Hosting\Hosted Service\IHostedService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

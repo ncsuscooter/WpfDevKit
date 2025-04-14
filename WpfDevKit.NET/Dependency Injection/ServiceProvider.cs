@@ -92,3 +92,7 @@ namespace WpfDevKit.DependencyInjection
         }
     }
 }
+
+// TODO: CONSIDER_MULTI_CTOR_SUPPORT
+// Currently restricted to a single public constructor (as per Microsoft.Extensions.DependencyInjection).
+// Consider relaxing this in future to support constructor scoring or [PreferredConstructor] selection.
