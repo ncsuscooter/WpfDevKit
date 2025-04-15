@@ -28,8 +28,8 @@ public static class ExponentialRetry
         bool result;
         do
         {
-            var interval = Math.Min(maximum, Math.Max(minimum, (int)Math.Round(Math.Exp(count++ / 10.0) * 1000.0, 0)));
-            result = await function($"Retrying in {TimeSpan.FromMilliseconds(interval).ToReadableTime()} after [{count}] failed attempts");
+            var interval = CalculateDelay(count++, minimum, maximum);
+            result = await function($"Retrying in {interval.ToReadableTime()} after [{count}] failed attempts");
             if (!result)
             {
                 try
@@ -43,4 +43,14 @@ public static class ExponentialRetry
             }
         } while (!token.IsCancellationRequested && !result);
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="attempt"></param>
+    /// <param name="min"></param>
+    /// <param name="max"></param>
+    /// <returns></returns>
+    public static TimeSpan CalculateDelay(int attempt, int min, int max) => 
+        TimeSpan.FromMilliseconds(Math.Min(max, Math.Max(min, (int)Math.Round(Math.Exp(attempt / 10.0) * 1000.0, 0))));
 }
