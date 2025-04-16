@@ -20,10 +20,7 @@ namespace WpfDevKit.Connectivity
         public event EventHandler StatusChanged;
 
         /// <inheritdoc/>
-        public bool IsConnecting { get; private set; }
-
-        /// <inheritdoc/>
-        public bool IsConnected { get; private set; }
+        public TConnectivityState State { get; private set; }
 
         /// <inheritdoc/>
         public int Attempts { get; private set; }
@@ -32,19 +29,29 @@ namespace WpfDevKit.Connectivity
         public Exception Error { get; private set; }
 
         /// <inheritdoc/>
+        public DateTime? LastSuccessfulConnection { get; private set; }
+
+        /// <inheritdoc/>
+        public TimeSpan? Uptime => LastSuccessfulConnection.HasValue ? DateTime.UtcNow - LastSuccessfulConnection.Value : default;
+
+        /// <inheritdoc/>
         public DateTime NextAttempt { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectivityService"/> class.
         /// </summary>
         /// <param name="options">The options used to configure the connectivity service.</param>
-        public ConnectivityService(ConnectivityServiceOptions options) => this.options = options ?? throw new ArgumentNullException(nameof(options));
+        public ConnectivityService(ConnectivityServiceOptions options)
+        {
+            this.options = options ?? throw new ArgumentNullException(nameof(options));
+            this.options.Validate();
+        }
 
         /// <inheritdoc/>
         public void TriggerImmediateExecution() => reset.Signal();
 
         /// <inheritdoc/>
-        public string GetStatus() => options.GetStatusMessage(this);
+        public string GetStatus() => options.GetStatus(this);
 
         /// <inheritdoc/>
         /// <remarks>
@@ -56,11 +63,12 @@ namespace WpfDevKit.Connectivity
             while (!cancellationToken.IsCancellationRequested)
             {
                 Error = null;
-                IsConnecting = true;
+                State = TConnectivityState.Connecting;
                 RaiseStatusChanged();
+                bool connected = false;
                 try
                 {
-                    IsConnected = await options.ConnectionValidationFunctionAsync(cancellationToken);
+                    connected = await options.ValidateConnectionAsync(cancellationToken);
                 }
                 catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                 {
@@ -69,10 +77,10 @@ namespace WpfDevKit.Connectivity
                 catch (Exception ex)
                 {
                     Error = ex;
-                    IsConnected = false;
                 }
-                IsConnecting = false;
-                Attempts = IsConnected ? 0 : Attempts + 1;
+                State = connected ? TConnectivityState.Connected : TConnectivityState.Disconnected;
+                LastSuccessfulConnection = connected ? DateTime.UtcNow : default;
+                Attempts = connected ? 0 : Attempts + 1;
                 var delay = Attempts > 0
                             ? ExponentialRetry.CalculateDelay(Attempts, options.MinimumRetryMilliseconds, options.MaximumRetryMilliseconds)
                             : TimeSpan.FromMilliseconds(options.ExecutionIntervalMilliseconds);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,29 +10,30 @@ namespace WpfDevKit.Tests.Connectivity
     [TestClass]
     public class ConnectivityServiceTests
     {
-        private ConnectivityService _service;
+        private IConnectivityService connectivityService;
 
         [TestInitialize]
         public void Init()
         {
             var options = new ConnectivityServiceOptions
             {
-                Host = "localhost",
-                ConnectingStatusMessage = "connecting...",
-                ConnectedStatusMessage = "connected",
-                IsReadyAsync = async (ct) => await Task.FromResult(true)
+                ValidateConnectionAsync = async (ct) =>
+                {
+                    await Task.Delay(50);
+                    return await Task.FromResult(true);
+                }
             };
-
-            _service = new ConnectivityService(options);
+            connectivityService = new ConnectivityService(options);
         }
 
         [TestMethod]
         [TestCategory("ConnectivityService")]
         public async Task ConnectivityService_SetsInitialState()
         {
-            await _service.StartAsync(CancellationToken.None);
-            Assert.IsTrue(_service.IsConnected);
-            Assert.AreEqual("connected", _service.Status);
+            await connectivityService.StartAsync(CancellationToken.None);
+            await Task.Delay(100);
+            Assert.IsTrue(connectivityService.IsConnected);
+            Assert.AreEqual("connected", connectivityService.Status);
         }
 
         [TestMethod]
@@ -39,8 +41,8 @@ namespace WpfDevKit.Tests.Connectivity
         public async Task ConnectivityService_ChangeEvent_Fires()
         {
             bool raised = false;
-            _service.ConnectionChanged += () => raised = true;
-            await _service.StartAsync(CancellationToken.None);
+            connectivityService.StatusChanged += () => raised = true;
+            await connectivityService.StartAsync(CancellationToken.None);
             Assert.IsTrue(raised);
         }
 
@@ -52,14 +54,19 @@ namespace WpfDevKit.Tests.Connectivity
             var options = new ConnectivityServiceOptions
             {
                 Host = "retryhost",
-                ConnectingStatusMessage = "connecting...",
-                ConnectedStatusMessage = "connected",
-                IsReadyAsync = async (ct) => await Task.FromResult(++attempts >= 3)
+                ValidateConnectionAsync = async (ct) =>
+                {
+                    await Task.Delay(50, ct);
+                    return await Task.FromResult(++attempts >= 3);
+                }
             };
+            var service = new ConnectivityService(options);
+            await service.StartAsync(CancellationToken.None);
+            var sw = Stopwatch.StartNew();
+            while (!service.IsConnected && sw.Elapsed < TimeSpan.FromSeconds(5))
+                await Task.Delay(50);
 
-            var retryingService = new ConnectivityService(options);
-            await retryingService.StartAsync(CancellationToken.None);
-            Assert.IsTrue(retryingService.IsConnected);
+            Assert.IsTrue(service.IsConnected, $"Expected connection after retries (attempts: {attempts})");
             Assert.IsTrue(attempts >= 3);
         }
 
@@ -70,8 +77,8 @@ namespace WpfDevKit.Tests.Connectivity
             var cts = new CancellationTokenSource();
             cts.Cancel();
 
-            await _service.StartAsync(cts.Token);
-            Assert.IsFalse(_service.IsConnected); // Likely short-circuited
+            await connectivityService.StartAsync(cts.Token);
+            Assert.IsFalse(connectivityService.IsConnected); // Likely short-circuited
         }
 
         [TestMethod]
@@ -82,20 +89,20 @@ namespace WpfDevKit.Tests.Connectivity
             var options = new ConnectivityServiceOptions
             {
                 Host = "failhost",
-                ConnectingStatusMessage = "connecting...",
-                ConnectedStatusMessage = "connected",
-                IsReadyAsync = async (ct) =>
+                ValidateConnectionAsync = async (ct) =>
                 {
+                    await Task.Delay(50);
                     calls++;
                     if (calls == 1)
                         throw new InvalidOperationException("Simulated failure");
-                    return true;
+                    return await Task.FromResult(true);
                 }
             };
-
             var service = new ConnectivityService(options);
             await service.StartAsync(CancellationToken.None);
-
+            var sw = Stopwatch.StartNew();
+            while (!service.IsConnected && sw.Elapsed < TimeSpan.FromSeconds(5))
+                await Task.Delay(50);
             Assert.IsTrue(service.IsConnected);
             Assert.IsTrue(calls >= 2);
         }
@@ -107,15 +114,19 @@ namespace WpfDevKit.Tests.Connectivity
             var options = new ConnectivityServiceOptions
             {
                 Host = "neverhost",
-                ConnectingStatusMessage = "connecting...",
-                ConnectedStatusMessage = "connected",
-                IsReadyAsync = async (ct) => await Task.FromResult(false)
+                ValidateConnectionAsync = async (ct) =>
+                {
+                    await Task.Delay(50);
+                    return await Task.FromResult(false);
+                }
             };
 
             var service = new ConnectivityService(options);
             var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
             await service.StartAsync(cts.Token);
-
+            var sw = Stopwatch.StartNew();
+            while (!service.IsConnected && sw.Elapsed < TimeSpan.FromSeconds(5))
+                await Task.Delay(50);
             Assert.IsFalse(service.IsConnected);
         }
 
@@ -126,9 +137,7 @@ namespace WpfDevKit.Tests.Connectivity
             var options = new ConnectivityServiceOptions
             {
                 Host = "timeouthost",
-                ConnectingStatusMessage = "connecting...",
-                ConnectedStatusMessage = "connected",
-                IsReadyAsync = async (ct) =>
+                ValidateConnectionAsync = async (ct) =>
                 {
                     await Task.Delay(5000, ct); // Simulates long delay
                     return true;
@@ -138,7 +147,9 @@ namespace WpfDevKit.Tests.Connectivity
             var service = new ConnectivityService(options);
             var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
             await service.StartAsync(cts.Token);
-
+            var sw = Stopwatch.StartNew();
+            while (!service.IsConnected && sw.Elapsed < TimeSpan.FromSeconds(5))
+                await Task.Delay(50);
             Assert.IsFalse(service.IsConnected);
         }
     }

@@ -55,14 +55,35 @@ namespace WpfDevKit.Connectivity
         /// Gets or sets a function that performs an asynchronous check to determine if the connectivity service is ready.
         /// The function should accept a <see cref="CancellationToken"/> and return a <see cref="Task{bool}"/> indicating readiness.
         /// </summary>
-        public Func<CancellationToken, Task<bool>> ConnectionValidationFunctionAsync { get; set; } = token => Task.FromResult(false);
+        public Func<CancellationToken, Task<bool>> ValidateConnectionAsync { get; set; } = token => Task.FromResult(false);
 
         /// <summary>
-        /// 
+        /// Gets or sets a function that formats a status message based on the properties provided by the <see cref="IConnectivityService"/>.
         /// </summary>
-        public Func<IConnectivityService, string> GetStatusMessage { get; set; } = 
+        public Func<IConnectivityService, string> GetStatus { get; set; } = 
             x => x.IsConnecting ? "connecting" :
             x.IsConnected ? "connected" :
             $"retrying in {DateTime.Now.Subtract(x.NextAttempt).ToReadableTime()} after [{x.Attempts}] failed attempts";
+
+        /// <summary>
+        /// Validates the current configuration and throws an exception if any required properties are missing or invalid.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if required delegates are not provided.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if timing values are invalid or inconsistent.</exception>
+        internal void Validate()
+        {
+            if (ValidateConnectionAsync == null)
+                throw new InvalidOperationException("The ValidateConnectionAsync delegate must be provided.");
+            if (GetStatus == null)
+                throw new InvalidOperationException("The GetStatusMessage delegate must be provided.");
+            if (MinimumRetryMilliseconds < 0)
+                throw new ArgumentOutOfRangeException(nameof(MinimumRetryMilliseconds), "Minimum retry delay must be >= 0.");
+            if (MaximumRetryMilliseconds < MinimumRetryMilliseconds)
+                throw new ArgumentOutOfRangeException(nameof(MaximumRetryMilliseconds),
+                    "Maximum retry delay cannot be less than the minimum retry delay.");
+            if (ExecutionIntervalMilliseconds < MinimumRetryMilliseconds || ExecutionIntervalMilliseconds > MaximumRetryMilliseconds)
+                throw new ArgumentOutOfRangeException(nameof(ExecutionIntervalMilliseconds),
+                    "Execution interval must be at least as large as the minimum retry delay and smaller than the maximum retry delay.");
+        }
     }
 }
