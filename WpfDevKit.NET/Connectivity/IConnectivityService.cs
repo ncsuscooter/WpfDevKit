@@ -1,58 +1,50 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using WpfDevKit.Hosting;
 
 namespace WpfDevKit.Connectivity
 {
     /// <summary>
     /// Provides methods and events for monitoring the connectivity status of a system.
     /// </summary>
-    public interface IConnectivityService : IHostedService
+    public interface IConnectivityService
     {
         /// <summary>
         /// Occurs when the connection status changes.
         /// </summary>
-        event Action ConnectionChanged;
+        event EventHandler StatusChanged;
 
         /// <summary>
-        /// Gets a value indicating whether the system is currently connected.
+        /// 
         /// </summary>
-        /// <value>
-        /// <c>true</c> if the system is connected; otherwise, <c>false</c>.
-        /// </value>
+        bool IsConnecting { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         bool IsConnected { get; }
 
         /// <summary>
-        /// Gets the current status of the system's connectivity.
-        /// This could be information such as "Connected", "Disconnected", or error messages.
+        /// Gets the number of retry attempts that have occurred.
         /// </summary>
-        /// <value>
-        /// The connectivity status message.
-        /// </value>
-        string Status { get; }
+        int Attempts { get; }
 
         /// <summary>
-        /// Gets the host or endpoint to which the system is connected, if applicable.
-        /// This could be a server or network address.
+        /// Gets the exception that caused the retry, if available.
         /// </summary>
-        /// <value>
-        /// The host address.
-        /// </value>
-        string Host { get; }
+        Exception Error { get; }
 
         /// <summary>
-        /// Invoked when the connection status changes.
-        /// Triggers the <see cref="ConnectionChanged"/> event to notify subscribers of the status change.
+        /// Gets the timestamp associated with the next retry attempt.
         /// </summary>
-        void OnConnectionChanged();
+        DateTime NextAttempt { get; }
 
         /// <summary>
-        /// Monitors the connectivity status asynchronously, with the option to cancel the operation.
-        /// This method allows ongoing monitoring of the system's connection status.
+        /// 
         /// </summary>
-        /// <param name="cancellationToken">A token used to cancel the operation if needed.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        Task IsConnectedAsync(CancellationToken cancellationToken);
+        string GetStatus();
+
+        /// <summary>
+        /// Signals the service to execute immediately, bypassing any current delay.
+        /// </summary>
+        void TriggerImmediateExecution();
     }
 }

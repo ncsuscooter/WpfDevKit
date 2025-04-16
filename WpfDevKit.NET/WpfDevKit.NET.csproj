@@ -39,6 +39,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncAutoResetEvent.cs" />
     <Compile Include="Factory\IObjectFactory.cs" />
     <Compile Include="Factory\ObjectFactory.cs" />
     <Compile Include="Busy\BusyServiceExtensions.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="Logging\Log Provider Collection\ILogProviderCollection.cs" />
     <Compile Include="Factory\ResolvableAttribute.cs" />
     <Compile Include="EnumExtensions.cs" />
+    <Compile Include="TaskExtensions.cs" />
     <Compile Include="TimeSpanExtensions.cs" />
     <Compile Include="Logging\TLogCategory.cs" />
     <Compile Include="Logging\TLogElement.cs" />
