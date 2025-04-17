@@ -1,5 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WpfDevKit.DependencyInjection;
 
 namespace WpfDevKit.Tests.DependencyInjection

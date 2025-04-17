@@ -1,5 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WpfDevKit.DependencyInjection;
 using WpfDevKit.Factory;
 
@@ -8,8 +8,8 @@ namespace WpfDevKit.Tests.Factory
     [TestClass]
     public class ObjectFactoryTests
     {
-        private IServiceProvider provider;
-        private ObjectFactory factory;
+        private IObjectResolver resolver;
+        private IObjectFactory factory;
 
         [TestInitialize]
         public void Setup()
@@ -18,8 +18,8 @@ namespace WpfDevKit.Tests.Factory
             services.AddSingleton<IDependency, Dependency>();
             services.AddSingleton<AnotherDependency>();
             services.AddSingleton<InternalLogger>();
-            provider = services.Build();
-            factory = new ObjectFactory(provider);
+            resolver = services.Build() as IObjectResolver;
+            factory = new ObjectFactory(resolver);
         }
 
         [TestMethod]
@@ -74,7 +74,7 @@ namespace WpfDevKit.Tests.Factory
         {
             var services = new ServiceCollection();
             services.AddSingleton<InternalLogger>();
-            var localProvider = services.Build();
+            var localProvider = services.Build() as IObjectResolver;
             var localFactory = new ObjectFactory(localProvider);
 
             var result = localFactory.Create<MultiConstructorClass>("manual input");
@@ -114,7 +114,7 @@ namespace WpfDevKit.Tests.Factory
         {
             var services = new ServiceCollection();
             services.AddSingleton<InternalLogger>();
-            var localProvider = services.Build();
+            var localProvider = services.Build() as IObjectResolver;
             var localFactory = new ObjectFactory(localProvider);
 
             var result = localFactory.Create<UnregisteredResolvablePropertyClass>();
@@ -207,7 +207,7 @@ namespace WpfDevKit.Tests.Factory
         {
             var services = new ServiceCollection();
             services.AddSingleton<IDependency, Dependency>();
-            var provider = services.Build();
+            var provider = services.Build() as IObjectResolver;
             var factory = new ObjectFactory(provider);
 
             var first = factory.Create<MultiConstructorClass>("manual"); // manual param, should use string ctor

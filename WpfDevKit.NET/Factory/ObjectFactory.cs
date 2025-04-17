@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
-using System;
 using System.Linq;
+using System.Reflection;
 
 namespace WpfDevKit.Factory
 {
@@ -13,14 +13,14 @@ namespace WpfDevKit.Factory
     [DebuggerStepThrough]
     internal class ObjectFactory : IObjectFactory
     {
-        private readonly IServiceProvider provider;
+        private readonly IObjectResolver resolver;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectFactory"/> class with the given service provider.
         /// </summary>
-        /// <param name="provider">The service provider used for resolving dependencies.</param>
+        /// <param name="resolver">The object resolver used for resolving dependencies.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="provider"/> is null.</exception>
-        public ObjectFactory(IServiceProvider provider) => this.provider = provider ?? throw new ArgumentNullException(nameof(provider));
+        public ObjectFactory(IObjectResolver resolver) => this.resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
 
         /// <inheritdoc/>
         /// <remarks>
@@ -42,7 +42,8 @@ namespace WpfDevKit.Factory
                                                               .FirstOrDefault());
 
         /// <summary>
-        /// Core instantiation logic used to create and initialize an object instance with dependency and property injection.
+        /// Entry method to find the appropriate constructor (using the provided delegate), it's parameters, and the type's properties 
+        /// marked with <see cref="ResolvableAttribute"/>. All used to create and initialize an object instance with dependency and property injection.
         /// </summary>
         /// <param name="type">The type of object to create.</param>
         /// <param name="stack">A set used to detect circular dependencies during recursive resolution.</param>
@@ -60,80 +61,89 @@ namespace WpfDevKit.Factory
             if (!type.IsClass) throw new ArgumentException("Type must be a class", nameof(type));
             if (stack == null) throw new ArgumentNullException(nameof(stack));
             if (!stack.Add(type)) throw new InvalidOperationException($"Circular dependency detected for type {type.Name}.");
-
             try
             {
                 var constructor = getConstructor() ?? throw new InvalidOperationException($"No suitable constructor found for {type.Name}.");
                 var parameters = constructor.GetParameters();
-                var arguments = new object[parameters.Length];
-                var usedArgs = new HashSet<int>();
-
-                for (int i = 0; i < parameters.Length; i++)
-                {
-                    var param = parameters[i];
-                    bool resolved = false;
-
-                    if (args != null)
-                    {
-                        if (i < args.Length)
-                        {
-                            var arg = args[i];
-                            if (arg == null && !param.ParameterType.IsValueType ||
-                                arg != null && param.ParameterType.IsInstanceOfType(arg))
-                            {
-                                usedArgs.Add(i);
-                                (arguments[i], resolved) = (arg, true);
-                            }
-                        }
-
-                        if (!resolved)
-                        {
-                            for (int j = 0; j < args.Length; j++)
-                            {
-                                if (usedArgs.Contains(j)) continue;
-                                var arg = args[j];
-                                if (arg == null && !param.ParameterType.IsValueType ||
-                                    arg != null && param.ParameterType.IsInstanceOfType(arg))
-                                {
-                                    usedArgs.Add(j);
-                                    (arguments[i], resolved) = (arg, true);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if (!resolved && provider.GetService(param.ParameterType) is object service)
-                        (arguments[i], resolved) = (service, true);
-                    if (!resolved && param.HasDefaultValue)
-                        (arguments[i], resolved) = (param.DefaultValue, true);
-                    if (!resolved)
-                        throw new InvalidOperationException($"Cannot resolve parameter '{param.Name}' of type '{param.ParameterType.Name}'.");
-                }
-
-                // Create an instance with the provided arguments.
-                // Arguments provided either through the constructor DI or user supplied.
-                var instance = constructor.Invoke(arguments);
-
-                // Inject properties marked with [Resolvable]
                 var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                                      .Where(p => p.IsDefined(typeof(ResolvableAttribute), inherit: true) && p.CanWrite);
-
-                foreach (var prop in properties)
-                {
-                    var service = provider.GetService(prop.PropertyType);
-                    if (service != null)
-                        prop.SetValue(instance, service);
-                    else
-                        Debug.WriteLine($"[Inject] Warning: No service ({type.Name}) found for property ({prop.Name}).");
-                }
-
-                return instance;
+                return Create(constructor, parameters, properties, stack, args);
             }
             finally
             {
                 stack.Remove(type);
             }
+        }
+        /// <summary>
+        /// Core instantiation logic used to create and initialize an object instance with dependency and property injection.
+        /// </summary>
+        /// <param name="constructor">The constructor to be used for instantiation.</param>
+        /// <param name="parameters">The constructor's parameters to be used for instantiation.</param>
+        /// <param name="properties">The type's properties using the <see cref="ResolvableAttribute"/> for DI.</param>
+        /// <param name="args">Arguments to be matched against constructor parameters.</param>
+        /// <returns>A fully constructed and property-injected object.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if any required parameter is null.</exception>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="type"/> is not a class.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when a circular dependency is detected.</exception>>
+        internal object Create(ConstructorInfo constructor, ParameterInfo[] parameters, IEnumerable<PropertyInfo> properties, HashSet<Type> stack, object[] args)
+        {
+            var arguments = new object[parameters.Length];
+            var usedArgs = new HashSet<int>();
+
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var param = parameters[i];
+                bool resolved = false;
+
+                if (args != null)
+                {
+                    if (i < args.Length)
+                    {
+                        var arg = args[i];
+                        if (arg == null && !param.ParameterType.IsValueType ||
+                            arg != null && param.ParameterType.IsInstanceOfType(arg))
+                        {
+                            usedArgs.Add(i);
+                            (arguments[i], resolved) = (arg, true);
+                        }
+                    }
+
+                    if (!resolved)
+                    {
+                        for (int j = 0; j < args.Length; j++)
+                        {
+                            if (usedArgs.Contains(j)) continue;
+                            var arg = args[j];
+                            if (arg == null && !param.ParameterType.IsValueType ||
+                                arg != null && param.ParameterType.IsInstanceOfType(arg))
+                            {
+                                usedArgs.Add(j);
+                                (arguments[i], resolved) = (arg, true);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (!resolved && resolver.CanResolve(param.ParameterType))
+                    (arguments[i], resolved) = (resolver.Resolve(param.ParameterType, stack), true);
+                if (!resolved && param.HasDefaultValue)
+                    (arguments[i], resolved) = (param.DefaultValue, true);
+                if (!resolved)
+                    throw new InvalidOperationException($"Cannot resolve parameter '{param.Name}' of type '{param.ParameterType.Name}'.");
+            }
+
+            var instance = constructor.Invoke(arguments);
+
+            foreach (var prop in properties)
+            {
+                if (resolver.CanResolve(prop.PropertyType))
+                    prop.SetValue(instance, resolver.Resolve(prop.PropertyType, stack));
+                else
+                    Debug.WriteLine($"[Inject] Warning: No service ({prop.PropertyType.Name}) found for property ({prop.Name}).");
+            }
+
+            return instance;
         }
 
         /// <summary>
@@ -170,7 +180,7 @@ namespace WpfDevKit.Factory
                         }
                     }
                 }
-                if (!matched && provider.GetService(param.ParameterType) != null)
+                if (!matched && resolver.CanResolve(param.ParameterType))
                     (score, matched) = (score + 3, true);
                 if (!matched && param.HasDefaultValue)
                     (score, matched) = (score + 1, true);

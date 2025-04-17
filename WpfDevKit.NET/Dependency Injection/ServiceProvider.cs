@@ -13,7 +13,7 @@ namespace WpfDevKit.DependencyInjection
     /// Also detects circular dependencies and supports resolution of multiple implementations using <see cref="IEnumerable{T}"/>.
     /// </summary>
     [DebuggerStepThrough]
-    internal class ServiceProvider : IServiceProvider
+    internal class ServiceProvider : IServiceProvider, IObjectResolver
     {
         private readonly List<ServiceDescriptor> descriptors;
         private readonly ObjectFactory factory;
@@ -45,7 +45,7 @@ namespace WpfDevKit.DependencyInjection
         /// <exception cref="InvalidOperationException">
         /// Thrown when a circular dependency is detected or when constructor parameters cannot be resolved.
         /// </exception>
-        private object GetService(Type serviceType, HashSet<Type> stack)
+        public object GetService(Type serviceType, HashSet<Type> stack)
         {
             // Handle IEnumerable<T> resolution
             if (serviceType.IsGenericType && serviceType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
@@ -92,6 +92,12 @@ namespace WpfDevKit.DependencyInjection
                 return ctors[0];
             });
         }
+
+        /// <inheritdoc/>
+        bool IObjectResolver.CanResolve(Type type) => descriptors.Any(d => d.ServiceType == type);
+
+        /// <inheritdoc/>
+        object IObjectResolver.Resolve(Type type, HashSet<Type> stack) => GetService(type, stack);
     }
 }
 

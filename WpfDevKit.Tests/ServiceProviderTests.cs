@@ -1,10 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Linq;
-using WpfDevKit.DependencyInjection;
-using WpfDevKit.Factory;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using WpfDevKit.DependencyInjection;
+using WpfDevKit.Factory;
 
 namespace WpfDevKit.Tests.DependencyInjection
 {
