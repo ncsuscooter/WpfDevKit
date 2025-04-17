@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using WpfDevKit.DependencyInjection;
 
 namespace WpfDevKit.Connectivity
@@ -6,6 +7,7 @@ namespace WpfDevKit.Connectivity
     /// <summary>
     /// Provides extension methods for registering WpfDevKit core services.
     /// </summary>
+    [DebuggerStepThrough]
     public static class ConnectivityServiceExtensions
     {
         /// <summary>

@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
+/// <summary>
+/// Provides extension methods for working with <see cref="Task"/> objects.
+/// </summary>
+[DebuggerStepThrough]
 public static class TaskExtensions
 {
     /// <summary>

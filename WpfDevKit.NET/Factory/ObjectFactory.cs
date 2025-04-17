@@ -10,6 +10,7 @@ namespace WpfDevKit.Factory
     /// Provides runtime creation of object instances with support for constructor injection,
     /// property injection via <see cref="ResolvableAttribute"/>, and optional parameter matching.
     /// </summary>
+    [DebuggerStepThrough]
     internal class ObjectFactory : IObjectFactory
     {
         private readonly IServiceProvider provider;

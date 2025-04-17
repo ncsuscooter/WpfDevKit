@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using WpfDevKit.DependencyInjection;
@@ -9,6 +10,7 @@ namespace WpfDevKit.Factory
     /// Provides extension methods for registering services and configuring the
     /// resolvable container within the application.
     /// </summary>
+    [DebuggerStepThrough]
     public static class ResolvableExtensions
     {
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using WpfDevKit.Factory;
@@ -11,6 +12,7 @@ namespace WpfDevKit.DependencyInjection
     /// Supports constructor injection, property injection via the <see cref="ResolvableAttribute"/>.
     /// Also detects circular dependencies and supports resolution of multiple implementations using <see cref="IEnumerable{T}"/>.
     /// </summary>
+    [DebuggerStepThrough]
     internal class ServiceProvider : IServiceProvider
     {
         private readonly List<ServiceDescriptor> descriptors;

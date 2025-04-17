@@ -1,10 +1,12 @@
-﻿using WpfDevKit.DependencyInjection;
+﻿using System.Diagnostics;
+using WpfDevKit.DependencyInjection;
 
 namespace WpfDevKit.Hosting
 {
     /// <summary>
     /// Provides functionality to configure services and build a service host.
     /// </summary>
+    [DebuggerStepThrough]
     public class HostBuilder
     {
         private readonly IServiceCollection services = new ServiceCollection();

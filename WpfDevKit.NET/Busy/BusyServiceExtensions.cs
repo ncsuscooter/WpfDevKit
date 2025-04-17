@@ -1,10 +1,12 @@
-﻿using WpfDevKit.DependencyInjection;
+﻿using System.Diagnostics;
+using WpfDevKit.DependencyInjection;
 
 namespace WpfDevKit.Busy
 {
     /// <summary>
     /// Provides extension methods for registering WpfDevKit core services.
     /// </summary>
+    [DebuggerStepThrough]
     public static class BusyServiceExtensions
     {
         /// <summary>

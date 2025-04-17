@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 /// <summary>
 /// Provides extension methods for resolving services from an <see cref="IServiceProvider"/>.
 /// </summary>
+[DebuggerStepThrough]
 public static class ServiceProviderExtensions
 {
     /// <summary>

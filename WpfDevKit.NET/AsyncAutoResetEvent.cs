@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -8,7 +9,8 @@ using System.Threading.Tasks;
 /// Only one waiter is released per <see cref="Signal"/> call. If <see cref="Signal"/> is called multiple times 
 /// before any <see cref="WaitAsync(CancellationToken)"/> call is made, only one signal is stored — all extra signals are ignored.
 /// This prevents signal accumulation or queueing, making it ideal for early-wake or change-notification scenarios.
-/// </remarks>>
+/// </remarks>
+[DebuggerStepThrough]
 public class AsyncAutoResetEvent
 {
     private readonly object sync = new object();
