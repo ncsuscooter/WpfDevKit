@@ -9,7 +9,18 @@ namespace WpfDevKit.Hosting
     [DebuggerStepThrough]
     public class HostBuilder
     {
-        private readonly IServiceCollection services = new ServiceCollection();
+        private readonly IServiceCollection services;
+
+        /// <summary>
+        /// Creates and returns a new instance of the <see cref="HostBuilder"/> class.
+        /// </summary>
+        /// <returns>A configured <see cref="HostBuilder"/> instance.</returns>
+        public static HostBuilder CreateHostBuilder() => new HostBuilder();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HostBuilder"/> class.
+        /// </summary>
+        private HostBuilder() => services = new ServiceCollection();
 
         /// <summary>
         /// Gets the collection of registered service descriptors.
