@@ -64,7 +64,6 @@ namespace WpfDevKit.Connectivity
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    Error = null;
                     State = TConnectivityState.Connecting;
                     RaiseStatusChanged();
                     bool connected = false;
@@ -80,13 +79,24 @@ namespace WpfDevKit.Connectivity
                     {
                         Error = ex;
                     }
-                    State = connected ? TConnectivityState.Connected : TConnectivityState.Disconnected;
-                    LastSuccessfulConnection = connected ? DateTime.UtcNow : new DateTime?();
-                    Attempts = connected ? 0 : Attempts + 1;
+                    if (connected)
+                    {
+                        Error = null;
+                        Attempts = 0;
+                        State = TConnectivityState.Connected;
+                        if (!LastSuccessfulConnection.HasValue)
+                            LastSuccessfulConnection = DateTime.UtcNow;
+                    }
+                    else
+                    {
+                        Attempts++;
+                        State = TConnectivityState.Disconnected;
+                        LastSuccessfulConnection = null;
+                    }
                     var delay = Attempts > 0
                                 ? ExponentialRetry.CalculateDelay(Attempts, options.MinimumRetryMilliseconds, options.MaximumRetryMilliseconds, 10, 2.5)
                                 : TimeSpan.FromMilliseconds(options.ExecutionIntervalMilliseconds);
-                    NextAttempt = DateTime.UtcNow + delay;
+                    NextAttempt = DateTime.UtcNow.Add(delay);
                     RaiseStatusChanged();
                     try
                     {
@@ -101,6 +111,7 @@ namespace WpfDevKit.Connectivity
             finally
             {
                 State = TConnectivityState.Disconnected;
+                RaiseStatusChanged();
             }
         }, cancellationToken);
 
