@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,6 +18,7 @@ namespace WpfDevKit.Tests.Hosting
 
             protected override async Task ExecuteAsync(CancellationToken cancellationToken)
             {
+                Debug.WriteLine($"[HOST TESTS] HostedService '{GetType().FullName}' executing.");
                 Started = true;
                 while (!cancellationToken.IsCancellationRequested)
                     await Task.Delay(10, cancellationToken);
@@ -40,6 +42,7 @@ namespace WpfDevKit.Tests.Hosting
 
             protected override async Task ExecuteAsync(CancellationToken cancellationToken)
             {
+                Debug.WriteLine($"[HOST TESTS] HostedService '{GetType().FullName}' executing.");
                 while (!cancellationToken.IsCancellationRequested)
                     await Task.Delay(50, cancellationToken);
             }

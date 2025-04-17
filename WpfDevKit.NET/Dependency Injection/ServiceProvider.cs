@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace WpfDevKit.DependencyInjection
     [DebuggerStepThrough]
     internal class ServiceProvider : IServiceProvider, IObjectResolver
     {
+        private readonly ConcurrentDictionary<ServiceDescriptor, object> cache;
         private readonly List<ServiceDescriptor> descriptors;
         private readonly ObjectFactory factory;
 
@@ -22,7 +24,8 @@ namespace WpfDevKit.DependencyInjection
         /// Initializes a new instance of the <see cref="ServiceProvider"/> class using the specified descriptors.
         /// </summary>
         /// <param name="descriptors">The collection of registered services to use for resolution.</param>
-        public ServiceProvider(List<ServiceDescriptor> descriptors) => (this.descriptors, factory) = (descriptors, new ObjectFactory(this));
+        public ServiceProvider(List<ServiceDescriptor> descriptors) =>
+            (this.descriptors, factory, cache) = (descriptors, new ObjectFactory(this), new ConcurrentDictionary<ServiceDescriptor, object>());
 
         /// <inheritdoc/>
         /// <exception cref="InvalidOperationException">
@@ -47,51 +50,48 @@ namespace WpfDevKit.DependencyInjection
         /// </exception>
         public object GetService(Type serviceType, HashSet<Type> stack)
         {
-            // Handle IEnumerable<T> resolution
             if (serviceType.IsGenericType && serviceType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
             {
                 var elementType = serviceType.GetGenericArguments()[0];
-                var instances = descriptors.Where(d => d.ServiceType == elementType).Select(d => GetService(d.ServiceType, stack)).ToArray();
+                var instances = descriptors.Where(d => d.ServiceType == elementType).Select(d => GetService(d, stack)).ToArray();
                 var array = Array.CreateInstance(elementType, instances.Length);
                 instances.CopyTo(array, 0);
                 return array;
             }
-            // Find last-registered descriptor
             var descriptor = descriptors.LastOrDefault(x => x.ServiceType == serviceType);
-            if (descriptor == null)
-                return null;
-            // Handle singleton instance
-            if (descriptor.Lifetime == TServiceLifetime.Singleton)
-            {
-                if (descriptor.Instance == null)
-                    descriptor.Instance = CreateInstance(descriptor, stack);
-                return descriptor.Instance;
-            }
-            // Always create new instance for transient
-            return CreateInstance(descriptor, stack);
+            return descriptor == null ? null : GetService(descriptor, stack);
         }
 
         /// <summary>
-        /// Creates a service instance using constructor injection or a custom factory delegate.
+        /// Resolves and returns a service instance from the provided descriptor, using singleton caching when applicable.
         /// </summary>
-        /// <param name="descriptor">The service descriptor that defines how to create the service.</param>
-        /// <param name="stack">Stack used for tracking nested resolutions and preventing circular dependencies.</param>
-        /// <returns>The created service instance.</returns>
+        /// <param name="descriptor">The service descriptor that defines the service type and lifetime.</param>
+        /// <param name="stack">The current resolution stack used to detect circular dependencies.</param>
+        /// <returns>The resolved service instance.</returns>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when constructor selection fails, required parameters are missing, or circular resolution is detected.
+        /// Thrown when circular dependency is detected, constructor selection fails, or required parameters cannot be resolved.
         /// </exception>
-        private object CreateInstance(ServiceDescriptor descriptor, HashSet<Type> stack)
-        {
-            if (descriptor.Factory != null)
-                return descriptor.Factory(this);
-            return factory.Create(descriptor.ImplementationType, stack, null, () =>
+        private object GetService(ServiceDescriptor descriptor, HashSet<Type> stack) => 
+            descriptor.Lifetime == TServiceLifetime.Singleton ? cache.GetOrAdd(descriptor, _ => CreateInstance(descriptor, stack)) : CreateInstance(descriptor, stack);
+
+        /// <summary>
+        /// Instantiates a new service instance using either a factory delegate or constructor injection.
+        /// This method does not perform caching and should be used internally by resolution logic.
+        /// </summary>
+        /// <param name="descriptor">The service descriptor that defines how to instantiate the service.</param>
+        /// <param name="stack">The resolution stack for detecting circular dependencies.</param>
+        /// <returns>A newly constructed service instance.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when constructor selection fails, circular dependencies are detected, or required parameters cannot be resolved.
+        /// </exception>
+        private object CreateInstance(ServiceDescriptor descriptor, HashSet<Type> stack) =>
+            descriptor.Factory != null ? descriptor.Factory(this) : factory.Create(descriptor.ImplementationType, stack, null, () =>
             {
                 var ctors = descriptor.ImplementationType.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
                 if (ctors.Length != 1)
                     throw new InvalidOperationException($"Type '{descriptor.ImplementationType.Name}' must have exactly one public constructor. Found: {ctors.Length}.");
                 return ctors[0];
             });
-        }
 
         /// <inheritdoc/>
         bool IObjectResolver.CanResolve(Type type) => descriptors.Any(d => d.ServiceType == type);

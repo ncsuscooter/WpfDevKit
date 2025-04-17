@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace WpfDevKit.DependencyInjection
@@ -26,19 +25,9 @@ namespace WpfDevKit.DependencyInjection
         public TServiceLifetime Lifetime { get; }
 
         /// <summary>
-        /// Gets or sets the singleton instance of the service.
-        /// </summary>
-        public object Instance { get; set; }
-
-        /// <summary>
         /// Gets the factory used to create the service instance.
         /// </summary>
         public Func<IServiceProvider, object> Factory { get; }
-
-        /// <summary>
-        /// Gets the collection of configurators used to configure the service instance. Typically used for <see cref="IOptions{TOptions}"/>
-        /// </summary>
-        public List<Action<object>> OptionConfigurators { get; } = new List<Action<object>>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServiceDescriptor"/> class with an implementation type.
@@ -47,7 +36,7 @@ namespace WpfDevKit.DependencyInjection
         /// <param name="implementationType">The type implementing the service.</param>
         /// <param name="lifetime">The lifetime of the service.</param>
         public ServiceDescriptor(Type serviceType, Type implementationType, TServiceLifetime lifetime) =>
-            (ServiceType, ImplementationType, Lifetime) = (serviceType, implementationType, lifetime);
+            (ServiceType, ImplementationType, Lifetime, Factory) = (serviceType, implementationType, lifetime, null);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServiceDescriptor"/> class with a factory method.
@@ -56,6 +45,6 @@ namespace WpfDevKit.DependencyInjection
         /// <param name="factory">The factory method used to create the service instance.</param>
         /// <param name="lifetime">The lifetime of the service.</param>
         public ServiceDescriptor(Type serviceType, Func<IServiceProvider, object> factory, TServiceLifetime lifetime) =>
-            (ServiceType, Factory, Lifetime) = (serviceType, factory, lifetime);
+            (ServiceType, ImplementationType, Factory, Lifetime) = (serviceType, null, factory, lifetime);
     }
 }

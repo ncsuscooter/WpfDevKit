@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,6 +8,7 @@ namespace WpfDevKit.Hosting
     /// <summary>
     /// Provides an application host for managing and running services.
     /// </summary>
+    [DebuggerStepThrough]
     internal class Host : IHost
     {
         private bool disposed;
@@ -33,10 +35,13 @@ namespace WpfDevKit.Hosting
             {
                 try
                 {
+                    Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' starting.");
                     await service.StartAsync(cancellationToken);
+                    Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' started.");
                 }
                 catch (Exception ex)
                 {
+                    Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' failed to start.");
                     Services.GetService<InternalLogger>()?.LogMessage?.Invoke($"[Host] StartAsync failed", default, GetType());
                     Services.GetService<InternalLogger>()?.LogException?.Invoke(ex, GetType());
                 }
@@ -51,10 +56,13 @@ namespace WpfDevKit.Hosting
             {
                 try
                 {
+                    Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' stopping.");
                     await service.StopAsync(cancellationToken);
+                    Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' stopped.");
                 }
                 catch (Exception ex)
                 {
+                    Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' failed to stop.");
                     Services.GetService<InternalLogger>()?.LogMessage?.Invoke($"[Host] StopAsync failed", default, GetType());
                     Services.GetService<InternalLogger>()?.LogException?.Invoke(ex, GetType());
                 }
@@ -73,10 +81,13 @@ namespace WpfDevKit.Hosting
             {
                 try
                 {
+                    Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' disposing.");
                     service.Dispose();
+                    Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' disposed.");
                 }
                 catch (Exception ex)
                 {
+                    Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' failed to dispose.");
                     Services.GetService<InternalLogger>()?.LogMessage?.Invoke($"[Host] Dispose failed", default, GetType());
                     Services.GetService<InternalLogger>()?.LogException?.Invoke(ex, GetType());
                 }

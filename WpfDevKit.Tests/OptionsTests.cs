@@ -216,10 +216,8 @@ namespace WpfDevKit.Tests.DependencyInjection
             // This compiles because we're registering manually (not using AddOptions<T>())
             services.AddSingleton<IOptions<NoDefaultCtorOptions>>();
 
-            // Configuring will fail at runtime since there's no default constructor
+            // Configuring will fail at runtime since there's no default constructor AND the options weren't added using AddOptions<TOptions>()
             services.Configure<NoDefaultCtorOptions>(o => o.Name = "Test");
-
-            var provider = services.Build(); // <-- this will throw
         }
 
         [TestMethod]
