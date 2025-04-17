@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BusyServiceTests.cs" />
+    <Compile Include="HostTests.cs" />
     <Compile Include="RemoteFileConnectionTests.cs" />
     <Compile Include="ConnectivityServiceTests.cs" />
     <Compile Include="UtilityTests.cs" />

@@ -37,8 +37,8 @@ namespace WpfDevKit.Hosting
                 }
                 catch (Exception ex)
                 {
-                    Services.GetService<InternalLogger>()?.LogMessage($"[Host] StartAsync failed", default, GetType());
-                    Services.GetService<InternalLogger>()?.LogException(ex, GetType());
+                    Services.GetService<InternalLogger>()?.LogMessage?.Invoke($"[Host] StartAsync failed", default, GetType());
+                    Services.GetService<InternalLogger>()?.LogException?.Invoke(ex, GetType());
                 }
             }
         }
@@ -55,8 +55,8 @@ namespace WpfDevKit.Hosting
                 }
                 catch (Exception ex)
                 {
-                    Services.GetService<InternalLogger>()?.LogMessage($"[Host] StopAsync failed", default, GetType());
-                    Services.GetService<InternalLogger>()?.LogException(ex, GetType());
+                    Services.GetService<InternalLogger>()?.LogMessage?.Invoke($"[Host] StopAsync failed", default, GetType());
+                    Services.GetService<InternalLogger>()?.LogException?.Invoke(ex, GetType());
                 }
             }
         }
@@ -77,8 +77,8 @@ namespace WpfDevKit.Hosting
                 }
                 catch (Exception ex)
                 {
-                    Services.GetService<InternalLogger>()?.LogMessage($"[Host] Dispose failed", default, GetType());
-                    Services.GetService<InternalLogger>()?.LogException(ex, GetType());
+                    Services.GetService<InternalLogger>()?.LogMessage?.Invoke($"[Host] Dispose failed", default, GetType());
+                    Services.GetService<InternalLogger>()?.LogException?.Invoke(ex, GetType());
                 }
             }
             if (Services is IDisposable disposable)

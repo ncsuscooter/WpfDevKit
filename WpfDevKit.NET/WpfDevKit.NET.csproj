@@ -47,6 +47,7 @@
     <Compile Include="Busy\BusyServiceExtensions.cs" />
     <Compile Include="Connectivity\ConnectivityServiceExtensions.cs" />
     <Compile Include="Dependency Injection\Options\IOptions.cs" />
+    <Compile Include="Factory\ObjectFactoryExtensions.cs" />
     <Compile Include="Hosting\Host\IHost.cs" />
     <Compile Include="Logging\Database\DatabaseLogColumn.cs" />
     <Compile Include="Logging\Database\DatabaseLogProvider.cs" />
@@ -55,7 +56,6 @@
     <Compile Include="Logging\Log Metrics\ILogMetricsFactory.cs" />
     <Compile Include="Logging\Log Metrics\LogMetricsFactory.cs" />
     <Compile Include="InternalLogger.cs" />
-    <Compile Include="Logging\LogServiceExtensions2.cs" />
     <Compile Include="Hosting\Host\Host.cs" />
     <Compile Include="Hosting\HostBuilder.cs" />
     <Compile Include="Logging\ILogMessage.cs" />
@@ -76,7 +76,7 @@
     <Compile Include="TimeSpanExtensions.cs" />
     <Compile Include="Logging\TLogCategory.cs" />
     <Compile Include="Logging\TLogElement.cs" />
-    <Compile Include="Logging\LogServiceExtensions1.cs" />
+    <Compile Include="Logging\LogServiceExtensions.cs" />
     <Compile Include="Logging\Log Metrics\ILogMetrics.cs" />
     <Compile Include="Logging\ILogProvider.cs" />
     <Compile Include="Logging\ILogService.cs" />

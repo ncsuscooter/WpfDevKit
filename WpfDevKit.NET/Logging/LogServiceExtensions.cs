@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using WpfDevKit.DependencyInjection;
 
 namespace WpfDevKit.Logging
 {
@@ -9,8 +10,28 @@ namespace WpfDevKit.Logging
     /// Provides extension methods for registering WpfDevKit core services.
     /// </summary>
     [DebuggerStepThrough]
-    public static partial class LogServiceExtensions
+    public static class LogServiceExtensions
     {
+        /// <summary>
+        /// Registers logging services.
+        /// </summary>
+        /// <param name="services">The IServiceCollection instance.</param>
+        /// <returns>The current IServiceCollection instance for chaining.</returns>
+        public static IServiceCollection AddLoggingService(this IServiceCollection services)
+        {
+            services.AddSingleton<LogQueue, LogQueue>();
+            services.AddSingleton<ILogService, LogService>();
+            services.AddSingleton<ILogMetricsFactory, LogMetricsFactory>();
+            services.AddSingleton<ILogProviderCollection, LogProviderCollection>();
+            services.AddSingleton<LogBackgroundService, LogBackgroundService>();
+            services.AddSingleton<InternalLogger>(p => new InternalLogger()
+            {
+                LogMessage = (message, attributes, type) => p.GetService<ILogService>().LogTrace(message, attributes, type),
+                LogException = (exception, type) => p.GetService<ILogService>().LogTrace(exception, type)
+            });
+            return services;
+        }
+
         /// <summary>
         /// Logs a message at the Trace log level.
         /// </summary>

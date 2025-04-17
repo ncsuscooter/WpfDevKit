@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using WpfDevKit.Factory;
 
 namespace WpfDevKit.DependencyInjection
 {
@@ -13,12 +12,6 @@ namespace WpfDevKit.DependencyInjection
     internal class ServiceCollection : IServiceCollection
     {
         private readonly List<ServiceDescriptor> descriptors = new List<ServiceDescriptor>();
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ServiceCollection"/> class.
-        /// Automatically registers the default <see cref="IObjectFactory"/> service as a singleton.
-        /// </summary>
-        public ServiceCollection() => AddSingleton<IObjectFactory>(p => new ObjectFactory(p as IObjectResolver));
 
         /// <inheritdoc/>
         public bool IsBuilt { get; private set; }
