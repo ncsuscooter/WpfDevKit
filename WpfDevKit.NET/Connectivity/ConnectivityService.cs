@@ -60,33 +60,47 @@ namespace WpfDevKit.Connectivity
         /// </remarks>
         protected override Task ExecuteAsync(CancellationToken cancellationToken) => Task.Run(async () =>
         {
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                Error = null;
-                State = TConnectivityState.Connecting;
-                RaiseStatusChanged();
-                bool connected = false;
-                try
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    connected = await options.ValidateConnectionAsync(cancellationToken);
+                    Error = null;
+                    State = TConnectivityState.Connecting;
+                    RaiseStatusChanged();
+                    bool connected = false;
+                    try
+                    {
+                        connected = await options.ValidateConnectionAsync(cancellationToken);
+                    }
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        Error = ex;
+                    }
+                    State = connected ? TConnectivityState.Connected : TConnectivityState.Disconnected;
+                    LastSuccessfulConnection = connected ? DateTime.UtcNow : new DateTime?();
+                    Attempts = connected ? 0 : Attempts + 1;
+                    var delay = Attempts > 0
+                                ? ExponentialRetry.CalculateDelay(Attempts, options.MinimumRetryMilliseconds, options.MaximumRetryMilliseconds, 10, 2.5)
+                                : TimeSpan.FromMilliseconds(options.ExecutionIntervalMilliseconds);
+                    NextAttempt = DateTime.UtcNow + delay;
+                    RaiseStatusChanged();
+                    try
+                    {
+                        await Task.WhenAny(Task.Delay(delay, cancellationToken), reset.WaitAsync(cancellationToken));
+                    }
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
                 }
-                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-                {
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    Error = ex;
-                }
-                State = connected ? TConnectivityState.Connected : TConnectivityState.Disconnected;
-                LastSuccessfulConnection = connected ? DateTime.UtcNow : default;
-                Attempts = connected ? 0 : Attempts + 1;
-                var delay = Attempts > 0
-                            ? ExponentialRetry.CalculateDelay(Attempts, options.MinimumRetryMilliseconds, options.MaximumRetryMilliseconds)
-                            : TimeSpan.FromMilliseconds(options.ExecutionIntervalMilliseconds);
-                NextAttempt = DateTime.UtcNow + delay;
-                RaiseStatusChanged();
-                await Task.WhenAny(Task.Delay(delay, cancellationToken), reset.WaitAsync(cancellationToken));
+            }
+            finally
+            {
+                State = TConnectivityState.Disconnected;
             }
         }, cancellationToken);
 

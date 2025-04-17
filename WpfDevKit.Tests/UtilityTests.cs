@@ -118,6 +118,31 @@ namespace WpfDevKit.Tests
         }
 
         [TestMethod]
+        [TestCategory("ExponentialRetry")]
+        public void ExponentialRetry_CalculateDelay_MatchesExpectedValues()
+        {
+            int min = 50;
+            int max = 1000;
+            int scale = 10;
+            double exponent = 2.5;
+
+            int[] expectedDelays = new[] { 53, 66, 96, 146, 217, 314, 439, 593, 780, 1000 };
+
+            for (int attempt = 1; attempt <= 10; attempt++)
+            {
+                TimeSpan actual = ExponentialRetry.CalculateDelay(attempt, min, max, scale, exponent);
+                int actualMs = (int)actual.TotalMilliseconds;
+                int expectedMs = expectedDelays[attempt - 1];
+
+                Console.WriteLine($"Attempt {attempt}: Actual = {actualMs} ms, Expected = {expectedMs} ms");
+
+                // Allow ±1 ms tolerance due to rounding behavior
+                Assert.IsTrue(Math.Abs(actualMs - expectedMs) <= 1,
+                    $"Delay for attempt {attempt} was {actualMs} ms; expected {expectedMs} ms");
+            }
+        }
+
+        [TestMethod]
         [TestCategory("StartStopRegistration")]
         public void StartStopRegistration_TimesCorrectly()
         {

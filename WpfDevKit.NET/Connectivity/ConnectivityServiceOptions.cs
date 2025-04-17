@@ -28,7 +28,7 @@ namespace WpfDevKit.Connectivity
         public int MinimumRetryMilliseconds
         {
             get => minimum;
-            set => minimum = Math.Min(MaximumRetryMilliseconds, Math.Max(250, value));
+            set => minimum = Math.Min(MaximumRetryMilliseconds, Math.Max(1, value));
         }
 
         /// <summary>
@@ -61,8 +61,8 @@ namespace WpfDevKit.Connectivity
         /// Gets or sets a function that formats a status message based on the properties provided by the <see cref="IConnectivityService"/>.
         /// </summary>
         public Func<IConnectivityService, string> GetStatus { get; set; } = 
-            x => x.IsConnecting ? "connecting" :
-            x.IsConnected ? "connected" :
+            x => x.State == TConnectivityState.Connecting ? "connecting" :
+            x.State == TConnectivityState.Connected ? "connected" :
             $"retrying in {DateTime.Now.Subtract(x.NextAttempt).ToReadableTime()} after [{x.Attempts}] failed attempts";
 
         /// <summary>
@@ -76,8 +76,8 @@ namespace WpfDevKit.Connectivity
                 throw new InvalidOperationException("The ValidateConnectionAsync delegate must be provided.");
             if (GetStatus == null)
                 throw new InvalidOperationException("The GetStatusMessage delegate must be provided.");
-            if (MinimumRetryMilliseconds < 0)
-                throw new ArgumentOutOfRangeException(nameof(MinimumRetryMilliseconds), "Minimum retry delay must be >= 0.");
+            if (MinimumRetryMilliseconds <= 0)
+                throw new ArgumentOutOfRangeException(nameof(MinimumRetryMilliseconds), "Minimum retry delay must be > 0.");
             if (MaximumRetryMilliseconds < MinimumRetryMilliseconds)
                 throw new ArgumentOutOfRangeException(nameof(MaximumRetryMilliseconds),
                     "Maximum retry delay cannot be less than the minimum retry delay.");

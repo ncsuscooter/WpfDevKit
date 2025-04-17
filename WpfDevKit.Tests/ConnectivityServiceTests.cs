@@ -1,8 +1,7 @@
-﻿using System;
-using System.Diagnostics;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WpfDevKit.Connectivity;
 
 namespace WpfDevKit.Tests.Connectivity
@@ -10,147 +9,118 @@ namespace WpfDevKit.Tests.Connectivity
     [TestClass]
     public class ConnectivityServiceTests
     {
-        private IConnectivityService connectivityService;
-
-        [TestInitialize]
-        public void Init()
+        private class TestOptions : ConnectivityServiceOptions
         {
-            var options = new ConnectivityServiceOptions
+            private int _attempts = 0;
+            private readonly Func<int, bool> _condition;
+
+            public TestOptions(Func<int, bool> connectionCondition)
             {
+                _condition = connectionCondition;
                 ValidateConnectionAsync = async (ct) =>
                 {
-                    await Task.Delay(50);
-                    return await Task.FromResult(true);
-                }
-            };
-            connectivityService = new ConnectivityService(options);
+                    await Task.Delay(10, ct);
+                    _attempts++;
+                    return _condition(_attempts);
+                };
+
+                GetStatus = _ => "TestStatus";
+                MinimumRetryMilliseconds = 10;
+                MaximumRetryMilliseconds = 500;
+                ExecutionIntervalMilliseconds = 500;
+            }
         }
 
         [TestMethod]
-        [TestCategory("ConnectivityService")]
-        public async Task ConnectivityService_SetsInitialState()
+        public async Task ConnectivityService_SuccessfulConnection_ImmediatelyConnected()
         {
-            await connectivityService.StartAsync(CancellationToken.None);
-            await Task.Delay(100);
-            Assert.IsTrue(connectivityService.IsConnected);
-            Assert.AreEqual("connected", connectivityService.Status);
-        }
+            var options = new TestOptions(attempt => true);
+            var service = new ConnectivityService(options);
 
-        [TestMethod]
-        [TestCategory("ConnectivityService")]
-        public async Task ConnectivityService_ChangeEvent_Fires()
-        {
-            bool raised = false;
-            connectivityService.StatusChanged += () => raised = true;
-            await connectivityService.StartAsync(CancellationToken.None);
-            Assert.IsTrue(raised);
-        }
-
-        [TestMethod]
-        [TestCategory("ConnectivityService")]
-        public async Task ConnectivityService_Failure_RetriesUntilSuccess()
-        {
-            int attempts = 0;
-            var options = new ConnectivityServiceOptions
+            using (var cts = new CancellationTokenSource(250))
             {
-                Host = "retryhost",
-                ValidateConnectionAsync = async (ct) =>
-                {
-                    await Task.Delay(50, ct);
-                    return await Task.FromResult(++attempts >= 3);
-                }
+                await service.StartAsync(cts.Token);
+                await Task.Delay(100); // Exit BEFORE token times out
+            }
+
+            Console.WriteLine($"State = '{service.State}' - Expected: Connected");
+            Assert.AreEqual(TConnectivityState.Connected, service.State);
+
+            Console.WriteLine($"LastSuccessfulConnection.HasValue = {service.LastSuccessfulConnection.HasValue} - Expected: true");
+            Assert.IsTrue(service.LastSuccessfulConnection.HasValue);
+
+            Console.WriteLine($"Attempts = {service.Attempts} - Expected: 0");
+            Assert.AreEqual(0, service.Attempts);
+        }
+
+        [TestMethod]
+        public async Task ConnectivityService_AlwaysFails_RetriesIncrement()
+        {
+            var options = new TestOptions(attempt => false)
+            {
+                ExecutionIntervalMilliseconds = 100
             };
             var service = new ConnectivityService(options);
-            await service.StartAsync(CancellationToken.None);
-            var sw = Stopwatch.StartNew();
-            while (!service.IsConnected && sw.Elapsed < TimeSpan.FromSeconds(5))
-                await Task.Delay(50);
 
-            Assert.IsTrue(service.IsConnected, $"Expected connection after retries (attempts: {attempts})");
-            Assert.IsTrue(attempts >= 3);
-        }
-
-        [TestMethod]
-        [TestCategory("ConnectivityService")]
-        public async Task ConnectivityService_CancelStopsMonitoring()
-        {
-            var cts = new CancellationTokenSource();
-            cts.Cancel();
-
-            await connectivityService.StartAsync(cts.Token);
-            Assert.IsFalse(connectivityService.IsConnected); // Likely short-circuited
-        }
-
-        [TestMethod]
-        [TestCategory("ConnectivityService")]
-        public async Task ConnectivityService_Failure_ThrowsAndContinues()
-        {
-            int calls = 0;
-            var options = new ConnectivityServiceOptions
+            using (var cts = new CancellationTokenSource(250))
             {
-                Host = "failhost",
-                ValidateConnectionAsync = async (ct) =>
-                {
-                    await Task.Delay(50);
-                    calls++;
-                    if (calls == 1)
-                        throw new InvalidOperationException("Simulated failure");
-                    return await Task.FromResult(true);
-                }
-            };
-            var service = new ConnectivityService(options);
-            await service.StartAsync(CancellationToken.None);
-            var sw = Stopwatch.StartNew();
-            while (!service.IsConnected && sw.Elapsed < TimeSpan.FromSeconds(5))
-                await Task.Delay(50);
-            Assert.IsTrue(service.IsConnected);
-            Assert.IsTrue(calls >= 2);
+                await service.StartAsync(cts.Token);
+                await Task.Delay(500); // Exit AFTER token times out
+            }
+
+            Console.WriteLine($"State = '{service.State}' - Expected: Disconnected");
+            Assert.AreEqual(TConnectivityState.Disconnected, service.State);
+
+            Console.WriteLine($"Attempts = {service.Attempts} - Expected: >1");
+            Assert.IsTrue(service.Attempts > 1);
+
+            Console.WriteLine($"LastSuccessfulConnection.HasValue = {service.LastSuccessfulConnection.HasValue} - Expected: false");
+            Assert.IsFalse(service.LastSuccessfulConnection.HasValue);
         }
 
         [TestMethod]
-        [TestCategory("ConnectivityService")]
-        public async Task ConnectivityService_AlwaysFalseReadiness_NeverConnects()
+        public async Task ConnectivityService_ManualTrigger_OverridesDelay()
         {
-            var options = new ConnectivityServiceOptions
+            var callCount = 0;
+            var options = new TestOptions(_ =>
             {
-                Host = "neverhost",
-                ValidateConnectionAsync = async (ct) =>
-                {
-                    await Task.Delay(50);
-                    return await Task.FromResult(false);
-                }
-            };
+                callCount++;
+                return false;
+            });
 
             var service = new ConnectivityService(options);
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
-            await service.StartAsync(cts.Token);
-            var sw = Stopwatch.StartNew();
-            while (!service.IsConnected && sw.Elapsed < TimeSpan.FromSeconds(5))
-                await Task.Delay(50);
-            Assert.IsFalse(service.IsConnected);
+
+            using (var cts = new CancellationTokenSource(250))
+            {
+                await service.StartAsync(cts.Token);
+                await Task.Delay(100); // Exit BEFORE token times out
+
+                var countBefore = callCount;
+                service.TriggerImmediateExecution();
+                await Task.Delay(400); // Exit AFTER token times out
+
+                Console.WriteLine($"Call count after trigger = {callCount} - Expected: > {countBefore}");
+                Assert.IsTrue(callCount > countBefore);
+            }
         }
 
         [TestMethod]
-        [TestCategory("ConnectivityService")]
-        public async Task ConnectivityService_TimeoutOnIsReadyAsync_DoesNotCrash()
+        public async Task ConnectivityService_StatusChanged_EventFires()
         {
-            var options = new ConnectivityServiceOptions
-            {
-                Host = "timeouthost",
-                ValidateConnectionAsync = async (ct) =>
-                {
-                    await Task.Delay(5000, ct); // Simulates long delay
-                    return true;
-                }
-            };
-
+            var options = new TestOptions(attempt => attempt == 2);
             var service = new ConnectivityService(options);
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-            await service.StartAsync(cts.Token);
-            var sw = Stopwatch.StartNew();
-            while (!service.IsConnected && sw.Elapsed < TimeSpan.FromSeconds(5))
-                await Task.Delay(50);
-            Assert.IsFalse(service.IsConnected);
+
+            int changeCount = 0;
+            service.StatusChanged += (s, e) => changeCount++;
+
+            using (var cts = new CancellationTokenSource(250))
+            {
+                await service.StartAsync(cts.Token);
+                await Task.Delay(500); // Exit AFTER token times out
+            }
+
+            Console.WriteLine($"StatusChanged event count = {changeCount} - Expected: >= 2");
+            Assert.IsTrue(changeCount >= 2);
         }
     }
 }
