@@ -17,7 +17,7 @@ namespace WpfDevKit.Logging
         /// Initializes a new instance of the <see cref="UserLogProvider"/> class.
         /// </summary>
         /// <param name="options">The options for configuring the user log provider.</param>
-        public UserLogProvider(IOptions<UserLogProviderOptions> options) : base(options.Value) { }
+        public UserLogProvider(IOptions<UserLogProviderOptions> options) : base(options.Value) => this.options = options.Value;
 
         /// <summary>
         /// Gets or sets the log categories that are enabled for logging.

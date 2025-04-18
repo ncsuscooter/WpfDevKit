@@ -76,12 +76,12 @@
     <Compile Include="Logging\LogServiceExtensions.cs" />
     <Compile Include="Logging\Log Metrics\ILogMetrics.cs" />
     <Compile Include="Logging\ILogProvider.cs" />
-    <Compile Include="Logging\ILogService.cs" />
+    <Compile Include="Logging\Log Service\ILogService.cs" />
     <Compile Include="Logging\LogBackgroundService.cs" />
     <Compile Include="Logging\Log Message\LogMessage.cs" />
     <Compile Include="Logging\Log Metrics\LogMetrics.cs" />
     <Compile Include="Logging\LogQueue.cs" />
-    <Compile Include="Logging\LogService.cs" />
+    <Compile Include="Logging\Log Service\LogService.cs" />
     <Compile Include="Logging\Console\ConsoleLogProviderOptions.cs" />
     <Compile Include="Logging\Memory\MemoryLogProviderOptions.cs" />
     <Compile Include="Logging\User\UserLogProviderOptions.cs" />

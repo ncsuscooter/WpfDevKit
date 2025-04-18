@@ -25,13 +25,6 @@ namespace WpfDevKit.Logging
         public LogService(LogQueue queue) => this.queue = queue;
 
         /// <summary>
-        /// Logs a message to the logging queue.
-        /// </summary>
-        /// <param name="message">The log message to store.</param>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="message"/> is null.</exception>
-        private void Log(LogMessage message) => queue.TryWrite(message);
-
-        /// <summary>
         /// Logs an exception with additional contextual details.
         /// </summary>
         /// <param name="category">The log category (must be Error, Warning, or Trace).</param>
@@ -74,7 +67,7 @@ namespace WpfDevKit.Logging
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.ToString());
+                Debug.WriteLine(ex);
             }
         }
 
@@ -114,8 +107,15 @@ namespace WpfDevKit.Logging
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.ToString());
+                Debug.WriteLine(ex);
             }
         }
+
+        /// <summary>
+        /// Logs a message to the logging queue.
+        /// </summary>
+        /// <param name="message">The log message to store.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="message"/> is null.</exception>
+        private void Log(LogMessage message) => queue.TryWrite(message);
     }
 }
