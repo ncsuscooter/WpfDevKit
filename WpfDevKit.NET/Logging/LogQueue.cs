@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 
@@ -13,10 +14,16 @@ namespace WpfDevKit.Logging
         private readonly LogMetrics metrics;
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="LogQueue"/> class with the specified metrics tracker.
         /// </summary>
-        /// <param name="metrics"></param>
-        public LogQueue(LogMetrics metrics) => this.metrics = metrics;
+        /// <param name="metrics">
+        /// The <see cref="LogMetrics"/> instance used to record logging statistics such as total messages, category counts,
+        /// queued or lost entries, and null messages. This enables real-time monitoring and diagnostics of the logging pipeline.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if the <paramref name="metrics"/> parameter is <c>null</c>.
+        /// </exception>
+        public LogQueue(LogMetrics metrics) => this.metrics = metrics ?? throw new ArgumentNullException(nameof(metrics));
 
         /// <summary>
         /// Attempts to read a log message from the queue.
@@ -32,12 +39,20 @@ namespace WpfDevKit.Logging
         /// <returns><c>true</c> if the message was successfully added to the queue; otherwise, <c>false</c>.</returns>
         public bool TryWrite(ILogMessage message)
         {
-            var result = message != null && messages.TryAdd(message);
-            if (result)
+            metrics.IncrementTotal();
+            if (message == null)
+            {
+                metrics.IncrementNull();
+                return false;
+            }
+            metrics.IncrementCategory(message.Category);
+            if (messages.TryAdd(message))
+            {
                 metrics.IncrementQueued();
-            else
-                metrics.IncrementLost();
-            return result;
+                return true;
+            }
+            metrics.IncrementLost();
+            return false;
         }
     }
 }
