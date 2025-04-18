@@ -88,27 +88,5 @@ namespace WpfDevKit.Logging
         /// </summary>
         /// <returns></returns>
         public IEnumerable<ILogProviderDescriptor> GetProviderInfos() => GetProviders().Cast<ILogProviderDescriptor>();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="provider"></param>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public ILogMetricsReader GetMetrics(ILogProvider provider, string key = null)
-        {
-            if (provider == null)
-                throw new ArgumentNullException(nameof(provider));
-            readerWriterLock.EnterReadLock();
-            try
-            {
-                return descriptors.FirstOrDefault(p => p.Provider == provider && p.Key == key)?.Metrics;
-            }
-            finally
-            {
-                readerWriterLock.ExitReadLock();
-            }
-        }
     }
 }
