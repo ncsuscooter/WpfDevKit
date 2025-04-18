@@ -30,14 +30,14 @@ namespace WpfDevKit.Logging
         int Null { get; }
 
         /// <summary>
-        /// Gets a read-only dictionary of log category counts, representing the number of logs per category.
-        /// </summary>
-        IReadOnlyDictionary<TLogCategory, int> CategoryCounts { get; }
-
-        /// <summary>
         /// Gets the total elapsed time spent logging in milliseconds.
         /// </summary>
         TimeSpan Elapsed { get; }
+
+        /// <summary>
+        /// Gets a read-only dictionary of log category counts, representing the number of logs per category.
+        /// </summary>
+        IReadOnlyDictionary<TLogCategory, int> CategoryCounts { get; }
     }
 
     /// <summary>
