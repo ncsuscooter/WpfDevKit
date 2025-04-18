@@ -39,20 +39,16 @@ namespace WpfDevKit.Logging
         /// <returns><c>true</c> if the message was successfully added to the queue; otherwise, <c>false</c>.</returns>
         public bool TryWrite(ILogMessage message)
         {
-            metrics.IncrementTotal();
-            if (message == null)
+            // StartStop method increments total, null, and category metrics internally
+            using (var disposable = metrics.StartStop(message))
             {
-                metrics.IncrementNull();
-                return false;
+                var result = message != null && messages.TryAdd(message);
+                if (result)
+                    metrics.IncrementQueued();
+                else
+                    metrics.IncrementLost();
+                return result;
             }
-            metrics.IncrementCategory(message.Category);
-            if (messages.TryAdd(message))
-            {
-                metrics.IncrementQueued();
-                return true;
-            }
-            metrics.IncrementLost();
-            return false;
         }
     }
 }

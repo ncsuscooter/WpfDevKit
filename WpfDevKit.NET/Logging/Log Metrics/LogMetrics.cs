@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 
 namespace WpfDevKit.Logging
@@ -15,7 +14,6 @@ namespace WpfDevKit.Logging
     internal class LogMetrics : ILogMetricsReader, ILogMetricsWriter
     {
         private readonly ConcurrentDictionary<TLogCategory, int> categoryCounts = new ConcurrentDictionary<TLogCategory, int>();
-        private readonly ConcurrentBag<Exception> unhandledExceptions = new ConcurrentBag<Exception>();
         private long elapsed = 0;
         private int totalCount = 0;
         private int queuedCount = 0;
@@ -41,16 +39,6 @@ namespace WpfDevKit.Logging
         /// Gets the total number of null log messages.
         /// </summary>
         public int Null => nullCount;
-
-        /// <summary>
-        /// Gets the total number of unhandled exceptions.
-        /// </summary>
-        public int Unhandled => unhandledExceptions.Count;
-
-        /// <summary>
-        /// Gets a collection of unhandled exceptions.
-        /// </summary>
-        public IReadOnlyCollection<Exception> UnhandledExceptions => new ReadOnlyCollection<Exception>(unhandledExceptions.ToList());
 
         /// <summary>
         /// Gets a dictionary of log categories and their associated counts.
@@ -87,16 +75,6 @@ namespace WpfDevKit.Logging
         /// Increments the count of null log messages by 1.
         /// </summary>
         public void IncrementNull() => Interlocked.Increment(ref nullCount);
-
-        /// <summary>
-        /// Adds an unhandled exception to the collection of unhandled exceptions.
-        /// </summary>
-        /// <param name="ex">The exception to add.</param>
-        public void IncrementUnhandled(Exception ex)
-        {
-            Debug.WriteLine(ex);
-            unhandledExceptions.Add(ex);
-        }
 
         /// <summary>
         /// Increments the count of logs for a specified category.

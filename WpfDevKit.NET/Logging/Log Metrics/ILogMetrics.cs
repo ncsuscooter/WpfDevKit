@@ -30,16 +30,6 @@ namespace WpfDevKit.Logging
         int Null { get; }
 
         /// <summary>
-        /// Gets the count of unhandled exceptions that were encountered during logging.
-        /// </summary>
-        int Unhandled { get; }
-
-        /// <summary>
-        /// Gets a read-only collection of unhandled exceptions.
-        /// </summary>
-        IReadOnlyCollection<Exception> UnhandledExceptions { get; }
-
-        /// <summary>
         /// Gets a read-only dictionary of log category counts, representing the number of logs per category.
         /// </summary>
         IReadOnlyDictionary<TLogCategory, int> CategoryCounts { get; }
@@ -89,12 +79,6 @@ namespace WpfDevKit.Logging
         /// Increments the null log count by 1.
         /// </summary>
         void IncrementNull();
-
-        /// <summary>
-        /// Increments the unhandled exception count by 1 and adds the exception to the collection.
-        /// </summary>
-        /// <param name="ex">The exception to be added to the collection.</param>
-        void IncrementUnhandled(Exception ex);
 
         /// <summary>
         /// Increments the count of logs for a specific log category.
