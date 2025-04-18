@@ -72,15 +72,4 @@ namespace WpfDevKit.Logging
             return new StartStopRegistration(default, IncrementElapsed);
         }
     }
-
-    /// <inheritdoc/>
-    /// <typeparam name="T">The type associated with the log metrics.</typeparam>
-    [DebuggerStepThrough]
-    internal class LogMetrics<T> : LogMetrics, ILogMetricsReader<T>, ILogMetricsWriter<T>
-    {
-        /// <summary>
-        /// Gets the name of the type associated with the log metrics.
-        /// </summary>
-        public string Name => typeof(T).Name;
-    }
 }

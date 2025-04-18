@@ -49,6 +49,9 @@
     <Compile Include="Dependency Injection\Options\IOptions.cs" />
     <Compile Include="Factory\ObjectFactoryExtensions.cs" />
     <Compile Include="Hosting\Host\IHost.cs" />
+    <Compile Include="Logging\Log Metrics\ILogMetricsWriter.cs" />
+    <Compile Include="Logging\Log Provider Descriptor\ILogProviderDescriptor.cs" />
+    <Compile Include="Logging\Log Provider Descriptor\LogProviderDescriptor.cs" />
     <Compile Include="Logging\Log Providers\Database\DatabaseLogColumn.cs" />
     <Compile Include="Logging\Log Providers\Database\DatabaseLogProvider.cs" />
     <Compile Include="Logging\Log Providers\Database\DatabaseLogProviderOptions.cs" />
@@ -74,7 +77,7 @@
     <Compile Include="Logging\TLogCategory.cs" />
     <Compile Include="Logging\TLogElement.cs" />
     <Compile Include="Logging\LogServiceExtensions.cs" />
-    <Compile Include="Logging\Log Metrics\ILogMetrics.cs" />
+    <Compile Include="Logging\Log Metrics\ILogMetricsReader.cs" />
     <Compile Include="Logging\Log Providers\ILogProvider.cs" />
     <Compile Include="Logging\Log Service\ILogService.cs" />
     <Compile Include="Logging\LogBackgroundService.cs" />

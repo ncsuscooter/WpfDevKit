@@ -22,7 +22,6 @@ namespace WpfDevKit.Logging
         /// <param name="options">The options for configuring the console log provider.</param>
         public ConsoleLogProvider(IOptions<ConsoleLogProviderOptions> options) => this.options = options.Value;
 
-
         /// <inheritdoc/>
         /// <remarks>
         /// The default value is <see cref="TLogCategory.None"/> bitwise complemented 

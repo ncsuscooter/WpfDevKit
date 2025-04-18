@@ -39,7 +39,7 @@ namespace WpfDevKit.Logging
                     string attributes = default;
                     if (exception.Data.Count > 0)
                         attributes = string.Join(" - ", exception.Data.Cast<DictionaryEntry>().Select(x => $"{x.Key}='{x.Value ?? "N/A"}'"));
-                    Log(new LogMessage(
+                    logQueue.TryWrite(new LogMessage(
                         Index: Interlocked.Increment(ref index),
                         Timestamp: DateTime.Now,
                         MachineName: Environment.MachineName,
@@ -74,7 +74,7 @@ namespace WpfDevKit.Logging
         {
             try
             {
-                Log(new LogMessage(
+                logQueue.TryWrite(new LogMessage(
                     Index: Interlocked.Increment(ref index),
                     Timestamp: DateTime.Now,
                     MachineName: Environment.MachineName,
@@ -95,11 +95,5 @@ namespace WpfDevKit.Logging
                 Debug.WriteLine(ex);
             }
         }
-
-        /// <summary>
-        /// Logs a message to the logging queue.
-        /// </summary>
-        /// <param name="message">The log message to store.</param>
-        private void Log(LogMessage message) => logQueue.TryWrite(message);
     }
 }

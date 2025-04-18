@@ -8,9 +8,9 @@ namespace WpfDevKit.Logging
     /// <summary>
     /// Provides a dynamic, thread-safe manager for handling logging service providers.
     /// </summary>
-    internal class LogProviderCollection : ILogProviderCollection
+    internal partial class LogProviderCollection : ILogProviderCollection
     {
-        private readonly List<(ILogProvider Provider, string Key)> providers = new List<(ILogProvider, string)>();
+        private readonly HashSet<LogProviderDescriptor> descriptors = new HashSet<LogProviderDescriptor>();
         private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
         private readonly LogService logService;
 
@@ -25,17 +25,16 @@ namespace WpfDevKit.Logging
         {
             if (provider == null)
                 return false;
+            var descriptor = new LogProviderDescriptor(provider, key);
             readerWriterLock.EnterWriteLock();
             try
             {
-                bool exists = providers.Any(p => p.Provider.GetType() == provider.GetType() && p.Key == key);
-                if (exists)
+                if (!descriptors.Add(descriptor))
                 {
-                    logService.LogTrace("Provider was not added to the collection", $"Name='{provider.GetType().Name}' - Key='{key}'", default);
+                    logService.LogTrace("Provider was not added to the collection", descriptor.ToString(), default);
                     return false;
                 }
-                providers.Add((provider, key));
-                logService.LogTrace("Provider was successfully added to the collection", $"Name='{provider.GetType().Name}' - Key='{key}'", default);
+                logService.LogTrace("Provider was successfully added to the collection", descriptor.ToString(), default);
                 return true;
             }
             finally
@@ -49,18 +48,17 @@ namespace WpfDevKit.Logging
         {
             if (provider == null)
                 return false;
+            var descriptor = new LogProviderDescriptor(provider, key);
             readerWriterLock.EnterWriteLock();
             try
             {
-                var existing = providers.FirstOrDefault(p => p.Provider.GetType() == provider.GetType() && p.Key == key);
-                if (existing.Provider != null)
+                if (!descriptors.Remove(descriptor))
                 {
-                    providers.Remove(existing);
-                    logService.LogTrace("Provider was successfully removed from the collection", $"Name='{provider.GetType().Name}' - Key='{key}'", default);
-                    return true;
+                    logService.LogTrace("Provider was not removed from the collection", descriptor.ToString(), default);
+                    return false;
                 }
-                logService.LogTrace("Provider was not removed from the collection", $"Name='{provider.GetType().Name}' - Key='{key}'", default);
-                return false;
+                logService.LogTrace("Provider was successfully removed from the collection", descriptor.ToString(), default);
+                return true;
             }
             finally
             {
@@ -68,13 +66,44 @@ namespace WpfDevKit.Logging
             }
         }
 
-        /// <inheritdoc/>
-        public IEnumerable<(ILogProvider Provider, string Key)> GetProviders()
+        /// <summary>
+        /// Retrieves the currently managed logging service providers.
+        /// </summary>
+        /// <returns>A collection of managed logging service providers with their keys.</returns>
+        public IEnumerable<LogProviderDescriptor> GetProviders()
         {
             readerWriterLock.EnterReadLock();
             try
             {
-                return providers.ToList();
+                return descriptors.ToList();
+            }
+            finally
+            {
+                readerWriterLock.ExitReadLock();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ILogProviderDescriptor> GetProviderInfos() => GetProviders().Cast<ILogProviderDescriptor>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public ILogMetricsReader GetMetrics(ILogProvider provider, string key = null)
+        {
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
+            readerWriterLock.EnterReadLock();
+            try
+            {
+                return descriptors.FirstOrDefault(p => p.Provider == provider && p.Key == key)?.Metrics;
             }
             finally
             {

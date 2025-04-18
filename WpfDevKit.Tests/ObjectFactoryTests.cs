@@ -17,7 +17,7 @@ namespace WpfDevKit.Tests.Factory
             var services = new ServiceCollection();
             services.AddSingleton<IDependency, Dependency>();
             services.AddSingleton<AnotherDependency>();
-            services.AddSingleton<InternalLogger>();
+            //services.AddSingleton<InternalLogger>();
             resolver = services.Build() as IObjectResolver;
             factory = new ObjectFactory(resolver);
         }
@@ -73,7 +73,7 @@ namespace WpfDevKit.Tests.Factory
         public void Create_WithMultipleConstructors_UsesManualParameterWhenDependencyMissing()
         {
             var services = new ServiceCollection();
-            services.AddSingleton<InternalLogger>();
+            //services.AddSingleton<InternalLogger>();
             var localProvider = services.Build() as IObjectResolver;
             var localFactory = new ObjectFactory(localProvider);
 
@@ -113,7 +113,7 @@ namespace WpfDevKit.Tests.Factory
         public void Create_WithUnregisteredResolvableProperty_LogsWarningButSucceeds()
         {
             var services = new ServiceCollection();
-            services.AddSingleton<InternalLogger>();
+            //services.AddSingleton<InternalLogger>();
             var localProvider = services.Build() as IObjectResolver;
             var localFactory = new ObjectFactory(localProvider);
 

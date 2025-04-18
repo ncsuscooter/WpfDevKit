@@ -134,7 +134,7 @@ namespace WpfDevKit.Tests.Hosting
             var services = new ServiceCollection();
             services.AddSingleton<IHostedService>(_ => good);
             services.AddSingleton<IHostedService>(_ => bad);
-            services.AddSingleton<InternalLogger>(_ => new InternalLogger()); // Optional stub
+            //services.AddSingleton<InternalLogger>(_ => new InternalLogger()); // Optional stub
 
             var host = new Host(services.Build());
 
