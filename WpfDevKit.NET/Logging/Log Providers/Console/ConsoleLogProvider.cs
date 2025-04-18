@@ -22,25 +22,22 @@ namespace WpfDevKit.Logging
         /// <param name="options">The options for configuring the console log provider.</param>
         public ConsoleLogProvider(IOptions<ConsoleLogProviderOptions> options) => this.options = options.Value;
 
-        /// <summary>
-        /// Gets or sets the log categories that are enabled for logging.
+
+        /// <inheritdoc/>
+        /// <remarks>
         /// The default value is <see cref="TLogCategory.None"/> bitwise complemented 
         /// (<c>~TLogCategory.None</c>), which means all categories are enabled by default.
-        /// </summary>
+        /// </remarks>
         public TLogCategory EnabledCategories { get; set; } = ~TLogCategory.None;
 
-        /// <summary>
-        /// Gets the log categories that are disabled for logging.
+        /// <inheritdoc/>
+        /// <remarks>
         /// The default value is <see cref="TLogCategory.None"/>, meaning no categories 
         /// are disabled by default.
-        /// </summary>
+        /// </remarks>
         public TLogCategory DisabledCategories => TLogCategory.None;
 
-        /// <summary>
-        /// Logs a log message asynchronously to the console or trace, depending on the environment.
-        /// </summary>
-        /// <param name="message">The log message to be logged.</param>
-        /// <returns>A task representing the asynchronous log operation.</returns>
+        /// <inheritdoc/>
         public Task LogAsync(ILogMessage message)
         {
             // Determine if we are in a console environment or tracing environment

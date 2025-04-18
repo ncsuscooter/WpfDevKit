@@ -18,25 +18,21 @@ namespace WpfDevKit.Logging
         /// <param name="options">The options for configuring the database log provider.</param>
         public DatabaseLogProvider(IOptions<DatabaseLogProviderOptions> options) => this.options = options.Value;
 
-        /// <summary>
-        /// Gets or sets the log categories that are enabled for logging.
+        /// <inheritdoc/>
+        /// <remarks>
         /// The default values are <see cref="TLogCategory.StartStop"/>, <see cref="TLogCategory.Info"/>, <see cref="TLogCategory.Warning"/>,
         /// <see cref="TLogCategory.Error"/>, and <see cref="TLogCategory.Fatal"/>.
-        /// </summary>
+        /// </remarks>
         public TLogCategory EnabledCategories { get; set; } = TLogCategory.Info | TLogCategory.StartStop | TLogCategory.Warning | TLogCategory.Error | TLogCategory.Fatal;
 
-        /// <summary>
-        /// Gets the log categories that are disabled for logging.
+        /// <inheritdoc/>
+        /// <remarks>
         /// The default value is <see cref="TLogCategory.Trace"/>, meaning only Trace categories 
         /// are disabled by default.
-        /// </summary>
+        /// </remarks>
         public TLogCategory DisabledCategories => TLogCategory.Trace;
 
-        /// <summary>
-        /// Logs a log message asynchronously to the database, depending on the configured options.
-        /// </summary>
-        /// <param name="message">The log message to be logged.</param>
-        /// <returns>A task representing the asynchronous log operation.</returns>
+        /// <inheritdoc/>
         /// <exception cref="InvalidOperationException" />
         public async Task LogAsync(ILogMessage message)
         {

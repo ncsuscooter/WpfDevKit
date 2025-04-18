@@ -57,7 +57,7 @@ namespace WpfDevKit.Logging
         /// <summary>
         /// Increments the elapsed time by the specified value.
         /// </summary>
-        /// <param name="value">The value to increment the elapsed time by.</param>
+        /// <param name="value">The value to increment the elapsed time by, in milliseconds.</param>
         void IncrementElapsed(long value);
 
         /// <summary>

@@ -49,14 +49,14 @@
     <Compile Include="Dependency Injection\Options\IOptions.cs" />
     <Compile Include="Factory\ObjectFactoryExtensions.cs" />
     <Compile Include="Hosting\Host\IHost.cs" />
-    <Compile Include="Logging\Database\DatabaseLogColumn.cs" />
-    <Compile Include="Logging\Database\DatabaseLogProvider.cs" />
-    <Compile Include="Logging\Database\DatabaseLogProviderOptions.cs" />
-    <Compile Include="Logging\gRPC\GrpcLogProvider.cs" />
+    <Compile Include="Logging\Log Providers\Database\DatabaseLogColumn.cs" />
+    <Compile Include="Logging\Log Providers\Database\DatabaseLogProvider.cs" />
+    <Compile Include="Logging\Log Providers\Database\DatabaseLogProviderOptions.cs" />
+    <Compile Include="Logging\Log Providers\gRPC\GrpcLogProvider.cs" />
     <Compile Include="Hosting\Host\Host.cs" />
     <Compile Include="Hosting\HostBuilder.cs" />
     <Compile Include="Logging\Log Message\ILogMessage.cs" />
-    <Compile Include="Logging\User\IUserLogProvider.cs" />
+    <Compile Include="Logging\Log Providers\User\IUserLogProvider.cs" />
     <Compile Include="Dependency Injection\Service Collection\IServiceCollection.cs" />
     <Compile Include="Dependency Injection\Options\Options.cs" />
     <Compile Include="Dependency Injection\ServiceProvider.cs" />
@@ -75,19 +75,19 @@
     <Compile Include="Logging\TLogElement.cs" />
     <Compile Include="Logging\LogServiceExtensions.cs" />
     <Compile Include="Logging\Log Metrics\ILogMetrics.cs" />
-    <Compile Include="Logging\ILogProvider.cs" />
+    <Compile Include="Logging\Log Providers\ILogProvider.cs" />
     <Compile Include="Logging\Log Service\ILogService.cs" />
     <Compile Include="Logging\LogBackgroundService.cs" />
     <Compile Include="Logging\Log Message\LogMessage.cs" />
     <Compile Include="Logging\Log Metrics\LogMetrics.cs" />
     <Compile Include="Logging\LogQueue.cs" />
     <Compile Include="Logging\Log Service\LogService.cs" />
-    <Compile Include="Logging\Console\ConsoleLogProviderOptions.cs" />
-    <Compile Include="Logging\Memory\MemoryLogProviderOptions.cs" />
-    <Compile Include="Logging\User\UserLogProviderOptions.cs" />
-    <Compile Include="Logging\Console\ConsoleLogProvider.cs" />
-    <Compile Include="Logging\Memory\MemoryLogProvider.cs" />
-    <Compile Include="Logging\User\UserLogProvider.cs" />
+    <Compile Include="Logging\Log Providers\Console\ConsoleLogProviderOptions.cs" />
+    <Compile Include="Logging\Log Providers\Memory\MemoryLogProviderOptions.cs" />
+    <Compile Include="Logging\Log Providers\User\UserLogProviderOptions.cs" />
+    <Compile Include="Logging\Log Providers\Console\ConsoleLogProvider.cs" />
+    <Compile Include="Logging\Log Providers\Memory\MemoryLogProvider.cs" />
+    <Compile Include="Logging\Log Providers\User\UserLogProvider.cs" />
     <Compile Include="Factory\ResolvableExtensions.cs" />
     <Compile Include="Busy\BusyService.cs" />
     <Compile Include="Connectivity\ConnectivityService.cs" />
@@ -111,7 +111,7 @@
     <Compile Include="StartStopRegistration.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Logging\gRPC\Protos\Logging.proto" />
+    <None Include="Logging\Log Providers\gRPC\Protos\Logging.proto" />
     <None Include="packages.config" />
     <None Include="Project_Improvement_Checklist.md" />
   </ItemGroup>

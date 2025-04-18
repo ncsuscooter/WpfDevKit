@@ -20,66 +20,40 @@ namespace WpfDevKit.Logging
         private int lostCount = 0;
         private int nullCount = 0;
 
-        /// <summary>
-        /// Gets the total number of log entries.
-        /// </summary>
+        /// <inheritdoc/>
         public int Total => totalCount;
 
-        /// <summary>
-        /// Gets the total number of queued log messages.
-        /// </summary>
+        /// <inheritdoc/>
         public int Queued => queuedCount;
 
-        /// <summary>
-        /// Gets the total number of lost log messages.
-        /// </summary>
+        /// <inheritdoc/>
         public int Lost => lostCount;
 
-        /// <summary>
-        /// Gets the total number of null log messages.
-        /// </summary>
+        /// <inheritdoc/>
         public int Null => nullCount;
 
-        /// <summary>
-        /// Gets a dictionary of log categories and their associated counts.
-        /// </summary>
+        /// <inheritdoc/>
         public IReadOnlyDictionary<TLogCategory, int> CategoryCounts => new ReadOnlyDictionary<TLogCategory, int>(categoryCounts);
 
-        /// <summary>
-        /// Gets the total elapsed time for logging operations.
-        /// </summary>
+        /// <inheritdoc/>
         public TimeSpan Elapsed => TimeSpan.FromMilliseconds(elapsed);
 
-        /// <summary>
-        /// Increments the elapsed time by the specified value.
-        /// </summary>
-        /// <param name="value">The value to increment the elapsed time by, in milliseconds.</param>
+        /// <inheritdoc/>
         public void IncrementElapsed(long value) => Interlocked.Add(ref elapsed, value);
 
-        /// <summary>
-        /// Increments the total count of log entries by 1.
-        /// </summary>
+        /// <inheritdoc/>
         public void IncrementTotal() => Interlocked.Increment(ref totalCount);
 
-        /// <summary>
-        /// Increments the count of queued log messages by 1.
-        /// </summary>
+        /// <inheritdoc/>
         public void IncrementQueued() => Interlocked.Increment(ref queuedCount);
 
-        /// <summary>
-        /// Increments the count of lost log messages by 1.
-        /// </summary>
+        /// <inheritdoc/>
         public void IncrementLost() => Interlocked.Increment(ref lostCount);
 
-        /// <summary>
-        /// Increments the count of null log messages by 1.
-        /// </summary>
+        /// <inheritdoc/>
         public void IncrementNull() => Interlocked.Increment(ref nullCount);
 
-        /// <summary>
-        /// Increments the count of logs for a specified category.
-        /// </summary>
-        /// <param name="category">The log category to increment.</param>
+        /// <inheritdoc/>
         public void IncrementCategory(TLogCategory category)
         {
             if (!categoryCounts.ContainsKey(category))
@@ -87,11 +61,7 @@ namespace WpfDevKit.Logging
             categoryCounts[category]++;
         }
 
-        /// <summary>
-        /// Starts and stops a logging operation, incrementing the appropriate metrics.
-        /// </summary>
-        /// <param name="message">The log message associated with the operation.</param>
-        /// <returns>An <see cref="IDisposable"/> object to stop the operation.</returns>
+        /// <inheritdoc/>
         public IDisposable StartStop(ILogMessage message)
         {
             IncrementTotal();

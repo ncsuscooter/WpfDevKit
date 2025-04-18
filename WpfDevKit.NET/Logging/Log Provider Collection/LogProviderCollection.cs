@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
@@ -16,15 +17,10 @@ namespace WpfDevKit.Logging
         /// <summary>
         /// Initializes a new instance of the <see cref="LogProviderCollection"/> class.
         /// </summary>
-        /// <param name="LogProviderCollectionOptions">The options used for service configuration.</param>
-        public LogProviderCollection(LogService logService) => this.logService = logService;
+        /// <param name="logService">The log service.</param>
+        public LogProviderCollection(LogService logService) => this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
 
-        /// <summary>
-        /// Attempts to add a logging provider to the manager if it is not already present.
-        /// </summary>
-        /// <param name="provider">The logging provider to add.</param>
-        /// <param name="key">The key associated with the logging provider.</param>
-        /// <returns><c>true</c> if the provider was added; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc/>
         public bool TryAddProvider(ILogProvider provider, string key = default)
         {
             if (provider == null)
@@ -48,12 +44,7 @@ namespace WpfDevKit.Logging
             }
         }
 
-        /// <summary>
-        /// Attempts to remove a logging provider from the manager.
-        /// </summary>
-        /// <param name="provider">The logging provider to remove.</param>
-        /// <param name="key">The key associated with the logging provider.</param>
-        /// <returns><c>true</c> if the provider was removed; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc/>
         public bool TryRemoveProvider(ILogProvider provider, string key = default)
         {
             if (provider == null)
@@ -77,10 +68,7 @@ namespace WpfDevKit.Logging
             }
         }
 
-        /// <summary>
-        /// Retrieves the currently managed logging service providers.
-        /// </summary>
-        /// <returns>A collection of managed logging service providers with their keys.</returns>
+        /// <inheritdoc/>
         public IEnumerable<(ILogProvider Provider, string Key)> GetProviders()
         {
             readerWriterLock.EnterReadLock();

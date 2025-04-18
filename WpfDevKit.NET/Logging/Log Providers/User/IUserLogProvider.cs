@@ -8,6 +8,11 @@ namespace WpfDevKit.Logging
     /// </summary>
     public interface IUserLogProvider
     {
+        /// <summary>
+        /// Retrieves the stored log messages and optionally clears the stored messages 
+        /// based on the <see cref="UserLogProviderOptions.IsClearLogsOnGet"/> setting.
+        /// </summary>
+        /// <returns>A read-only collection of the stored log messages.</returns>
         IReadOnlyCollection<ILogMessage> GetLogMessages();
     }
 }

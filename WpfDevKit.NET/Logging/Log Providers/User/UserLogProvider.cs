@@ -19,25 +19,21 @@ namespace WpfDevKit.Logging
         /// <param name="options">The options for configuring the user log provider.</param>
         public UserLogProvider(IOptions<UserLogProviderOptions> options) : base(options.Value) => this.options = options.Value;
 
-        /// <summary>
-        /// Gets or sets the log categories that are enabled for logging.
+        /// <inheritdoc/>
+        /// <remarks>
         /// The default value is <c>TLogCategory.Fatal | TLogCategory.Error | TLogCategory.Warning</c>,
         /// meaning these categories are enabled for logging by default.
-        /// </summary>
+        /// </remarks>
         public override TLogCategory EnabledCategories { get; set; } = TLogCategory.Fatal | TLogCategory.Error | TLogCategory.Warning;
 
-        /// <summary>
-        /// Gets the log categories that are disabled for logging.
+        /// <inheritdoc/>
+        /// <remarks>
         /// The default value is <c>~(TLogCategory.Fatal | TLogCategory.Error | TLogCategory.Warning)</c>,
         /// meaning these categories are disabled by default and no other categories are explicitly disabled.
-        /// </summary>
+        /// </remarks>
         public override TLogCategory DisabledCategories => ~(TLogCategory.Fatal | TLogCategory.Error | TLogCategory.Warning);
 
-        /// <summary>
-        /// Retrieves the stored log messages.
-        /// Optionally clears the stored messages based on the <see cref="UserLogProviderOptions.IsClearLogsOnGet"/> setting.
-        /// </summary>
-        /// <returns>A read-only collection of the stored log messages.</returns>
+        /// <inheritdoc/>
         public IReadOnlyCollection<ILogMessage> GetLogMessages()
         {
             lock (this)

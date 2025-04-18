@@ -16,22 +16,15 @@ namespace WpfDevKit.Logging
     internal class LogService : ILogService
     {
         private static long index = 0;
-        private readonly LogQueue queue;
+        private readonly LogQueue logQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogService"/> class.
         /// </summary>
-        /// <param name="queue">The logging queue for message storage.</param>
-        public LogService(LogQueue queue) => this.queue = queue;
+        /// <param name="logQueue">The logging queue for message storage.</param>
+        public LogService(LogQueue logQueue) => this.logQueue = logQueue ?? throw new ArgumentNullException(nameof(logQueue));
 
-        /// <summary>
-        /// Logs an exception with additional contextual details.
-        /// </summary>
-        /// <param name="category">The log category (must be Error, Warning, or Trace).</param>
-        /// <param name="exception">The exception to log.</param>
-        /// <param name="type">The type where the exception originated (optional).</param>
-        /// <param name="fileName">The file where the exception occurred (auto-captured).</param>
-        /// <param name="memberName">The method where the exception occurred (auto-captured).</param>
+        /// <inheritdoc/>
         public void Log(TLogCategory category,
                         Exception exception,
                         Type type = default,
@@ -71,15 +64,7 @@ namespace WpfDevKit.Logging
             }
         }
 
-        /// <summary>
-        /// Logs a message with optional attributes and contextual details.
-        /// </summary>
-        /// <param name="category">The log category (must not be Error).</param>
-        /// <param name="message">The message to log.</param>
-        /// <param name="attributes">Additional attributes (optional).</param>
-        /// <param name="type">The type where the message originated (optional).</param>
-        /// <param name="fileName">The file where the message was logged (auto-captured).</param>
-        /// <param name="memberName">The method where the message was logged (auto-captured).</param>
+        /// <inheritdoc/>
         public void Log(TLogCategory category,
                         string message,
                         string attributes = default,
@@ -115,7 +100,6 @@ namespace WpfDevKit.Logging
         /// Logs a message to the logging queue.
         /// </summary>
         /// <param name="message">The log message to store.</param>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="message"/> is null.</exception>
-        private void Log(LogMessage message) => queue.TryWrite(message);
+        private void Log(LogMessage message) => logQueue.TryWrite(message);
     }
 }
