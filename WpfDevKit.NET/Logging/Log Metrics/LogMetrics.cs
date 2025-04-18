@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 
 namespace WpfDevKit.Logging
@@ -12,9 +11,8 @@ namespace WpfDevKit.Logging
     /// <summary>
     /// Tracks metrics related to logging, such as counts of logs by category, and provides methods for incrementing these metrics.
     /// </summary>
-    /// <typeparam name="T">The type associated with the log metrics.</typeparam>
     [DebuggerStepThrough]
-    internal class LogMetrics<T> : ILogMetrics<T>
+    internal class LogMetrics : ILogMetricsReader, ILogMetricsWriter
     {
         private readonly ConcurrentDictionary<TLogCategory, int> categoryCounts = new ConcurrentDictionary<TLogCategory, int>();
         private readonly ConcurrentBag<Exception> unhandledExceptions = new ConcurrentBag<Exception>();
@@ -23,11 +21,6 @@ namespace WpfDevKit.Logging
         private int queuedCount = 0;
         private int lostCount = 0;
         private int nullCount = 0;
-
-        /// <summary>
-        /// Gets the name of the type associated with the log metrics.
-        /// </summary>
-        public string Name => typeof(T).Name;
 
         /// <summary>
         /// Gets the total number of log entries.
@@ -73,48 +66,48 @@ namespace WpfDevKit.Logging
         /// Increments the elapsed time by the specified value.
         /// </summary>
         /// <param name="value">The value to increment the elapsed time by, in milliseconds.</param>
-        public void IncrementElapsed(long value) => ExecuteIfInternalOrThrow(() => Interlocked.Add(ref elapsed, value));
+        public void IncrementElapsed(long value) => Interlocked.Add(ref elapsed, value);
 
         /// <summary>
         /// Increments the total count of log entries by 1.
         /// </summary>
-        public void IncrementTotal() => ExecuteIfInternalOrThrow(() => Interlocked.Increment(ref totalCount));
+        public void IncrementTotal() => Interlocked.Increment(ref totalCount);
 
         /// <summary>
         /// Increments the count of queued log messages by 1.
         /// </summary>
-        public void IncrementQueued() => ExecuteIfInternalOrThrow(() => Interlocked.Increment(ref queuedCount));
+        public void IncrementQueued() => Interlocked.Increment(ref queuedCount);
 
         /// <summary>
         /// Increments the count of lost log messages by 1.
         /// </summary>
-        public void IncrementLost() => ExecuteIfInternalOrThrow(() => Interlocked.Increment(ref lostCount));
+        public void IncrementLost() => Interlocked.Increment(ref lostCount);
 
         /// <summary>
         /// Increments the count of null log messages by 1.
         /// </summary>
-        public void IncrementNull() => ExecuteIfInternalOrThrow(() => Interlocked.Increment(ref nullCount));
+        public void IncrementNull() => Interlocked.Increment(ref nullCount);
 
         /// <summary>
         /// Adds an unhandled exception to the collection of unhandled exceptions.
         /// </summary>
         /// <param name="ex">The exception to add.</param>
-        public void IncrementUnhandled(Exception ex) => ExecuteIfInternalOrThrow(() =>
+        public void IncrementUnhandled(Exception ex)
         {
             Debug.WriteLine(ex);
             unhandledExceptions.Add(ex);
-        });
+        }
 
         /// <summary>
         /// Increments the count of logs for a specified category.
         /// </summary>
         /// <param name="category">The log category to increment.</param>
-        public void IncrementCategory(TLogCategory category) => ExecuteIfInternalOrThrow(() =>
+        public void IncrementCategory(TLogCategory category)
         {
             if (!categoryCounts.ContainsKey(category))
                 categoryCounts[category] = 0;
             categoryCounts[category]++;
-        });
+        }
 
         /// <summary>
         /// Starts and stops a logging operation, incrementing the appropriate metrics.
@@ -130,18 +123,16 @@ namespace WpfDevKit.Logging
                 IncrementCategory(message.Category);
             return new StartStopRegistration(default, IncrementElapsed);
         }
+    }
 
+    /// <inheritdoc/>
+    /// <typeparam name="T">The type associated with the log metrics.</typeparam>
+    [DebuggerStepThrough]
+    internal class LogMetrics<T> : LogMetrics, ILogMetricsReader<T>, ILogMetricsWriter<T>
+    {
         /// <summary>
-        /// Executes the specified action only if called from the internal assembly, otherwise throws an exception.
+        /// Gets the name of the type associated with the log metrics.
         /// </summary>
-        /// <param name="action">The action to execute.</param>
-        /// <exception cref="NotSupportedException">Thrown when the action is not called from the internal assembly.</exception>
-        private void ExecuteIfInternalOrThrow(Action action)
-        {
-            if (Assembly.GetCallingAssembly().FullName.Equals(Assembly.GetExecutingAssembly().FullName))
-                action();
-            else
-                throw new NotSupportedException("Not allowed to increment counters from calling assembly");
-        }
+        public string Name => typeof(T).Name;
     }
 }

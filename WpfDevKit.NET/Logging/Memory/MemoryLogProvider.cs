@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using WpfDevKit.DependencyInjection;
 
 namespace WpfDevKit.Logging
 {
@@ -11,33 +12,21 @@ namespace WpfDevKit.Logging
     [DebuggerStepThrough]
     internal class MemoryLogProvider : ILogProvider
     {
-        /// <summary>
-        /// List to store log messages.
-        /// </summary>
+        private readonly MemoryLogProviderOptions options;
         protected readonly List<ILogMessage> items = new List<ILogMessage>();
 
         /// <summary>
-        /// The options for configuring the memory log provider.
+        /// Initializes a new instance of the <see cref="MemoryLogProvider"/> class,
+        /// but meant for subclasses, like the <see cref="UserLogProvider"/>.
         /// </summary>
-        private readonly MemoryLogProviderOptions options;
+        /// <param name="options">The options for configuring the memory log provider.</param>
+        protected MemoryLogProvider(MemoryLogProviderOptions options) => this.options = options;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MemoryLogProvider"/> class.
         /// </summary>
         /// <param name="options">The options for configuring the memory log provider.</param>
-        public MemoryLogProvider(MemoryLogProviderOptions options) : this(new LogMetrics<MemoryLogProvider>(), options) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryLogProvider"/> class.
-        /// </summary>
-        /// <param name="metrics">The metrics associated with this log provider.</param>
-        /// <param name="options">The options for configuring the memory log provider.</param>
-        protected MemoryLogProvider(ILogMetrics metrics, MemoryLogProviderOptions options) => (Metrics, this.options) = (metrics, options);
-
-        /// <summary>
-        /// Gets or privately sets the metrics associated with this log provider.
-        /// </summary>
-        public ILogMetrics Metrics { get; private set; }
+        public MemoryLogProvider(IOptions<MemoryLogProviderOptions> options) : this(options.Value) { }
 
         /// <summary>
         /// Gets or sets the log categories that are enabled for logging.
@@ -60,18 +49,15 @@ namespace WpfDevKit.Logging
         /// <returns>A task representing the asynchronous log operation.</returns>
         public Task LogAsync(ILogMessage message)
         {
-            using (var disposable = Metrics.StartStop(message))
+            lock (items)
             {
-                lock (items)
+                // If the capacity is reached, remove old messages based on the fill factor.
+                if (items.Count >= options.Capacity && options.Capacity > 0 && options.FillFactor > 0)
                 {
-                    // If the capacity is reached, remove old messages based on the fill factor.
-                    if (items.Count >= options.Capacity && options.Capacity > 0 && options.FillFactor > 0)
-                    {
-                        // Calculate the number of items to remove based on the fill factor.
-                        items.RemoveRange(0, (int)Math.Round(options.Capacity * (1d - options.FillFactor / 100d), 0));
-                    }
-                    items.Add(message); // Add the new message to the list.
+                    // Calculate the number of items to remove based on the fill factor.
+                    items.RemoveRange(0, Math.Max(1, (int)Math.Round(options.Capacity * (1.0 - options.FillFactor / 100.0), 0)));
                 }
+                items.Add(message); // Add the new message to the list.
             }
             return Task.CompletedTask;
         }

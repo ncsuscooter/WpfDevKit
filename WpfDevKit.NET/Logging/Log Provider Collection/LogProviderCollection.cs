@@ -11,13 +11,13 @@ namespace WpfDevKit.Logging
     {
         private readonly List<(ILogProvider Provider, string Key)> providers = new List<(ILogProvider, string)>();
         private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
-        private readonly InternalLogger options;
+        private readonly LogService logService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogProviderCollection"/> class.
         /// </summary>
         /// <param name="LogProviderCollectionOptions">The options used for service configuration.</param>
-        public LogProviderCollection(InternalLogger options) => this.options = options;
+        public LogProviderCollection(LogService logService) => this.logService = logService;
 
         /// <summary>
         /// Attempts to add a logging provider to the manager if it is not already present.
@@ -35,11 +35,11 @@ namespace WpfDevKit.Logging
                 bool exists = providers.Any(p => p.Provider.GetType() == provider.GetType() && p.Key == key);
                 if (exists)
                 {
-                    options?.LogMessage?.Invoke("Provider was not added to the collection", $"Name='{provider.GetType().Name}' - Key='{key}'", default);
+                    logService.LogTrace("Provider was not added to the collection", $"Name='{provider.GetType().Name}' - Key='{key}'", default);
                     return false;
                 }
                 providers.Add((provider, key));
-                options?.LogMessage?.Invoke("Provider was successfully added to the collection", $"Name='{provider.GetType().Name}' - Key='{key}'", default);
+                logService.LogTrace("Provider was successfully added to the collection", $"Name='{provider.GetType().Name}' - Key='{key}'", default);
                 return true;
             }
             finally
@@ -65,10 +65,10 @@ namespace WpfDevKit.Logging
                 if (existing.Provider != null)
                 {
                     providers.Remove(existing);
-                    options?.LogMessage?.Invoke("Provider was successfully removed from the collection", $"Name='{provider.GetType().Name}' - Key='{key}'", default);
+                    logService.LogTrace("Provider was successfully removed from the collection", $"Name='{provider.GetType().Name}' - Key='{key}'", default);
                     return true;
                 }
-                options?.LogMessage?.Invoke("Provider was not removed from the collection", $"Name='{provider.GetType().Name}' - Key='{key}'", default);
+                logService.LogTrace("Provider was not removed from the collection", $"Name='{provider.GetType().Name}' - Key='{key}'", default);
                 return false;
             }
             finally

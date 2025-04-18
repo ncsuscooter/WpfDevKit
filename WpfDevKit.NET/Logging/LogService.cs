@@ -25,26 +25,11 @@ namespace WpfDevKit.Logging
         public LogService(LogQueue queue) => this.queue = queue;
 
         /// <summary>
-        /// Gets the metrics associated with the log service.
-        /// </summary>
-        public ILogMetrics Metrics { get; private set; } = new LogMetrics<LogService>();
-
-        /// <summary>
         /// Logs a message to the logging queue.
         /// </summary>
         /// <param name="message">The log message to store.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="message"/> is null.</exception>
-        private void Log(LogMessage message)
-        {
-            if (message is null)
-            using (var disposable = Metrics.StartStop(message))
-            {
-                if (queue.TryWrite(message))
-                    Metrics.IncrementQueued();
-                else
-                    Metrics.IncrementLost();
-            }
-        }
+        private void Log(LogMessage message) => queue.TryWrite(message);
 
         /// <summary>
         /// Logs an exception with additional contextual details.
@@ -89,7 +74,7 @@ namespace WpfDevKit.Logging
             }
             catch (Exception ex)
             {
-                Metrics.IncrementUnhandled(ex);
+                Debug.WriteLine(ex.ToString());
             }
         }
 
@@ -129,7 +114,7 @@ namespace WpfDevKit.Logging
             }
             catch (Exception ex)
             {
-                Metrics.IncrementUnhandled(ex);
+                Debug.WriteLine(ex.ToString());
             }
         }
     }

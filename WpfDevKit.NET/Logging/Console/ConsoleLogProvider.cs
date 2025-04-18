@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using WpfDevKit.DependencyInjection;
 
 namespace WpfDevKit.Logging
 {
@@ -18,14 +19,8 @@ namespace WpfDevKit.Logging
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsoleLogProvider"/> class.
         /// </summary>
-        /// <param name="metrics">The metrics associated with this log provider.</param>
         /// <param name="options">The options for configuring the console log provider.</param>
-        public ConsoleLogProvider(ConsoleLogProviderOptions options) => (Metrics, this.options) = (new LogMetrics<ConsoleLogProvider>(), options);
-
-        /// <summary>
-        /// Gets the metrics associated with this log provider.
-        /// </summary>
-        public ILogMetrics Metrics { get; private set; }
+        public ConsoleLogProvider(IOptions<ConsoleLogProviderOptions> options) => this.options = options.Value;
 
         /// <summary>
         /// Gets or sets the log categories that are enabled for logging.
@@ -62,30 +57,27 @@ namespace WpfDevKit.Logging
                 }
             }
 
-            using (var disposable = Metrics.StartStop(message))
+            // Format the log message using the configured options
+            var s = options.FormattedOutput(message);
+
+            // Log to the console if it's available
+            if (isConsole)
             {
-                // Format the log message using the configured options
-                var s = options.FormattedOutput(message);
+                if (!options.CategoryConsoleColors.TryGetValue(message.Category, out var c))
+                    c = options.CategoryConsoleColors[TLogCategory.None];
 
-                // Log to the console if it's available
-                if (isConsole)
+                // Lock to ensure thread safety when writing to the console
+                lock (this)
                 {
-                    if (!options.CategoryConsoleColors.TryGetValue(message.Category, out var c))
-                        c = options.CategoryConsoleColors[TLogCategory.None];
-
-                    // Lock to ensure thread safety when writing to the console
-                    lock (this)
-                    {
-                        Console.ForegroundColor = c;
-                        Console.WriteLine(s);
-                        Console.ResetColor();
-                    }
+                    Console.ForegroundColor = c;
+                    Console.WriteLine(s);
+                    Console.ResetColor();
                 }
-                // Log to trace if console isn't available
-                else if (isTrace)
-                {
-                    Trace.WriteLine(s);
-                }
+            }
+            // Log to trace if console isn't available
+            else if (isTrace)
+            {
+                Trace.WriteLine(s);
             }
 
             return Task.CompletedTask;

@@ -9,11 +9,6 @@ namespace WpfDevKit.Logging
     public interface ILogService
     {
         /// <summary>
-        /// Gets the metrics associated with the log service.
-        /// </summary>
-        ILogMetrics Metrics { get; }
-
-        /// <summary>
         /// Logs an exception with the specified category, type, file, and method information.
         /// </summary>
         /// <param name="category">The log category, such as <see cref="TLogCategory.Error"/>, <see cref="TLogCategory.Warning"/>, etc.</param>

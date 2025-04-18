@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using WpfDevKit.Logging;
 
 namespace WpfDevKit.Hosting
 {
@@ -42,8 +43,8 @@ namespace WpfDevKit.Hosting
                 catch (Exception ex)
                 {
                     Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' failed to start.");
-                    Services.GetService<InternalLogger>()?.LogMessage?.Invoke($"[Host] StartAsync failed", default, GetType());
-                    Services.GetService<InternalLogger>()?.LogException?.Invoke(ex, GetType());
+                    Services.GetService<ILogService>()?.LogTrace($"[Host] StartAsync failed", default, GetType());
+                    Services.GetService<ILogService>()?.LogTrace(ex, GetType());
                 }
             }
         }
@@ -63,8 +64,8 @@ namespace WpfDevKit.Hosting
                 catch (Exception ex)
                 {
                     Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' failed to stop.");
-                    Services.GetService<InternalLogger>()?.LogMessage?.Invoke($"[Host] StopAsync failed", default, GetType());
-                    Services.GetService<InternalLogger>()?.LogException?.Invoke(ex, GetType());
+                    Services.GetService<ILogService>()?.LogTrace($"[Host] StopAsync failed", default, GetType());
+                    Services.GetService<ILogService>()?.LogTrace(ex, GetType());
                 }
             }
         }
@@ -88,8 +89,8 @@ namespace WpfDevKit.Hosting
                 catch (Exception ex)
                 {
                     Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' failed to dispose.");
-                    Services.GetService<InternalLogger>()?.LogMessage?.Invoke($"[Host] Dispose failed", default, GetType());
-                    Services.GetService<InternalLogger>()?.LogException?.Invoke(ex, GetType());
+                    Services.GetService<ILogService>()?.LogTrace($"[Host] Dispose failed", default, GetType());
+                    Services.GetService<ILogService>()?.LogTrace(ex, GetType());
                 }
             }
             if (Services is IDisposable disposable)

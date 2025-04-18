@@ -12,9 +12,10 @@ namespace WpfDevKit.Logging
     [DebuggerStepThrough]
     internal class LogBackgroundService : HostedService
     {
-        private readonly ILogProviderCollection logProviderCollection;
+        private readonly LogProviderCollection logProviderCollection;
+        private readonly LogService logService;
+        private readonly LogMetrics logMetrics;
         private readonly LogQueue logQueue;
-        private readonly InternalLogger options;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogBackgroundService"/> class.
@@ -22,8 +23,8 @@ namespace WpfDevKit.Logging
         /// <param name="logProviderManager">The manager used to resolve logging providers.</param>
         /// <param name="queue">The queue that holds the log messages to be processed.</param>
         /// <param name="options">The options for configuring the log background service.</param>
-        public LogBackgroundService(ILogProviderCollection logProviderCollection, LogQueue logQueue, InternalLogger options) => 
-            (this.logProviderCollection, this.logQueue, this.options) = (logProviderCollection, logQueue, options);
+        public LogBackgroundService(LogProviderCollection logProviderCollection, LogService logService, LogMetrics logMetrics, LogQueue logQueue) => 
+            (this.logProviderCollection, this.logService, this.logMetrics, this.logQueue) = (logProviderCollection, logService, logMetrics, logQueue);
 
         /// <summary>
         /// Executes the background service, processing and logging messages from the queue asynchronously.
@@ -38,6 +39,7 @@ namespace WpfDevKit.Logging
                     // Continuously attempt to read messages from the queue
                     while (logQueue.TryRead(out var message))
                     {
+                        logMetrics.IncrementTotal();
                         // Iterate over all available logging providers and log the message if appropriate
                         foreach (var (provider, key) in logProviderCollection.GetProviders())
                         {
@@ -57,7 +59,7 @@ namespace WpfDevKit.Logging
                             catch (Exception ex)
                             {
                                 logProviderCollection.TryRemoveProvider(provider);
-                                options?.LogException?.Invoke(ex, provider.GetType());
+                                logService.LogError(ex, provider.GetType());
                             }
                         }
                     }

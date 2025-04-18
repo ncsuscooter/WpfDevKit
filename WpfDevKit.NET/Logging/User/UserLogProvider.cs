@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using WpfDevKit.DependencyInjection;
 
 namespace WpfDevKit.Logging
 {
@@ -10,18 +11,13 @@ namespace WpfDevKit.Logging
     [DebuggerStepThrough]
     internal class UserLogProvider : MemoryLogProvider, IUserLogProvider
     {
-        /// <summary>
-        /// The options for configuring the user log provider.
-        /// </summary>
         private readonly UserLogProviderOptions options;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserLogProvider"/> class.
         /// </summary>
-        /// <param name="metrics">The metrics associated with this log provider.</param>
         /// <param name="options">The options for configuring the user log provider.</param>
-        public UserLogProvider(UserLogProviderOptions options)
-            : base(new LogMetrics<UserLogProvider>(), options) => this.options = options;
+        public UserLogProvider(IOptions<UserLogProviderOptions> options) : base(options.Value) { }
 
         /// <summary>
         /// Gets or sets the log categories that are enabled for logging.

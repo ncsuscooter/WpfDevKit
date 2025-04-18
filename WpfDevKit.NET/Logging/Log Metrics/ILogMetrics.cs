@@ -7,13 +7,8 @@ namespace WpfDevKit.Logging
     /// Defines the contract for logging metrics, including counters for different log categories
     /// and overall statistics such as the total count, queued logs, and unhandled exceptions.
     /// </summary>
-    public interface ILogMetrics
+    public interface ILogMetricsReader
     {
-        /// <summary>
-        /// Gets the name of the log metrics, typically the name of the log provider or class.
-        /// </summary>
-        string Name { get; }
-
         /// <summary>
         /// Gets the total count of log messages processed.
         /// </summary>
@@ -53,7 +48,22 @@ namespace WpfDevKit.Logging
         /// Gets the total elapsed time spent logging in milliseconds.
         /// </summary>
         TimeSpan Elapsed { get; }
+    }
 
+    /// <summary>
+    /// A generic version of the <see cref="ILogMetrics"/> interface for use with specific log providers.
+    /// </summary>
+    public interface ILogMetricsReader<out T> : ILogMetricsReader
+    {
+        // No additional members, used for type-safety with specific log providers.
+    }
+
+    /// <summary>
+    /// Defines the contract for logging metrics, including counters for different log categories
+    /// and overall statistics such as the total count, queued logs, and unhandled exceptions.
+    /// </summary>
+    internal interface ILogMetricsWriter
+    {
         /// <summary>
         /// Increments the elapsed time by the specified value.
         /// </summary>
@@ -103,7 +113,7 @@ namespace WpfDevKit.Logging
     /// <summary>
     /// A generic version of the <see cref="ILogMetrics"/> interface for use with specific log providers.
     /// </summary>
-    public interface ILogMetrics<out T> : ILogMetrics
+    internal interface ILogMetricsWriter<out T> : ILogMetricsWriter
     {
         // No additional members, used for type-safety with specific log providers.
     }

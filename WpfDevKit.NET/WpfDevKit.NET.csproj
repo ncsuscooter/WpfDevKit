@@ -53,12 +53,9 @@
     <Compile Include="Logging\Database\DatabaseLogProvider.cs" />
     <Compile Include="Logging\Database\DatabaseLogProviderOptions.cs" />
     <Compile Include="Logging\gRPC\GrpcLogProvider.cs" />
-    <Compile Include="Logging\Log Metrics\ILogMetricsFactory.cs" />
-    <Compile Include="Logging\Log Metrics\LogMetricsFactory.cs" />
-    <Compile Include="InternalLogger.cs" />
     <Compile Include="Hosting\Host\Host.cs" />
     <Compile Include="Hosting\HostBuilder.cs" />
-    <Compile Include="Logging\ILogMessage.cs" />
+    <Compile Include="Logging\Log Message\ILogMessage.cs" />
     <Compile Include="Logging\User\IUserLogProvider.cs" />
     <Compile Include="Dependency Injection\Service Collection\IServiceCollection.cs" />
     <Compile Include="Dependency Injection\Options\Options.cs" />
@@ -81,7 +78,7 @@
     <Compile Include="Logging\ILogProvider.cs" />
     <Compile Include="Logging\ILogService.cs" />
     <Compile Include="Logging\LogBackgroundService.cs" />
-    <Compile Include="Logging\LogMessage.cs" />
+    <Compile Include="Logging\Log Message\LogMessage.cs" />
     <Compile Include="Logging\Log Metrics\LogMetrics.cs" />
     <Compile Include="Logging\LogQueue.cs" />
     <Compile Include="Logging\LogService.cs" />

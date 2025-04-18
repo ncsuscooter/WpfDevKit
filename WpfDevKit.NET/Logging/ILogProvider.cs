@@ -8,11 +8,6 @@ namespace WpfDevKit.Logging
     public interface ILogProvider
     {
         /// <summary>
-        /// Gets the metrics associated with the log provider.
-        /// </summary>
-        ILogMetrics Metrics { get; }
-
-        /// <summary>
         /// Gets or sets the categories of log messages that are enabled for logging.
         /// </summary>
         TLogCategory EnabledCategories { get; set; }

@@ -19,11 +19,6 @@ namespace WpfDevKit.Logging
         public DatabaseLogProvider(IOptions<DatabaseLogProviderOptions> options) => this.options = options.Value;
 
         /// <summary>
-        /// Gets the metrics associated with this log provider.
-        /// </summary>
-        public ILogMetrics Metrics { get; private set; } = new LogMetrics<DatabaseLogProvider>();
-
-        /// <summary>
         /// Gets or sets the log categories that are enabled for logging.
         /// The default values are <see cref="TLogCategory.StartStop"/>, <see cref="TLogCategory.Info"/>, <see cref="TLogCategory.Warning"/>,
         /// <see cref="TLogCategory.Error"/>, and <see cref="TLogCategory.Fatal"/>.
@@ -42,9 +37,14 @@ namespace WpfDevKit.Logging
         /// </summary>
         /// <param name="message">The log message to be logged.</param>
         /// <returns>A task representing the asynchronous log operation.</returns>
+        /// <exception cref="InvalidOperationException" />
         public async Task LogAsync(ILogMessage message)
         {
-            using (var disposable = Metrics.StartStop(message))
+            void ThrowOrIgnore(string s)
+            {
+                if (options.ThrowOnFailure)
+                    throw new InvalidOperationException($"[DatabaseLogProvider] Validation failed: {s}");
+            }
             using (var connection = new SqlConnection(options.ConnectionString))
             using (var command = new SqlCommand(options.CommandText, connection))
             {
@@ -65,22 +65,6 @@ namespace WpfDevKit.Logging
                 if (count < 1 || count > 1)
                     ThrowOrIgnore($"Expected 1 row inserted, but {count} rows affected.");
             }
-        }
-
-        /// <summary>
-        /// Handles validation or runtime failures by either throwing an exception or silently tracking it, based on configuration.
-        /// </summary>
-        /// <param name="message">The error message describing the validation or processing failure.</param>
-        /// <remarks>
-        /// If <see cref="DatabaseLogProviderOptions.ThrowOnFailure"/> is <c>true</c>, this method will throw an <see cref="InvalidOperationException"/>.
-        /// Otherwise, the exception is tracked via <see cref="ILogMetrics.IncrementUnhandled(Exception)"/> but execution will continue.
-        /// </remarks>
-        private void ThrowOrIgnore(string message)
-        {
-            var ex = new InvalidOperationException($"[DatabaseLogProvider] Validation failed: {message}");
-            Metrics.IncrementUnhandled(ex);
-            if (options.ThrowOnFailure)
-                throw ex;
         }
     }
 }

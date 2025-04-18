@@ -17,20 +17,15 @@ namespace WpfDevKit.Logging
         /// </summary>
         /// <param name="services">The IServiceCollection instance.</param>
         /// <returns>The current IServiceCollection instance for chaining.</returns>
-        public static IServiceCollection AddLoggingService(this IServiceCollection services)
-        {
-            services.AddSingleton<LogQueue, LogQueue>();
-            services.AddSingleton<ILogService, LogService>();
-            services.AddSingleton<ILogMetricsFactory, LogMetricsFactory>();
-            services.AddSingleton<ILogProviderCollection, LogProviderCollection>();
-            services.AddSingleton<LogBackgroundService, LogBackgroundService>();
-            services.AddSingleton<InternalLogger>(p => new InternalLogger()
-            {
-                LogMessage = (message, attributes, type) => p.GetService<ILogService>().LogTrace(message, attributes, type),
-                LogException = (exception, type) => p.GetService<ILogService>().LogTrace(exception, type)
-            });
-            return services;
-        }
+        public static IServiceCollection AddLoggingService(this IServiceCollection services) =>
+            services.AddSingleton<LogMetrics, LogMetrics>()
+                    .AddSingleton<LogQueue, LogQueue>()
+                    .AddSingleton<LogService, LogService>()
+                    .AddSingleton<LogProviderCollection, LogProviderCollection>()
+                    .AddSingleton<LogBackgroundService, LogBackgroundService>()
+                    .AddSingleton<ILogProviderCollection>(p => p.GetService<LogProviderCollection>())
+                    .AddSingleton<ILogMetricsReader>(p => p.GetService<LogMetrics>())
+                    .AddSingleton<ILogService>(p => p.GetService<LogService>());
 
         /// <summary>
         /// Logs a message at the Trace log level.

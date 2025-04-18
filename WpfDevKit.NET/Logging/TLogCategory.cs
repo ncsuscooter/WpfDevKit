@@ -17,19 +17,19 @@ namespace WpfDevKit.Logging
         Trace = 1,
 
         /// <summary>
+        /// Start/Stop logging, used for tracking task or operation timing.
+        /// </summary>
+        StartStop = 2,
+
+        /// <summary>
         /// Debug level logging, typically used for debugging purposes.
         /// </summary>
-        Debug = 2,
+        Debug = 4,
 
         /// <summary>
         /// Information level logging, used for general informational messages.
         /// </summary>
-        Info = 4,
-
-        /// <summary>
-        /// Start/Stop logging, used for tracking task or operation timing.
-        /// </summary>
-        StartStop = 8,
+        Info = 8,
 
         /// <summary>
         /// Warning level logging, used for potentially harmful situations.
