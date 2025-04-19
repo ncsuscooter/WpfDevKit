@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 
 namespace WpfDevKit.Logging
 {
@@ -41,5 +42,10 @@ namespace WpfDevKit.Logging
                 s = $"{s}\n\r{logMessage.ExceptionStackTrace}";
             return s;
         };
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public TextWriter DefaultTextWriter { get; set; } = Console.Out;
     }
 }

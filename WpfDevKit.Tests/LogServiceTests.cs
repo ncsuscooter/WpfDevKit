@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WpfDevKit.DependencyInjection;
+using WpfDevKit.Hosting;
 using WpfDevKit.Logging;
 
 namespace WpfDevKit.Tests.Logging
@@ -515,7 +516,8 @@ namespace WpfDevKit.Tests.Logging
 
             Assert.AreEqual(1, metrics.Queued);
             Assert.IsTrue(queue.TryRead(out var log));
-            Assert.AreEqual("param", log.Message);
+            StringAssert.Contains(log.Message, "Value cannot be null");
+            StringAssert.Contains(log.Message, "param");
             Assert.IsTrue(log.Attributes.Contains("Context='UnitTest'"));
         }
 
@@ -746,6 +748,12 @@ namespace WpfDevKit.Tests.Logging
         public override void WriteLine(string message) => onWrite?.Invoke(message);
     }
 
+    internal class FailingTextWriter : TextWriter
+    {
+        public override Encoding Encoding => Encoding.UTF8;
+        public override void WriteLine(string value) => throw new IOException("Simulated failure");
+    }
+
     [TestClass]
     public class ConsoleLogProviderTests
     {
@@ -783,14 +791,11 @@ namespace WpfDevKit.Tests.Logging
 
             var options = new ConsoleLogProviderOptions
             {
-                FormattedOutput = _ => "TRACE_OK"
+                FormattedOutput = _ => "TRACE_OK",
+                DefaultTextWriter = new FailingTextWriter()
             };
 
             var provider = new ConsoleLogProvider(new Options<ConsoleLogProviderOptions>(options));
-
-            // Simulate console failure
-            typeof(Console).GetField("_out", BindingFlags.Static | BindingFlags.NonPublic)
-                ?.SetValue(null, null); // Force Trace fallback
 
             Trace.Listeners.Clear();
             Trace.Listeners.Add(new TestTraceListener(s => {
@@ -959,5 +964,48 @@ namespace WpfDevKit.Tests.Logging
         }
     }
 
+    [TestClass]
+    public class LogBackgroundServiceTests
+    {
+        [TestMethod]
+        public async Task Host_LogsMessageToMemoryProvider()
+        {
+            var builder = HostBuilder.CreateHostBuilder();
 
+            using (var host = builder.Build())
+            {
+                await host.StartAsync();
+
+                // Retrieve the provider collection and add the MemoryLogProvider
+                var logProviderCollection = host.Services.GetService<ILogProviderCollection>();
+                var memoryProvider = new MemoryLogProvider(new Options<MemoryLogProviderOptions>(new MemoryLogProviderOptions
+                {
+                    Capacity = 5,
+                    FillFactor = 100
+                }));
+
+                Assert.IsTrue(logProviderCollection.TryAddProvider(memoryProvider));
+
+                // Log a message through the ILogService
+                var logService = host.Services.GetService<ILogService>();
+                logService.Log(TLogCategory.Info, "Integration test message");
+
+                await Task.Delay(200); // Allow background service time to process
+
+                // Use reflection to inspect logged messages
+                var itemsField = typeof(MemoryLogProvider).GetField("items", BindingFlags.NonPublic | BindingFlags.Instance);
+                var logList = (List<ILogMessage>)itemsField.GetValue(memoryProvider);
+
+                lock (logList)
+                {
+                    Assert.AreEqual(1, logList.Count);
+                    Assert.AreEqual("Integration test message", logList[0].Message);
+                    Console.WriteLine($"Logged message = '{logList[0].Message}'");
+                }
+
+                await host.StopAsync();
+            }
+        }
+
+    }
 }

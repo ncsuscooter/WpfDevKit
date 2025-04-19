@@ -19,24 +19,33 @@ namespace WpfDevKit.App
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) => MessageBox.Show(e.Exception.ToString());
         private async void OnApplicationStartup(object sender, StartupEventArgs e)
         {
-            var host = new HostBuilder()
-                .ConfigureServices(services =>
+            var builder = HostBuilder.CreateHostBuilder();
+            builder.Services.AddContextSynchronization()
+                            .AddCollectionSynchronization()
+                            .AddCommandFactory()
+                            .AddDialogService()
+                            .AddConnectivityService(options =>
+                            {
+                                var collection = Dns.GetHostAddresses("dbc");
+                                if (collection != null && collection.Length > 0)
+                                    options.Host = collection[0].ToString();
+                            })
+                            .AddMemoryLogProvider()
+                            .AddConsoleLogProvider()
+                            .AddUserLogProvider();
+
+            using (var host = builder.Build())
+            {
+                await host.StartAsync();
+                Current.MainWindow = new MainWindow
                 {
-                    services
-                    .AddBusyService()
-                    .AddConnectivityService(options =>
-                    {
-                        var collection = Dns.GetHostAddresses("dbc");
-                        if (collection != null && collection.Length > 0)
-                            options.Host = collection[0].ToString();
-                    })
-                    .AddLoggingService()
-                    .AddContextSynchronization()
-                    .AddCollectionSynchronization()
-                    .AddCommandFactory()
-                    .AddDialogService();
-                })
-                .Build();
+                    DataContext = new MainViewModel(host.Services.GetService<IBusyService>(),
+                                                    host.Services.GetService<ICommandFactory>(),
+                                                    host.Services.GetService<IDialogService>(),
+                                                    host.Services.GetService<ILogService>())
+                };
+                Current.MainWindow.Show();
+            }
             //host.ServiceProvider.AddLogProvider()
             //public static IServiceProvider AddLogProvider<TOptions>(this IServiceProvider provider, ILogProvider logProvider, Action<TOptions> configure, string key = null)
             //{
@@ -56,15 +65,7 @@ namespace WpfDevKit.App
             //    collection.TryAddProvider(logProvider, key);
             //    return provider;
             //}
-            await host.RunAsync();
-            Current.MainWindow = new MainWindow
-            {
-                DataContext = new MainViewModel(host.ServiceProvider.GetService<IBusyService>(),
-                                                host.ServiceProvider.GetService<ICommandFactory>(),
-                                                host.ServiceProvider.GetService<IDialogService>(),
-                                                host.ServiceProvider.GetService<ILogService>())
-            };
-            Current.MainWindow.Show();
+
         }
     }
 }

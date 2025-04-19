@@ -33,10 +33,10 @@ namespace WpfDevKit.Logging
         /// <param name="provider">The logging provider instance.</param>
         /// <param name="key">A unique key to identify this provider instance.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="provider"/> or <paramref name="key"/> is null.</exception>
-        public LogProviderDescriptor(ILogProvider provider, string key)
+        public LogProviderDescriptor(ILogProvider provider, string key = default)
         {
             Provider = provider ?? throw new ArgumentNullException(nameof(provider));
-            Key = key ?? throw new ArgumentNullException(nameof(key));
+            Key = key;
             Metrics = new LogMetrics();
         }
 
@@ -62,7 +62,7 @@ namespace WpfDevKit.Logging
         {
             int hashCode = -1726572946;
             hashCode = hashCode * -1521134295 + ProviderType.GetHashCode();
-            hashCode = hashCode * -1521134295 + Key.GetHashCode();
+            hashCode = hashCode * -1521134295 + (!string.IsNullOrWhiteSpace(Key) ? Key.GetHashCode() : 0);
             return hashCode;
         }
 

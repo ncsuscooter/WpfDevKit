@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using WpfDevKit.DependencyInjection;
 
@@ -13,14 +12,13 @@ namespace WpfDevKit.Logging
     internal class ConsoleLogProvider : ILogProvider
     {
         private readonly ConsoleLogProviderOptions options;
-        private bool isTrace;
-        private bool isConsole;
+        private readonly object sync;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsoleLogProvider"/> class.
         /// </summary>
         /// <param name="options">The options for configuring the console log provider.</param>
-        public ConsoleLogProvider(IOptions<ConsoleLogProviderOptions> options) => this.options = options.Value;
+        public ConsoleLogProvider(IOptions<ConsoleLogProviderOptions> options) => (this.options, sync) = (options.Value, new object());
 
         /// <inheritdoc/>
         /// <remarks>
@@ -39,43 +37,41 @@ namespace WpfDevKit.Logging
         /// <inheritdoc/>
         public Task LogAsync(ILogMessage message)
         {
-            // Determine if we are in a console environment or tracing environment
-            if (!isConsole && !isTrace)
-            {
-                try
-                {
-                    isConsole = Console.OpenStandardInput(1) != Stream.Null;
-                    isTrace = !isConsole;
-                }
-                catch
-                {
-                    isTrace = true;
-                }
-            }
-
             // Format the log message using the configured options
             var s = options.FormattedOutput(message);
-
-            // Log to the console if it's available
-            if (isConsole)
+            try
             {
-                if (!options.CategoryConsoleColors.TryGetValue(message.Category, out var c))
-                    c = options.CategoryConsoleColors[TLogCategory.None];
-
-                // Lock to ensure thread safety when writing to the console
-                lock (this)
+                // Log to the console if it's selected
+                if (options.DefaultTextWriter == Console.Out)
                 {
-                    Console.ForegroundColor = c;
-                    Console.WriteLine(s);
-                    Console.ResetColor();
+                    if (!options.CategoryConsoleColors.TryGetValue(message.Category, out var c))
+                        c = options.CategoryConsoleColors[TLogCategory.None];
+
+                    // Lock to ensure thread safety when writing to the console, specifically so that the colors are set properly
+                    lock (sync)
+                    {
+                        var orig = Console.ForegroundColor;
+                        try
+                        {
+                            Console.ForegroundColor = c;
+                            Console.WriteLine(s);
+                        }
+                        finally
+                        {
+                            Console.ForegroundColor = orig;
+                        }
+                    }
+                }
+                // Log to trace if console isn't available
+                else
+                {
+                    options.DefaultTextWriter.WriteLine(s);
                 }
             }
-            // Log to trace if console isn't available
-            else if (isTrace)
+            catch
             {
                 Trace.WriteLine(s);
             }
-
             return Task.CompletedTask;
         }
     }
