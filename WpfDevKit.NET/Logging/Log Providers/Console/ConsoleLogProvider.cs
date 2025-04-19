@@ -38,9 +38,11 @@ namespace WpfDevKit.Logging
         public Task LogAsync(ILogMessage message)
         {
             // Format the log message using the configured options
-            var s = options.FormattedOutput(message);
+            var s = options.LogOutputFormat(message);
             try
             {
+                var writer = options.LogOutputWriter ?? Console.Out;
+
                 // Log to the console if it's selected
                 if (options.LogOutputWriter == Console.Out)
                 {
@@ -54,7 +56,7 @@ namespace WpfDevKit.Logging
                         try
                         {
                             Console.ForegroundColor = c;
-                            Console.WriteLine(s);
+                            writer.WriteLine(s);
                         }
                         finally
                         {
@@ -64,7 +66,7 @@ namespace WpfDevKit.Logging
                 }
                 else
                 {
-                    options.LogOutputWriter.WriteLine(s);
+                    writer.WriteLine(s);
                 }
             }
             catch

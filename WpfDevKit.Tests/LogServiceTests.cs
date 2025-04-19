@@ -765,7 +765,7 @@ namespace WpfDevKit.Tests.Logging
 
             var options = new ConsoleLogProviderOptions
             {
-                FormattedOutput = msg => $"[{msg.Category}] {msg.Message}"
+                LogOutputFormat = msg => $"[{msg.Category}] {msg.Message}"
             };
 
             return new ConsoleLogProvider(new Options<ConsoleLogProviderOptions>(options));
@@ -791,7 +791,7 @@ namespace WpfDevKit.Tests.Logging
 
             var options = new ConsoleLogProviderOptions
             {
-                FormattedOutput = _ => "TRACE_OK",
+                LogOutputFormat = _ => "TRACE_OK",
                 LogOutputWriter = new FailingTextWriter()
             };
 
@@ -810,14 +810,14 @@ namespace WpfDevKit.Tests.Logging
         [TestMethod]
         public async Task LogAsync_Respects_CustomFormattedOutput()
         {
-            var options = new ConsoleLogProviderOptions
-            {
-                FormattedOutput = msg => $"CUSTOM >> {msg.Message}"
-            };
-            var provider = new ConsoleLogProvider(new Options<ConsoleLogProviderOptions>(options));
-
             var writer = new StringWriter();
             Console.SetOut(writer);
+
+            var provider = new ConsoleLogProvider(new Options<ConsoleLogProviderOptions>(new ConsoleLogProviderOptions
+            {
+                LogOutputFormat = msg => $"CUSTOM >> {msg.Message}",
+                LogOutputWriter = writer
+            }));
 
             await provider.LogAsync(new TestLogMessage { Message = "XUnit" });
 

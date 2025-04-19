@@ -31,7 +31,7 @@ namespace WpfDevKit.Logging
         /// A function that formats the log message for console output.
         /// The default format includes the log index, timestamp, thread ID, category, class, method, message, attributes, and exception details.
         /// </summary>
-        public Func<ILogMessage, string> FormattedOutput { get; set; } = logMessage =>
+        public Func<ILogMessage, string> LogOutputFormat { get; set; } = logMessage =>
         {
             var s = $"{logMessage.Index}\t{logMessage.Timestamp:M/d/yy HH:mm:ss.fff}\t[0x{logMessage.ThreadId:X2}]\t{logMessage.Category,-17} {logMessage.ClassName}.{logMessage.MethodName}";
             if (!string.IsNullOrWhiteSpace(logMessage.Message))
@@ -47,6 +47,6 @@ namespace WpfDevKit.Logging
         /// Gets or sets the text writer used for outputting log messages.
         /// Defaults to <see cref="Console.Out"/>. If <c>null</c>, logging will fall back to <see cref="Trace"/>.
         /// </summary>
-        public TextWriter LogOutputWriter { get; set; } = Console.Out;
+        public TextWriter LogOutputWriter { get; set; }
     }
 }
