@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -817,6 +818,144 @@ namespace WpfDevKit.Tests.Logging
 
             var output = writer.ToString();
             Assert.IsTrue(output.Contains("CUSTOM >> XUnit"));
+        }
+    }
+
+    [TestClass]
+    public class DatabaseLogProviderTests1
+    {
+        private DatabaseLogProviderOptions GetValidOptions() => new DatabaseLogProviderOptions
+        {
+            ConnectionString = "Server=.;Database=TestDb;Trusted_Connection=True;",
+            TableName = "Logs",
+            //Columns = new List<DatabaseLogColumn>
+            //{
+            //    new DatabaseLogColumn { Name = "Message", Property = "Message" },
+            //    new DatabaseLogColumn { Name = "Category", Property = "Category" }
+            //}
+        };
+
+        [TestMethod]
+        public async Task LogAsync_Ignores_WhenOptionsInvalid()
+        {
+            var options = new DatabaseLogProviderOptions(); // Missing ConnectionString and TableName
+            var provider = new DatabaseLogProvider(new Options<DatabaseLogProviderOptions>(options));
+            await provider.LogAsync(new TestLogMessage { Message = "Should not log" });
+
+            Assert.IsTrue(true); // Should not throw
+        }
+
+        [TestMethod]
+        public async Task LogAsync_Handles_Exception_Gracefully()
+        {
+            var options = GetValidOptions();
+            options.ConnectionString = "invalid"; // Triggers failure
+
+            var provider = new DatabaseLogProvider(new Options<DatabaseLogProviderOptions>(options));
+            await provider.LogAsync(new TestLogMessage { Message = "Should fail silently" });
+
+            Assert.IsTrue(true); // Should not throw
+        }
+
+        [TestMethod]
+        public void Constructor_SetsOptions_Correctly()
+        {
+            var options = GetValidOptions();
+            var provider = new DatabaseLogProvider(new Options<DatabaseLogProviderOptions>(options));
+            Assert.IsNotNull(provider);
+        }
+    }
+
+    [TestClass]
+    public class DatabaseLogProviderTests2
+    {
+        private DatabaseLogProvider CreateProvider(Action<DatabaseLogProviderOptions> configure)
+        {
+            var options = new DatabaseLogProviderOptions
+            {
+                ConnectionString = "Server=.;Database=Logs;Trusted_Connection=True;",
+                TableName = "LogEntries"
+            };
+            configure?.Invoke(options);
+            return new DatabaseLogProvider(new Options<DatabaseLogProviderOptions>(options));
+        }
+
+        [TestMethod]
+        public void GenerateCommandText_BuildsInsertWithCorrectColumns()
+        {
+            var provider = CreateProvider(opt =>
+            {
+                opt.AddElement(TLogElement.Message, x => x.Message, "Msg", isNullable: false);
+                opt.AddElement(TLogElement.Category, x => x.Category.ToString(), "Cat", isNullable: false);
+                opt.AddElement(TLogElement.Timestamp, x => x.Timestamp, "Time", isNullable: false);
+            });
+
+            var field = typeof(DatabaseLogProvider).GetField("commandText", BindingFlags.NonPublic | BindingFlags.Instance);
+            var sql = field.GetValue(provider) as string;
+
+            Console.WriteLine("Generated SQL: " + sql);
+
+            Assert.IsTrue(sql.Contains("INSERT INTO [LogEntries]"), "SQL should target correct table");
+            Assert.IsTrue(sql.Contains("[Msg]"), "Should include Msg");
+            Assert.IsTrue(sql.Contains("[Cat]"), "Should include Cat");
+            Assert.IsTrue(sql.Contains("@Msg"), "Should include parameter");
+        }
+
+        [TestMethod]
+        public async Task LogAsync_WithNoProviderFactory_DoesNotThrow()
+        {
+            var provider = CreateProvider(opt =>
+            {
+                opt.AddElement(TLogElement.Message, x => x.Message, "Message", isNullable: false);
+            });
+
+            var msg = new TestLogMessage { Message = "Hello", Category = TLogCategory.Info };
+
+            await provider.LogAsync(msg); // Should not throw even without a factory
+            Assert.IsTrue(true); // Pass if no exception thrown
+        }
+
+        [TestMethod]
+        public void AddElement_AddsAndOverwritesCorrectly()
+        {
+            var options = new DatabaseLogProviderOptions();
+            var field = typeof(DatabaseLogProvider).GetField("elements", BindingFlags.NonPublic | BindingFlags.Instance);
+            var elements = field.GetValue(options) as ConcurrentDictionary<TLogElement, DatabaseLogColumn>;
+
+            options.AddElement(TLogElement.ThreadId, x => x.ThreadId, "Thread", isNullable: true);
+            Assert.AreEqual("Thread", elements[TLogElement.ThreadId].ColumnName);
+
+            // Overwrite same key
+            options.AddElement(TLogElement.ThreadId, x => x.ThreadId, "Thread_2", isNullable: true);
+            Assert.AreEqual("Thread_2",elements[TLogElement.ThreadId].ColumnName);
+        }
+
+        [TestMethod]
+        public void CommandText_BuildsEmpty_WhenNoColumnsAdded()
+        {
+            var provider = CreateProvider(opt =>
+            {
+                //opt.Elements.Clear(); // Remove default column definitions
+            });
+
+            var field = typeof(DatabaseLogProvider).GetField("commandText", BindingFlags.NonPublic | BindingFlags.Instance);
+            var sql = field.GetValue(provider) as string;
+
+            Assert.IsTrue(sql.Contains("INSERT INTO [LogEntries] () VALUES ()"), "Empty INSERT expected");
+        }
+
+        [TestMethod]
+        public void AddElement_WithMaxLength_IsCaptured()
+        {
+            var options = new DatabaseLogProviderOptions();
+            var field = typeof(DatabaseLogProvider).GetField("elements", BindingFlags.NonPublic | BindingFlags.Instance);
+            var elements = field.GetValue(options) as ConcurrentDictionary<TLogElement, DatabaseLogColumn>;
+
+            options.AddElement(TLogElement.UserName, x => x.UserName, "User", isNullable: true, maxLength: 50);
+            var col = elements[TLogElement.UserName];
+
+            Assert.AreEqual("User", col.ColumnName);
+            Assert.AreEqual(50, col.MaxLength);
         }
     }
 

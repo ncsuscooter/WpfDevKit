@@ -15,6 +15,7 @@ namespace WpfDevKit.Factory
         /// <param name="services">The IServiceCollection instance.</param>
         /// <returns>The current IServiceCollection instance for chaining.</returns>
         public static IServiceCollection AddObjectFactory(this IServiceCollection services) => 
-            services.AddSingleton<IObjectFactory>(p => new ObjectFactory(p as IObjectResolver));
+            services.AddSingleton<ObjectFactory>(p => new ObjectFactory(p as IObjectResolver))
+                    .AddSingleton<IObjectFactory>(p => p.GetService<ObjectFactory>());
     }
 }

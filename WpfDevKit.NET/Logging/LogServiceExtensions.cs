@@ -18,11 +18,11 @@ namespace WpfDevKit.Logging
         /// <param name="services">The IServiceCollection instance.</param>
         /// <returns>The current IServiceCollection instance for chaining.</returns>
         public static IServiceCollection AddLoggingService(this IServiceCollection services) =>
-            services.AddSingleton<LogMetrics, LogMetrics>()
-                    .AddSingleton<LogQueue, LogQueue>()
-                    .AddSingleton<LogService, LogService>()
-                    .AddSingleton<LogProviderCollection, LogProviderCollection>()
-                    .AddSingleton<LogBackgroundService, LogBackgroundService>()
+            services.AddSingleton<LogMetrics>()
+                    .AddSingleton<LogQueue>()
+                    .AddSingleton<LogService>()
+                    .AddSingleton<LogProviderCollection>()
+                    .AddSingleton<LogBackgroundService>()
                     .AddSingleton<ILogProviderCollection>(p => p.GetService<LogProviderCollection>())
                     .AddSingleton<ILogMetricsReader>(p => p.GetService<LogMetrics>())
                     .AddSingleton<ILogService>(p => p.GetService<LogService>());
