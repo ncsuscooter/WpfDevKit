@@ -460,7 +460,6 @@ namespace WpfDevKit.Tests.Logging
         }
     }
 
-
     [TestClass]
     public class LogServiceTests
     {
@@ -820,4 +819,6 @@ namespace WpfDevKit.Tests.Logging
             Assert.IsTrue(output.Contains("CUSTOM >> XUnit"));
         }
     }
+
+
 }
