@@ -21,26 +21,12 @@ namespace WpfDevKit.Logging
         public ConsoleLogProvider(IOptions<ConsoleLogProviderOptions> options) => (this.options, sync) = (options.Value, new object());
 
         /// <inheritdoc/>
-        /// <remarks>
-        /// The default value is <see cref="TLogCategory.None"/> bitwise complemented 
-        /// (<c>~TLogCategory.None</c>), which means all categories are enabled by default.
-        /// </remarks>
-        public TLogCategory EnabledCategories { get; set; } = ~TLogCategory.None;
-
-        /// <inheritdoc/>
-        /// <remarks>
-        /// The default value is <see cref="TLogCategory.None"/>, meaning no categories 
-        /// are disabled by default.
-        /// </remarks>
-        public TLogCategory DisabledCategories => TLogCategory.None;
-
-        /// <inheritdoc/>
         public Task LogAsync(ILogMessage message)
         {
-            // Format the log message using the configured options
-            var s = options.LogOutputFormat(message);
             try
             {
+                // Format the log message using the configured options
+                var s = options.LogOutputFormat(message);
                 var writer = options.LogOutputWriter ?? Console.Out;
 
                 // Log to the console if it's selected
@@ -71,7 +57,7 @@ namespace WpfDevKit.Logging
             }
             catch
             {
-                Trace.WriteLine(s);
+                Trace.WriteLine(message);
             }
             return Task.CompletedTask;
         }

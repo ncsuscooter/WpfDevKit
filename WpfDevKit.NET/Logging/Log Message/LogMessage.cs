@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
 
 namespace WpfDevKit.Logging
 {
@@ -98,5 +100,10 @@ namespace WpfDevKit.Logging
 
         /// <inheritdoc/>
         public string ExceptionStackTrace { get; }
+
+        /// <inheritdoc/>
+        public override string ToString() => GetType().GetProperties()
+                                                      .Select(info => (info.Name, Value: info.GetValue(this, null) ?? "(null)"))
+                                                      .Aggregate(new StringBuilder(), (sb, pair) => sb.AppendLine($"{pair.Name}: {pair.Value}"), sb => sb.ToString());
     }
 }

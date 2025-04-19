@@ -576,7 +576,7 @@ namespace WpfDevKit.Tests.Logging
     [TestClass]
     public class LogProviderCollectionTests
     {
-        private LogProviderCollection CreateCollection(out LogService service)
+        private LogProviderDescriptorCollection CreateCollection(out LogService service)
         {
             var metrics = new LogMetrics();
             var queue = new LogQueue(metrics);
@@ -976,15 +976,6 @@ namespace WpfDevKit.Tests.Logging
             {
                 await host.StartAsync();
 
-                // Retrieve the provider collection and add the MemoryLogProvider
-                var logProviderCollection = host.Services.GetService<ILogProviderCollection>();
-                var memoryProvider = new MemoryLogProvider(new Options<MemoryLogProviderOptions>(new MemoryLogProviderOptions
-                {
-                    Capacity = 5,
-                    FillFactor = 100
-                }));
-
-                Assert.IsTrue(logProviderCollection.TryAddProvider(memoryProvider));
 
                 // Log a message through the ILogService
                 var logService = host.Services.GetService<ILogService>();

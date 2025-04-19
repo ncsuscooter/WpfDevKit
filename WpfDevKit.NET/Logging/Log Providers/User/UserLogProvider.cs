@@ -1,42 +1,40 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using WpfDevKit.DependencyInjection;
 
 namespace WpfDevKit.Logging
 {
     /// <summary>
-    /// A log provider that extends the <see cref="MemoryLogProvider"/> and provides user-specific logging functionality.
+    /// A log provider that provides user-specific logging functionality.
     /// It manages a collection of log messages with custom behavior for enabled/disabled categories and optional log clearing.
     /// </summary>
     [DebuggerStepThrough]
-    internal class UserLogProvider : MemoryLogProvider, IUserLogProvider
+    internal class UserLogProvider : ILogProvider, IGetLogs
     {
         private readonly UserLogProviderOptions options;
+        private readonly List<ILogMessage> items;
+        private readonly object sync;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserLogProvider"/> class.
         /// </summary>
         /// <param name="options">The options for configuring the user log provider.</param>
-        public UserLogProvider(IOptions<UserLogProviderOptions> options) : base(options.Value) => this.options = options.Value;
+        public UserLogProvider(IOptions<UserLogProviderOptions> options) =>
+            (this.options, items, sync) = (options.Value, new List<ILogMessage>(), new object());
 
         /// <inheritdoc/>
-        /// <remarks>
-        /// The default value is <c>TLogCategory.Fatal | TLogCategory.Error | TLogCategory.Warning</c>,
-        /// meaning these categories are enabled for logging by default.
-        /// </remarks>
-        public override TLogCategory EnabledCategories { get; set; } = TLogCategory.Fatal | TLogCategory.Error | TLogCategory.Warning;
-
-        /// <inheritdoc/>
-        /// <remarks>
-        /// The default value is <c>~(TLogCategory.Fatal | TLogCategory.Error | TLogCategory.Warning)</c>,
-        /// meaning these categories are disabled by default and no other categories are explicitly disabled.
-        /// </remarks>
-        public override TLogCategory DisabledCategories => ~(TLogCategory.Fatal | TLogCategory.Error | TLogCategory.Warning);
-
-        /// <inheritdoc/>
-        public IReadOnlyCollection<ILogMessage> GetLogMessages()
+        public Task LogAsync(ILogMessage message)
         {
-            lock (this)
+            lock (sync)
+                items.Add(message);
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public IReadOnlyCollection<ILogMessage> GetLogs()
+        {
+            lock (sync)
             {
                 // Create a read-only copy of the stored log messages
                 var result = new List<ILogMessage>(items).AsReadOnly();

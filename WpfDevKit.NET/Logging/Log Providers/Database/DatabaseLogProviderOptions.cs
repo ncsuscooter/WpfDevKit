@@ -11,13 +11,27 @@ namespace WpfDevKit.Logging
     /// schema/table settings, column definitions, and error-handling behavior.
     /// </summary>
     [DebuggerStepThrough]
-    public sealed class DatabaseLogProviderOptions
+    public sealed class DatabaseLogProviderOptions : ILogProviderOptions
     {
         private readonly ConcurrentDictionary<TLogElement, DatabaseLogColumn> elements =
             new ConcurrentDictionary<TLogElement, DatabaseLogColumn>();
 
         private string tableName;
         private string schemaName;
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The default values are <see cref="TLogCategory.None"/> to prevent logging to the database right away.
+        /// The user is expected to "enable" the database log provider by properly setting the enabled categories.
+        /// </remarks>
+        public TLogCategory EnabledCategories { get; set; } = TLogCategory.None;
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The default value is <see cref="TLogCategory.Trace"/>, meaning only Trace categories 
+        /// are disabled by default.
+        /// </remarks>
+        public TLogCategory DisabledCategories => TLogCategory.Trace;
 
         /// <summary>
         /// Gets or sets a value indicating whether the log provider should throw an exception on validation or insert failure.

@@ -12,20 +12,20 @@ namespace WpfDevKit.Logging
     [DebuggerStepThrough]
     internal class LogBackgroundService : HostedService
     {
-        private readonly LogProviderCollection logProviderCollection;
+        private readonly LogProviderDescriptorCollection logProviderDescriptorCollection;
         private readonly LogService logService;
         private readonly LogQueue logQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogBackgroundService"/> class.
         /// </summary>
-        /// <param name="logProviderCollection">The collection used to resolve logging providers.</param>
+        /// <param name="logProviderDescriptorCollection">The collection of log provider descriptors to help resolve providers, metrics, and options.</param>
         /// <param name="logService">The service used to log messages or exceptions while processing messages.</param>
         /// <param name="logQueue">The queue that holds the log messages to be processed.</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the object's required arguments are null</exception>
-        public LogBackgroundService(LogProviderCollection logProviderCollection, LogService logService, LogQueue logQueue)
+        public LogBackgroundService(IServiceProvider provider, LogProviderDescriptorCollection logProviderDescriptorCollection, LogService logService, LogQueue logQueue)
         {
-            this.logProviderCollection = logProviderCollection ?? throw new ArgumentNullException(nameof(logProviderCollection));
+            this.logProviderDescriptorCollection = logProviderDescriptorCollection ?? throw new ArgumentNullException(nameof(logProviderDescriptorCollection));
             this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
             this.logQueue = logQueue ?? throw new ArgumentNullException(nameof(logQueue));
         }
@@ -44,15 +44,15 @@ namespace WpfDevKit.Logging
                     while (logQueue.TryRead(out var message))
                     {
                         // Iterate over all available logging providers and log the message if appropriate
-                        foreach (var descriptor in logProviderCollection.GetProviders())
+                        foreach (var descriptor in logProviderDescriptorCollection.GetDescriptors())
                         {
                             using (descriptor.Metrics.StartStop(message))
                             {
                                 try
                                 {
                                     // Retrieve the logging provider and check if it is enabled for the given category
-                                    if ((descriptor.Provider.EnabledCategories & message.Category) == 0 ||
-                                        (descriptor.Provider.DisabledCategories & message.Category) > 0)
+                                    if ((descriptor.Options.EnabledCategories & message.Category) == 0 ||
+                                        (descriptor.Options.DisabledCategories & message.Category) > 0)
                                     {
                                         descriptor.Metrics.IncrementLost();
                                         continue;
@@ -66,7 +66,7 @@ namespace WpfDevKit.Logging
                                 }
                                 catch (Exception ex)
                                 {
-                                    logProviderCollection.TryRemoveProvider(descriptor.Provider);
+                                    descriptor.Options.EnabledCategories = TLogCategory.None;
                                     logService.LogError(ex, descriptor.ProviderType);
                                 }
                             }

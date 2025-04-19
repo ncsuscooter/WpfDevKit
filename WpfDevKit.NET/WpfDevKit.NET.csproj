@@ -52,6 +52,7 @@
     <Compile Include="Logging\Log Metrics\ILogMetricsWriter.cs" />
     <Compile Include="Logging\Log Provider Descriptor\ILogProviderDescriptor.cs" />
     <Compile Include="Logging\Log Provider Descriptor\LogProviderDescriptor.cs" />
+    <Compile Include="Logging\Log Provider Descriptor\LogProviderCollection.cs" />
     <Compile Include="Logging\Log Providers\Database\DatabaseLogColumn.cs" />
     <Compile Include="Logging\Log Providers\Database\DatabaseLogProvider.cs" />
     <Compile Include="Logging\Log Providers\Database\DatabaseLogProviderOptions.cs" />
@@ -59,7 +60,8 @@
     <Compile Include="Hosting\Host\Host.cs" />
     <Compile Include="Hosting\HostBuilder.cs" />
     <Compile Include="Logging\Log Message\ILogMessage.cs" />
-    <Compile Include="Logging\Log Providers\User\IUserLogProvider.cs" />
+    <Compile Include="Logging\Log Providers\ILogProviderOptions.cs" />
+    <Compile Include="Logging\Log Providers\IGetLogs.cs" />
     <Compile Include="Dependency Injection\Service Collection\IServiceCollection.cs" />
     <Compile Include="Dependency Injection\Options\Options.cs" />
     <Compile Include="Dependency Injection\ServiceProvider.cs" />
@@ -68,8 +70,6 @@
     <Compile Include="Dependency Injection\TServiceLifetime.cs" />
     <Compile Include="Remote File Access\Connection\IRemoteFileConnection.cs" />
     <Compile Include="ServiceProviderExtensions.cs" />
-    <Compile Include="Logging\Log Provider Collection\LogProviderCollection.cs" />
-    <Compile Include="Logging\Log Provider Collection\ILogProviderCollection.cs" />
     <Compile Include="Factory\ResolvableAttribute.cs" />
     <Compile Include="EnumExtensions.cs" />
     <Compile Include="TaskExtensions.cs" />

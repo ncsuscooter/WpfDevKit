@@ -12,7 +12,7 @@ namespace WpfDevKit.DependencyInjection
     internal class ServiceCollection : IServiceCollection
     {
         private readonly List<ServiceDescriptor> descriptors = new List<ServiceDescriptor>();
-        private readonly Dictionary<ServiceDescriptor, List<Delegate>> optionsConfigurators = new Dictionary<ServiceDescriptor, List<Delegate>>();
+        private readonly Dictionary<ServiceDescriptor, List<Delegate>> configurators = new Dictionary<ServiceDescriptor, List<Delegate>>();
 
         /// <inheritdoc/>
         public bool IsBuilt { get; private set; }
@@ -120,8 +120,8 @@ namespace WpfDevKit.DependencyInjection
             EnsureOptionsNotRegistered<TOptions>();
             descriptors.Add(new ServiceDescriptor(typeof(IOptions<TOptions>), typeof(Options<TOptions>), TServiceLifetime.Singleton));
             var descriptor = descriptors.FirstOrDefault(d => d.ServiceType == typeof(IOptions<TOptions>));
-            if (!optionsConfigurators.TryGetValue(descriptor, out var _))
-                optionsConfigurators[descriptor] = new List<Delegate>();
+            if (!configurators.TryGetValue(descriptor, out var _))
+                configurators[descriptor] = new List<Delegate>();
             return this;
         }
 
@@ -149,7 +149,7 @@ namespace WpfDevKit.DependencyInjection
                 throw new InvalidOperationException($"Cannot configure options for '{typeof(TOptions).Name}' because it is not registered as a service.");
             var descriptor = collection.FirstOrDefault(d => d.Factory == null) ??
                 throw new InvalidOperationException($"Cannot configure options for '{typeof(TOptions).Name}' because it is registered using a factory.");
-            if (!optionsConfigurators.TryGetValue(descriptor, out var list))
+            if (!configurators.TryGetValue(descriptor, out var list))
                 throw new InvalidOperationException($"Cannot configure options for '{typeof(TOptions).Name}' because it was not registered using AddOptions<T>().");
             list.Add(configure);
             return this;
@@ -179,7 +179,7 @@ namespace WpfDevKit.DependencyInjection
                     if (optionsType.GetConstructor(Type.EmptyTypes) == null)
                         throw new InvalidOperationException($"Options type '{optionsType.Name}' must have a public parameterless constructor.");
                     var optionsInstance = Activator.CreateInstance(optionsType);
-                    foreach (var config in optionsConfigurators[descriptor])
+                    foreach (var config in configurators[descriptor])
                         config.DynamicInvoke(optionsInstance);
                     var wrapped = Activator.CreateInstance(typeof(Options<>).MakeGenericType(optionsType), optionsInstance);
                     copy.Add(new ServiceDescriptor(descriptor.ServiceType, _ => wrapped, TServiceLifetime.Singleton));

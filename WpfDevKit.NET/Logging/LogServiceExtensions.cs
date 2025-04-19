@@ -21,50 +21,49 @@ namespace WpfDevKit.Logging
             services.AddSingleton<LogMetrics>()
                     .AddSingleton<LogQueue>()
                     .AddSingleton<LogService>()
-                    .AddSingleton<LogProviderCollection>()
                     .AddSingleton<LogBackgroundService>()
-                    .AddSingleton<ILogProviderCollection>(p => p.GetService<LogProviderCollection>())
-                    .AddSingleton<ILogMetricsReader>(p => p.GetService<LogMetrics>())
-                    .AddSingleton<ILogService>(p => p.GetService<LogService>());
+                    .AddSingleton<LogProviderDescriptorCollection>()
+                    .AddLogProvider<MemoryLogProvider, MemoryLogProviderOptions>()
+                    .AddLogProvider<ConsoleLogProvider, ConsoleLogProviderOptions>()
+                    .AddLogProvider<DatabaseLogProvider, DatabaseLogProviderOptions>()
+                    .AddLogProvider<UserLogProvider, UserLogProviderOptions>()
+                    .AddSingleton<IGetLogs>(p => p.GetRequiredService<UserLogProvider>())
+                    .AddSingleton<IGetLogs>(p => p.GetRequiredService<MemoryLogProvider>())
+                    .AddSingleton<ILogService>(p => p.GetRequiredService<LogService>())
+                    .AddSingleton<ILogMetricsReader>(p => p.GetRequiredService<LogMetrics>());
 
         /// <summary>
-        /// Registers the <see cref="MemoryLogProvider"/> with optional configuration.
+        /// Registers a logging provider and its associated options, descriptor, and implementation into the <see cref="IServiceCollection"/>.
         /// </summary>
-        /// <param name="services">The service collection to add the provider to.</param>
-        /// <param name="configure">An optional delegate to configure the provider options.</param>
-        /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
-        public static IServiceCollection AddMemoryLogProvider(this IServiceCollection services, Action<MemoryLogProviderOptions> configure = default) =>
-            services.AddSingleton<MemoryLogProvider>().AddOptions(configure);
-
-        /// <summary>
-        /// Registers the <see cref="ConsoleLogProvider"/> with optional configuration.
-        /// </summary>
-        /// <param name="services">The service collection to add the provider to.</param>
-        /// <param name="configure">An optional delegate to configure the provider options.</param>
-        /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
-        public static IServiceCollection AddConsoleLogProvider(this IServiceCollection services, Action<ConsoleLogProviderOptions> configure = default) =>
-            services.AddSingleton<ConsoleLogProvider>().AddOptions(configure);
-
-        /// <summary>
-        /// Registers the <see cref="DatabaseLogProvider"/> with optional configuration.
-        /// </summary>
-        /// <param name="services">The service collection to add the provider to.</param>
-        /// <param name="configure">An optional delegate to configure the provider options.</param>
-        /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
-        public static IServiceCollection AddDatabaseLogProvider(this IServiceCollection services, Action<DatabaseLogProviderOptions> configure = default) =>
-            services.AddSingleton<DatabaseLogProvider>().AddOptions(configure);
-
-        /// <summary>
-        /// Registers the <see cref="UserLogProvider"/> and exposes it via the <see cref="IUserLogProvider"/> interface,
-        /// with optional configuration.
-        /// </summary>
-        /// <param name="services">The service collection to add the provider to.</param>
-        /// <param name="configure">An optional delegate to configure the provider options.</param>
-        /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
-        public static IServiceCollection AddUserLogProvider(this IServiceCollection services, Action<UserLogProviderOptions> configure = default) =>
-            services.AddSingleton<UserLogProvider>()
-                    .AddSingleton<IUserLogProvider>(p => p.GetService<UserLogProvider>())
-                    .AddOptions(configure);
+        /// <typeparam name="TProvider">The concrete logging provider class to register.</typeparam>
+        /// <typeparam name="TOptions">The options type used to configure the provider.</typeparam>
+        /// <param name="services">The service collection to add the provider and its dependencies to.</param>
+        /// <param name="configure">
+        /// An optional delegate to configure the provider's options. If not provided, default values will be used.
+        /// </param>
+        /// <returns>The updated <see cref="IServiceCollection"/> instance for chaining.</returns>
+        /// <remarks>
+        /// This method registers:
+        /// <list type="bullet">
+        /// <item><description>The <typeparamref name="TProvider"/> as itself and as <see cref="ILogProvider"/>.</description></item>
+        /// <item><description>The <see cref="ILogProviderDescriptor"/> generated from the provider and its options.</description></item>
+        /// <item><description>The <typeparamref name="TOptions"/> as configurable <c>IOptions&lt;T&gt;</c>.</description></item>
+        /// </list>
+        /// The provider descriptor is also added to the <see cref="LogProviderDescriptorCollection"/> for runtime lookup.
+        /// </remarks>
+        public static IServiceCollection AddLogProvider<TProvider, TOptions>(this IServiceCollection services, Action<TOptions> configure = default)
+            where TProvider : class, ILogProvider
+            where TOptions : class, ILogProviderOptions, new() => services.AddSingleton<TProvider>()
+                                                                          .AddSingleton<ILogProvider>(p => p.GetRequiredService<TProvider>())
+                                                                          .AddSingleton<ILogProviderDescriptor>(p =>
+                                                                          {
+                                                                              var provider = p.GetRequiredService<TProvider>();
+                                                                              var options = p.GetRequiredService<IOptions<TOptions>>().Value;
+                                                                              var descriptor = new LogProviderDescriptor(provider, options);
+                                                                              p.GetRequiredService<LogProviderDescriptorCollection>().Add<TProvider>(descriptor);
+                                                                              return descriptor;
+                                                                          })
+                                                                          .AddOptions(configure);
 
         /// <summary>
         /// Logs a message at the Trace log level.

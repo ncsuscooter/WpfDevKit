@@ -7,10 +7,24 @@ namespace WpfDevKit.Logging
     /// Configuration options for the <see cref="MemoryLogProvider"/> class, which handles logging to memory.
     /// </summary>
     [DebuggerStepThrough]
-    public class MemoryLogProviderOptions
+    public sealed class MemoryLogProviderOptions : ILogProviderOptions
     {
         private int capacity = 8196;
         private int fillFactor = 80;
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The default value is <see cref="TLogCategory.None"/> bitwise complemented 
+        /// (<c>~TLogCategory.None</c>), meaning all categories are enabled by default.
+        /// </remarks>
+        public TLogCategory EnabledCategories { get; set; } = ~TLogCategory.None;
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The default value is <see cref="TLogCategory.None"/>, meaning no categories 
+        /// are disabled by default.
+        /// </remarks>
+        public TLogCategory DisabledCategories => TLogCategory.None;
 
         /// <summary>
         /// The maximum number of log messages that can be stored in memory.

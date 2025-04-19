@@ -19,20 +19,6 @@ namespace WpfDevKit.Logging
         public DatabaseLogProvider(IOptions<DatabaseLogProviderOptions> options) => this.options = options.Value;
 
         /// <inheritdoc/>
-        /// <remarks>
-        /// The default values are <see cref="TLogCategory.StartStop"/>, <see cref="TLogCategory.Info"/>, <see cref="TLogCategory.Warning"/>,
-        /// <see cref="TLogCategory.Error"/>, and <see cref="TLogCategory.Fatal"/>.
-        /// </remarks>
-        public TLogCategory EnabledCategories { get; set; } = TLogCategory.Info | TLogCategory.StartStop | TLogCategory.Warning | TLogCategory.Error | TLogCategory.Fatal;
-
-        /// <inheritdoc/>
-        /// <remarks>
-        /// The default value is <see cref="TLogCategory.Trace"/>, meaning only Trace categories 
-        /// are disabled by default.
-        /// </remarks>
-        public TLogCategory DisabledCategories => TLogCategory.Trace;
-
-        /// <inheritdoc/>
         /// <exception cref="InvalidOperationException" />
         public async Task LogAsync(ILogMessage message)
         {

@@ -9,8 +9,22 @@ namespace WpfDevKit.Logging
     /// Configuration options for the <see cref="ConsoleLogProvider"/> class, which handles logging to the console.
     /// </summary>
     [DebuggerStepThrough]
-    public class ConsoleLogProviderOptions
+    public sealed class ConsoleLogProviderOptions : ILogProviderOptions
     {
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The default value is <see cref="TLogCategory.None"/> bitwise complemented 
+        /// (<c>~TLogCategory.None</c>), which means all categories are enabled by default.
+        /// </remarks>
+        public TLogCategory EnabledCategories { get; set; } = ~TLogCategory.None;
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The default value is <see cref="TLogCategory.None"/>, meaning no categories 
+        /// are disabled by default.
+        /// </remarks>
+        public TLogCategory DisabledCategories => TLogCategory.None;
+
         /// <summary>
         /// A dictionary that associates each log category with a specific console color.
         /// Default values are provided for each <see cref="TLogCategory"/>.

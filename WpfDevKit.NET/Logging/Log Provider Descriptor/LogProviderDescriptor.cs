@@ -9,9 +9,6 @@ namespace WpfDevKit.Logging
     internal class LogProviderDescriptor : ILogProviderDescriptor, IEquatable<ILogProviderDescriptor>
     {
         /// <inheritdoc/>
-        public string Key { get; private set; }
-
-        /// <inheritdoc/>
         public Type ProviderType => Provider.GetType();
 
         /// <inheritdoc/>
@@ -28,15 +25,20 @@ namespace WpfDevKit.Logging
         public LogMetrics Metrics { get; private set; }
 
         /// <summary>
+        /// Gets the internal metrics associated with this provider.
+        /// </summary>
+        public ILogProviderOptions Options { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="LogProviderDescriptor"/> class.
         /// </summary>
         /// <param name="provider">The logging provider instance.</param>
         /// <param name="key">A unique key to identify this provider instance.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="provider"/> or <paramref name="key"/> is null.</exception>
-        public LogProviderDescriptor(ILogProvider provider, string key = default)
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="provider"/> or <paramref name="options"/> is null.</exception>
+        public LogProviderDescriptor(ILogProvider provider, ILogProviderOptions options)
         {
             Provider = provider ?? throw new ArgumentNullException(nameof(provider));
-            Key = key;
+            Options = options ?? throw new ArgumentNullException(nameof(options));
             Metrics = new LogMetrics();
         }
 
@@ -50,26 +52,17 @@ namespace WpfDevKit.Logging
         /// <summary>
         /// Determines whether the specified object is equal to the current instance.
         /// </summary>
-        public override bool Equals(object obj) =>
-            obj is ILogProviderDescriptor other &&
-            ProviderType == other.ProviderType &&
-            Key == other.Key;
+        public override bool Equals(object obj) => obj is ILogProviderDescriptor other && ProviderType == other.ProviderType;
 
         /// <summary>
         /// Returns a hash code for the current instance based on provider type and key.
         /// </summary>
-        public override int GetHashCode()
-        {
-            int hashCode = -1726572946;
-            hashCode = hashCode * -1521134295 + ProviderType.GetHashCode();
-            hashCode = hashCode * -1521134295 + (!string.IsNullOrWhiteSpace(Key) ? Key.GetHashCode() : 0);
-            return hashCode;
-        }
+        public override int GetHashCode() => ProviderType.GetHashCode();
 
         /// <summary>
         /// Returns a string representation of the provider descriptor.
         /// </summary>
         /// <returns>A formatted string with provider type name and key.</returns>
-        public override string ToString() => $"Type='{ProviderType.Name}' - Key='{Key}'";
+        public override string ToString() => $"Type='{ProviderType.Name}'";
     }
 }
