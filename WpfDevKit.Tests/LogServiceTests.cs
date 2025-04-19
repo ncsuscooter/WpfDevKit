@@ -1,11 +1,14 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using WpfDevKit.DependencyInjection;
 using WpfDevKit.Logging;
 
 namespace WpfDevKit.Tests.Logging
@@ -117,7 +120,7 @@ namespace WpfDevKit.Tests.Logging
     }
 
     [TestClass]
-    public class LogQueueTests
+    public class LogQueueTests1
     {
         [TestMethod]
         public void TryWrite_AddsMessageToQueue()
@@ -355,9 +358,109 @@ namespace WpfDevKit.Tests.Logging
                 Assert.AreEqual($"msg{i}", msg.Message);
             }
         }
-
     }
-    
+
+    [TestClass]
+    public class LogQueueTests2
+    {
+        [TestMethod]
+        public void TryWrite_AddsMessage_AndTracksMetrics()
+        {
+            var metrics = new LogMetrics();
+            var queue = new LogQueue(metrics);
+            var msg = new TestLogMessage { Message = "Test" };
+
+            var result = queue.TryWrite(msg);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(1, metrics.Total);
+            Assert.AreEqual(1, metrics.Queued);
+            Assert.AreEqual(0, metrics.Lost);
+            Assert.AreEqual(0, metrics.Null);
+            Assert.AreEqual(1, metrics.CategoryCounts[msg.Category]);
+        }
+
+        [TestMethod]
+        public void TryWrite_NullMessage_TracksNullAndRejects()
+        {
+            var metrics = new LogMetrics();
+            var queue = new LogQueue(metrics);
+
+            var result = queue.TryWrite(null);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(1, metrics.Total);
+            Assert.AreEqual(0, metrics.Queued);
+            Assert.AreEqual(1, metrics.Lost);
+            Assert.AreEqual(1, metrics.Null);
+        }
+
+        [TestMethod]
+        public void TryWrite_WhenQueueFull_TracksLost()
+        {
+            var metrics = new LogMetrics();
+            var queue = new LogQueue(metrics);
+            var msg = new TestLogMessage { Message = "Full" };
+
+            for (int i = 0; i < 8196; i++)
+                Assert.IsTrue(queue.TryWrite(msg));
+
+            Assert.IsFalse(queue.TryWrite(msg));  // 8197th write fails
+            Assert.AreEqual(8197, metrics.Total);
+            Assert.AreEqual(8196, metrics.Queued);
+            Assert.AreEqual(1, metrics.Lost);
+            Assert.AreEqual(0, metrics.Null);
+        }
+
+        [TestMethod]
+        public void TryRead_MetricsNotAffected()
+        {
+            var metrics = new LogMetrics();
+            var queue = new LogQueue(metrics);
+            queue.TryWrite(new TestLogMessage { Message = "ReadTest" });
+
+            queue.TryRead(out var result);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, metrics.Total);
+            Assert.AreEqual(1, metrics.Queued);
+            Assert.AreEqual(0, metrics.Lost);
+            Assert.AreEqual(0, metrics.Null);
+        }
+
+        [TestMethod]
+        public void TryWriteTryRead_TracksEachCategory()
+        {
+            var metrics = new LogMetrics();
+            var queue = new LogQueue(metrics);
+            var categories = new[] { TLogCategory.Debug, TLogCategory.Error, TLogCategory.Info };
+
+            foreach (var cat in categories)
+                queue.TryWrite(new TestLogMessage { Message = "x", Category = cat });
+
+            foreach (var cat in categories)
+                Assert.AreEqual(1, metrics.CategoryCounts[cat]);
+        }
+
+        [TestMethod]
+        public async Task LogMetrics_StartStop_AccumulatesElapsedTime()
+        {
+            var metrics = new LogMetrics();
+
+            using (metrics.StartStop(new TestLogMessage()))
+                await Task.Delay(50);
+
+            using (metrics.StartStop(new TestLogMessage()))
+                await Task.Delay(100);
+
+            var totalMs = metrics.Elapsed.TotalMilliseconds;
+            Console.WriteLine($"Total Elapsed = {totalMs:N0}ms - Expected: >=150ms");
+
+            Assert.IsTrue(totalMs >= 145); // Accept small timing variation
+        }
+    }
+
+
     [TestClass]
     public class LogServiceTests
     {
@@ -562,155 +665,159 @@ namespace WpfDevKit.Tests.Logging
         }
     }
 
-
-    //[TestClass]
-    //public class MemoryLogProviderTests
-    //{
-    //    private TestableMemoryLogProvider CreateProvider(int capacity = 10)
-    //    {
-    //        var options = new MemoryLogProviderOptions
-    //        {
-    //            Capacity = capacity,
-    //            FillFactor = 100
-    //        };
-    //        return new TestableMemoryLogProvider(options);
-    //    }
-
-    //    [TestMethod]
-    //    public async Task LogAsync_AddsMessage_AndUpdatesMetrics()
-    //    {
-    //        var provider = CreateProvider();
-    //        var message = new TestLogMessage { Message = "Hello World", Category = TLogCategory.Info };
-
-    //        await provider.LogAsync(message);
-
-    //        var logs = provider.Snapshot;
-    //        Assert.AreEqual(1, logs.Count, "Message count mismatch.");
-    //        Assert.AreEqual("Hello World", logs[0].Message);
-
-    //        var metrics = provider.Metrics;
-    //        Assert.AreEqual(1, metrics.Total);
-    //        Assert.AreEqual(1, metrics.CategoryCounts[TLogCategory.Info]);
-    //    }
-
-    //    [TestMethod]
-    //    public async Task LogAsync_ExceedsCapacity_DropsOldest()
-    //    {
-    //        var provider = CreateProvider(capacity: 3);
-
-    //        await provider.LogAsync(new TestLogMessage { Message = "1", Category = TLogCategory.Debug });
-    //        await provider.LogAsync(new TestLogMessage { Message = "2", Category = TLogCategory.Debug });
-    //        await provider.LogAsync(new TestLogMessage { Message = "3", Category = TLogCategory.Debug });
-    //        await provider.LogAsync(new TestLogMessage { Message = "4", Category = TLogCategory.Debug });
-
-    //        var logs = provider.Snapshot;
-    //        Assert.AreEqual(3, logs.Count);
-    //        Assert.AreEqual("2", logs[0].Message);
-    //        Assert.AreEqual("3", logs[1].Message);
-    //        Assert.AreEqual("4", logs[2].Message);
-
-    //        var metrics = provider.Metrics;
-    //        Assert.AreEqual(4, metrics.Total);
-    //        Assert.AreEqual(4, metrics.CategoryCounts[TLogCategory.Debug]);
-    //    }
-
-    //    [TestMethod]
-    //    public async Task LogAsync_SupportsDifferentCategories()
-    //    {
-    //        var provider = CreateProvider();
-
-    //        await provider.LogAsync(new TestLogMessage { Message = "Trace", Category = TLogCategory.Trace });
-    //        await provider.LogAsync(new TestLogMessage { Message = "Warn", Category = TLogCategory.Warning });
-
-    //        var metrics = provider.Metrics;
-    //        Assert.AreEqual(2, metrics.Total);
-    //        Assert.AreEqual(1, metrics.CategoryCounts[TLogCategory.Trace]);
-    //        Assert.AreEqual(1, metrics.CategoryCounts[TLogCategory.Warning]);
-    //    }
-
-    //    [TestMethod]
-    //    public async Task LogAsync_MetricsCategoryMapIsStable()
-    //    {
-    //        var provider = CreateProvider();
-
-    //        foreach (var cat in Enum.GetValues(typeof(TLogCategory)).Cast<TLogCategory>())
-    //        {
-    //            if (cat == TLogCategory.None) continue;
-
-    //            await provider.LogAsync(new TestLogMessage { Message = $"Test: {cat}", Category = cat });
-    //        }
-
-    //        var metrics = provider.Metrics;
-    //        foreach (var cat in Enum.GetValues(typeof(TLogCategory)).Cast<TLogCategory>())
-    //        {
-    //            if (cat == TLogCategory.None) continue;
-    //            Assert.AreEqual(1, metrics.CategoryCounts[cat], $"Category {cat} expected 1 log.");
-    //        }
-    //    }
-
-    //    [TestMethod]
-    //    public async Task FillFactor_75Percent_TrimsThenAdds_NewestPreserved()
-    //    {
-    //        var provider = new TestableMemoryLogProvider(new MemoryLogProviderOptions
-    //        {
-    //            Capacity = 4,
-    //            FillFactor = 75
-    //        });
-
-    //        for (int i = 1; i <= 5; i++)
-    //            await provider.LogAsync(new TestLogMessage { Message = $"msg {i}", Category = TLogCategory.Info });
-
-    //        var logs = provider.Snapshot;
-    //        Assert.AreEqual(4, logs.Count); // Capacity is preserved
-    //        CollectionAssert.AreEqual(new[] { "msg 2", "msg 3", "msg 4", "msg 5" }, logs.Select(x => x.Message).ToArray());
-    //    }
-
-    //    [TestMethod]
-    //    public async Task FillFactor_100Percent_StillDropsOne()
-    //    {
-    //        var provider = new TestableMemoryLogProvider(new MemoryLogProviderOptions
-    //        {
-    //            Capacity = 3,
-    //            FillFactor = 100 // Would calculate to 0, but fallback ensures we drop at least 1
-    //        });
-
-    //        for (int i = 1; i <= 4; i++)
-    //            await provider.LogAsync(new TestLogMessage { Message = $"msg {i}", Category = TLogCategory.Info });
-
-    //        var logs = provider.Snapshot;
-    //        Assert.AreEqual(3, logs.Count);
-    //        CollectionAssert.AreEqual(new[] { "msg 2", "msg 3", "msg 4" }, logs.Select(x => x.Message).ToArray());
-    //    }
-
-    //}
-
-
-
-    internal class TestableMemoryLogProvider : MemoryLogProvider
+    [TestClass]
+    public class MemoryLogProviderTests
     {
-        private static readonly FieldInfo itemsField = typeof(MemoryLogProvider)
-            .GetField("items", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        public TestableMemoryLogProvider(MemoryLogProviderOptions options)
-            : base(options)
+        private MemoryLogProvider CreateProvider(int capacity = 10, int fill = 100)
         {
-            if (itemsField == null)
-                throw new InvalidOperationException("Failed to reflect internal 'items' list from MemoryLogProvider.");
+            return new MemoryLogProvider(new Options<MemoryLogProviderOptions>(new MemoryLogProviderOptions()
+            {
+                Capacity = capacity,
+                FillFactor = fill
+            }));
         }
 
-        /// <summary>
-        /// Returns a thread-safe snapshot of the internal log buffer using reflection.
-        /// </summary>
-        public IReadOnlyList<ILogMessage> Snapshot
+        private static IReadOnlyList<ILogMessage> GetLogs(MemoryLogProvider provider)
         {
-            get
+            var itemsField = typeof(MemoryLogProvider).GetField("items", BindingFlags.NonPublic | BindingFlags.Instance) ??
+                throw new InvalidOperationException("Failed to reflect internal 'items' list from MemoryLogProvider.");
+            var list = (List<ILogMessage>)itemsField.GetValue(provider);
+            lock (list)
+                return list.ToList();
+        }
+
+        [TestMethod]
+        public async Task LogAsync_AppendsMessages_InOrder()
+        {
+            var provider = CreateProvider();
+            await provider.LogAsync(new TestLogMessage { Message = "First" });
+            await provider.LogAsync(new TestLogMessage { Message = "Second" });
+
+            var logs = GetLogs(provider);
+            Assert.AreEqual(2, logs.Count);
+            Assert.AreEqual("First", logs[0].Message);
+            Assert.AreEqual("Second", logs[1].Message);
+        }
+
+        [TestMethod]
+        public async Task LogAsync_TrimsCorrectly_WhenOverCapacity()
+        {
+            var provider = CreateProvider(capacity: 3);
+            await provider.LogAsync(new TestLogMessage { Message = "1" });
+            await provider.LogAsync(new TestLogMessage { Message = "2" });
+            await provider.LogAsync(new TestLogMessage { Message = "3" });
+            await provider.LogAsync(new TestLogMessage { Message = "4" });
+
+            var logs = GetLogs(provider);
+            Assert.AreEqual(3, logs.Count);
+            CollectionAssert.AreEqual(new[] { "2", "3", "4" }, logs.Select(x => x.Message).ToArray());
+        }
+
+        [TestMethod]
+        public async Task LogAsync_FillFactor75_TrimsToPreserveRecent()
+        {
+            var provider = CreateProvider(capacity: 4, fill: 75);
+            for (int i = 1; i <= 5; i++)
+                await provider.LogAsync(new TestLogMessage { Message = $"msg {i}" });
+
+            var logs = GetLogs(provider);
+            Assert.AreEqual(4, logs.Count);
+            CollectionAssert.AreEqual(new[] { "msg 2", "msg 3", "msg 4", "msg 5" }, logs.Select(x => x.Message).ToArray());
+        }
+
+        [TestMethod]
+        public async Task LogAsync_FillFactor100_AlwaysTrimsAtLeastOne()
+        {
+            var provider = CreateProvider(capacity: 3, fill: 100);
+            for (int i = 1; i <= 4; i++)
+                await provider.LogAsync(new TestLogMessage { Message = $"msg {i}" });
+
+            var logs = GetLogs(provider);
+            Assert.AreEqual(3, logs.Count);
+            CollectionAssert.AreEqual(new[] { "msg 2", "msg 3", "msg 4" }, logs.Select(x => x.Message).ToArray());
+        }
+    }
+
+    internal class TestTraceListener : TraceListener
+    {
+        private readonly Action<string> onWrite;
+        public TestTraceListener(Action<string> onWrite) => this.onWrite = onWrite;
+        public override void Write(string message) { }
+        public override void WriteLine(string message) => onWrite?.Invoke(message);
+    }
+
+    [TestClass]
+    public class ConsoleLogProviderTests
+    {
+        private ConsoleLogProvider CreateProvider(out StringBuilder output)
+        {
+            output = new StringBuilder();
+            var writer = new StringWriter(output);
+            Console.SetOut(writer); // Redirect console output
+
+            var options = new ConsoleLogProviderOptions
             {
-                var list = (List<ILogMessage>)itemsField.GetValue(this);
-                lock (list)
-                {
-                    return list.ToList();
-                }
-            }
+                FormattedOutput = msg => $"[{msg.Category}] {msg.Message}"
+            };
+
+            return new ConsoleLogProvider(new Options<ConsoleLogProviderOptions>(options));
+        }
+
+        [TestMethod]
+        public async Task LogAsync_WritesFormattedMessage_ToConsole()
+        {
+            var msg = new TestLogMessage { Category = TLogCategory.Info, Message = "Hello" };
+            var provider = CreateProvider(out var output);
+
+            await provider.LogAsync(msg);
+
+            string result = output.ToString();
+            Assert.IsTrue(result.Contains("[Info] Hello"), $"Output: {result}");
+        }
+
+        [TestMethod]
+        public async Task LogAsync_WritesToTrace_WhenConsoleUnavailable()
+        {
+            var msg = new TestLogMessage { Category = TLogCategory.Error, Message = "Trace fallback" };
+            var calledTrace = false;
+
+            var options = new ConsoleLogProviderOptions
+            {
+                FormattedOutput = _ => "TRACE_OK"
+            };
+
+            var provider = new ConsoleLogProvider(new Options<ConsoleLogProviderOptions>(options));
+
+            // Simulate console failure
+            typeof(Console).GetField("_out", BindingFlags.Static | BindingFlags.NonPublic)
+                ?.SetValue(null, null); // Force Trace fallback
+
+            Trace.Listeners.Clear();
+            Trace.Listeners.Add(new TestTraceListener(s => {
+                calledTrace = s == "TRACE_OK";
+            }));
+
+            await provider.LogAsync(msg);
+
+            Assert.IsTrue(calledTrace, "Expected fallback to Trace logging.");
+        }
+
+        [TestMethod]
+        public async Task LogAsync_Respects_CustomFormattedOutput()
+        {
+            var options = new ConsoleLogProviderOptions
+            {
+                FormattedOutput = msg => $"CUSTOM >> {msg.Message}"
+            };
+            var provider = new ConsoleLogProvider(new Options<ConsoleLogProviderOptions>(options));
+
+            var writer = new StringWriter();
+            Console.SetOut(writer);
+
+            await provider.LogAsync(new TestLogMessage { Message = "XUnit" });
+
+            var output = writer.ToString();
+            Assert.IsTrue(output.Contains("CUSTOM >> XUnit"));
         }
     }
 }

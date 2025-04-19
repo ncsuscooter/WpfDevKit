@@ -64,3 +64,7 @@ namespace WpfDevKit.Logging
         }
     }
 }
+
+// TODO: Refactor to decouple direct ADO.NET usage from core provider logic.
+// Goal: Enable mocking or in-memory simulation for testing (e.g., avoid SqlConnection in unit tests).
+// Suggested steps below.
