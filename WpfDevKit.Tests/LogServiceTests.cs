@@ -792,7 +792,7 @@ namespace WpfDevKit.Tests.Logging
             var options = new ConsoleLogProviderOptions
             {
                 FormattedOutput = _ => "TRACE_OK",
-                DefaultTextWriter = new FailingTextWriter()
+                LogOutputWriter = new FailingTextWriter()
             };
 
             var provider = new ConsoleLogProvider(new Options<ConsoleLogProviderOptions>(options));

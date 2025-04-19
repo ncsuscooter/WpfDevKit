@@ -42,7 +42,7 @@ namespace WpfDevKit.Logging
             try
             {
                 // Log to the console if it's selected
-                if (options.DefaultTextWriter == Console.Out)
+                if (options.LogOutputWriter == Console.Out)
                 {
                     if (!options.CategoryConsoleColors.TryGetValue(message.Category, out var c))
                         c = options.CategoryConsoleColors[TLogCategory.None];
@@ -62,10 +62,9 @@ namespace WpfDevKit.Logging
                         }
                     }
                 }
-                // Log to trace if console isn't available
                 else
                 {
-                    options.DefaultTextWriter.WriteLine(s);
+                    options.LogOutputWriter.WriteLine(s);
                 }
             }
             catch

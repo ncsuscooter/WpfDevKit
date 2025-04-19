@@ -42,10 +42,11 @@ namespace WpfDevKit.Logging
                 s = $"{s}\n\r{logMessage.ExceptionStackTrace}";
             return s;
         };
-
+        
         /// <summary>
-        /// 
+        /// Gets or sets the text writer used for outputting log messages.
+        /// Defaults to <see cref="Console.Out"/>. If <c>null</c>, logging will fall back to <see cref="Trace"/>.
         /// </summary>
-        public TextWriter DefaultTextWriter { get; set; } = Console.Out;
+        public TextWriter LogOutputWriter { get; set; } = Console.Out;
     }
 }
