@@ -40,7 +40,7 @@ namespace WpfDevKit.Logging
         public bool TryWrite(ILogMessage message)
         {
             // StartStop method increments total, null, and category metrics internally
-            using (var disposable = metrics.StartStop(message))
+            using (metrics.StartStop(message))
             {
                 var result = message != null && messages.TryAdd(message);
                 if (result)

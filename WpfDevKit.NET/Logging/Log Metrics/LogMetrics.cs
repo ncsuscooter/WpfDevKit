@@ -62,14 +62,13 @@ namespace WpfDevKit.Logging
         }
 
         /// <inheritdoc/>
-        public IDisposable StartStop(ILogMessage message)
+        public IDisposable StartStop(ILogMessage message) => new StartStopRegistration(() =>
         {
             IncrementTotal();
-            if (message is null)
+            if (message == null)
                 IncrementNull();
             else
                 IncrementCategory(message.Category);
-            return new StartStopRegistration(default, IncrementElapsed);
-        }
+        }, IncrementElapsed);
     }
 }
