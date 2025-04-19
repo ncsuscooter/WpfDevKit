@@ -16,6 +16,6 @@ namespace WpfDevKit.RemoteFileAccess
         /// <returns>The current IServiceCollection instance for chaining.</returns>
         public static IServiceCollection AddRemoteFileConnectionFactory(this IServiceCollection services) => 
             services.AddSingleton<RemoteFileConnectionFactory>()
-                    .AddSingleton<IRemoteFileConnectionFactory>(p => p.GetService<RemoteFileConnectionFactory>());
+                    .AddSingleton<IRemoteFileConnectionFactory>(p => p.GetRequiredService<RemoteFileConnectionFactory>());
     }
 }

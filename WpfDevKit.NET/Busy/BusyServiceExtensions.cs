@@ -16,6 +16,6 @@ namespace WpfDevKit.Busy
         /// <returns>The current IServiceCollection instance for chaining.</returns>
         public static IServiceCollection AddBusyService(this IServiceCollection services) => 
             services.AddSingleton<BusyService>()
-                    .AddSingleton<IBusyService>(p => p.GetService<BusyService>());
+                    .AddSingleton<IBusyService>(p => p.GetRequiredService<BusyService>());
     }
 }

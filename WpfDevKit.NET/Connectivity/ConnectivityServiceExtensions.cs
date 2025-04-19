@@ -17,7 +17,7 @@ namespace WpfDevKit.Connectivity
         /// <returns>The current IServiceCollection instance for chaining.</returns>
         public static IServiceCollection AddConnectivityService(this IServiceCollection services, Action<ConnectivityServiceOptions> configure) =>
             services.AddSingleton<ConnectivityService>()
-                    .AddSingleton<IConnectivityService>(p => p.GetService<ConnectivityService>())
+                    .AddSingleton<IConnectivityService>(p => p.GetRequiredService<ConnectivityService>())
                     .AddOptions(configure);
     }
 }
