@@ -25,11 +25,6 @@ namespace WpfDevKit.UI.Core
         protected bool isDisposed;
 
         /// <summary>
-        /// The default message when no action is specified for the command.
-        /// </summary>
-        public const string NO_ACTION_MESSAGE = "No action specified for the command provided";
-
-        /// <summary>
         /// Gets the command that executes <see cref="DoCommandAsync"/> with a string parameter.
         /// </summary>
         public ICommand Command => commandFactory.CreateAsyncCommand<string>(async (command, token) => await DoCommandAsync(command));
@@ -106,7 +101,7 @@ namespace WpfDevKit.UI.Core
                 if (commandActions.TryGetValue(commandName, out var action))
                     await action.Invoke(cancellationToken);
                 else
-                    logService.LogWarning(NO_ACTION_MESSAGE);
+                    logService.LogWarning("No action specified for the command provided");
             }
         }
 
