@@ -44,11 +44,7 @@ namespace WpfDevKit.UI.Dialogs
         public void ShowDialog(Exception exception, Type type = null, [CallerFilePath] string fileName = null, [CallerMemberName] string memberName = null)
         {
             logService.LogError(exception, type, fileName, memberName);
-            
-            // logService.Flush() is the better solution, but not yet created
-            // Sleep to allow background logging to process
-            Thread.Sleep(500);
-
+            logService.FlushAsync(TimeSpan.FromMilliseconds(500)).Wait();
             ShowDialog(new DialogBase(busyService, commandFactory, logService)
             {
                 Message = "An error was reported. Please see the error log below for more details.",

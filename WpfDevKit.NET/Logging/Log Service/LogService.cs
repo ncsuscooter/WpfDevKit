@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace WpfDevKit.Logging
 {
@@ -93,6 +94,22 @@ namespace WpfDevKit.Logging
             catch (Exception ex)
             {
                 Debug.WriteLine(ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> FlushAsync(TimeSpan timeout, CancellationToken cancellationToken = default)
+        {
+            using (var timeoutSource = new CancellationTokenSource(timeout))
+            using (var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutSource.Token, cancellationToken))
+            {
+                while (!linkedSource.Token.IsCancellationRequested)
+                {
+                    if (logQueue.IsEmpty)
+                        return true;
+                    await logQueue.WaitAsync(linkedSource.Token);
+                }
+                return logQueue.IsEmpty;
             }
         }
     }

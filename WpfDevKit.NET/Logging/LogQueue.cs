@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace WpfDevKit.Logging
 {
@@ -11,7 +13,13 @@ namespace WpfDevKit.Logging
     internal class LogQueue
     {
         private readonly BlockingCollection<ILogMessage> messages = new BlockingCollection<ILogMessage>(8196);
+        private readonly AsyncAutoResetEvent reset = new AsyncAutoResetEvent();
         private readonly LogMetrics metrics;
+
+        /// <summary>
+        /// Indicates whether the log queue is currently empty.
+        /// </summary>
+        public bool IsEmpty => messages.Count == 0;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogQueue"/> class with the specified metrics tracker.
@@ -30,7 +38,13 @@ namespace WpfDevKit.Logging
         /// </summary>
         /// <param name="message">The log message read from the queue, if successful.</param>
         /// <returns><c>true</c> if a log message was successfully read; otherwise, <c>false</c>.</returns>
-        public bool TryRead(out ILogMessage message) => messages.TryTake(out message);
+        public bool TryRead(out ILogMessage message)
+        {
+            var result = messages.TryTake(out message);
+            if (result)
+                reset.Signal();
+            return result;
+        }
 
         /// <summary>
         /// Attempts to write a log message to the queue.
@@ -47,8 +61,23 @@ namespace WpfDevKit.Logging
                     metrics.IncrementQueued();
                 else
                     metrics.IncrementLost();
+                reset.Signal();
                 return result;
             }
         }
+
+        /// <summary>
+        /// Asynchronously waits for a change in the log queue (either a message was added or removed).
+        /// </summary>
+        /// <param name="token">A cancellation token to cancel the wait operation.</param>
+        /// <returns>
+        /// A task that completes when the log queue signals a change. 
+        /// This allows consumers to react to queue state changes without polling.
+        /// </returns>
+        /// <remarks>
+        /// This is useful for scenarios like flushing the log queue, where external components 
+        /// need to wait until the queue becomes empty or is modified.
+        /// </remarks>
+        public Task WaitAsync(CancellationToken token = default) => reset.WaitAsync(token);
     }
 }

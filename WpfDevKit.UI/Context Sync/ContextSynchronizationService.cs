@@ -1,7 +1,9 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace WpfDevKit.UI.ContextSynchronization
 {
@@ -12,6 +14,9 @@ namespace WpfDevKit.UI.ContextSynchronization
     [DebuggerStepThrough]
     internal class ContextSynchronizationService : IContextSynchronizationService
     {
+        private static Dispatcher Dispatcher =>
+            Application.Current?.Dispatcher ?? throw new InvalidOperationException("Application.Current is null. Cannot access the Dispatcher.");
+
         /// <summary>
         /// Gets a value indicating whether the current thread is the UI thread.
         /// This property checks if the current thread is the same as the thread associated with the WPF application's dispatcher.
@@ -19,7 +24,19 @@ namespace WpfDevKit.UI.ContextSynchronization
         /// <value>
         /// <c>true</c> if the current thread is the UI thread; otherwise, <c>false</c>.
         /// </value>
-        public bool IsSynchronized => Application.Current.Dispatcher.Thread == Thread.CurrentThread;
+        public bool IsSynchronized => Application.Current != null && Application.Current.Dispatcher.Thread == Thread.CurrentThread;
+
+        /// <summary>
+        /// Executes the specified action synchronously on the UI thread.
+        /// This method ensures that the action is executed on the thread that is associated with the WPF application's dispatcher.
+        /// </summary>
+        /// <param name="actionAsync">The action to execute on the UI thread.</param>
+        /// <remarks>
+        /// This method calls <see cref="Dispatcher.Invoke(Action)"/> to run the provided action synchronously on the UI thread.
+        /// If called from a non-UI thread, it will block the calling thread until the action is completed on the UI thread.
+        /// </remarks>
+        public void InvokeAsync(Func<Task> actionAsync, CancellationToken cancellationToken = default) => 
+            Dispatcher.InvokeAsync(actionAsync, DispatcherPriority.Normal, cancellationToken);
 
         /// <summary>
         /// Executes the specified action synchronously on the UI thread.
@@ -30,7 +47,7 @@ namespace WpfDevKit.UI.ContextSynchronization
         /// This method calls <see cref="Dispatcher.Invoke(Action)"/> to run the provided action synchronously on the UI thread.
         /// If called from a non-UI thread, it will block the calling thread until the action is completed on the UI thread.
         /// </remarks>
-        public void Invoke(Action action) => Application.Current.Dispatcher.Invoke(action);
+        public void Invoke(Action action) => Dispatcher.Invoke(action);
 
         /// <summary>
         /// Executes the specified action asynchronously on the UI thread.
@@ -41,7 +58,7 @@ namespace WpfDevKit.UI.ContextSynchronization
         /// This method calls <see cref="Dispatcher.BeginInvoke(Action)"/> to run the provided action asynchronously on the UI thread.
         /// The calling thread will not block while waiting for the action to complete.
         /// </remarks>
-        public void BeginInvoke(Action action) => Application.Current.Dispatcher.BeginInvoke(action);
+        public void BeginInvoke(Action action) => Dispatcher.BeginInvoke(action);
 
         /// <summary>
         /// Shuts down the WPF application and terminates the process with the specified exit code.
@@ -50,6 +67,6 @@ namespace WpfDevKit.UI.ContextSynchronization
         /// <remarks>
         /// This method calls <see cref="Application.Shutdown(int)"/> to gracefully shut down the application and optionally pass an exit code.
         /// </remarks>
-        public void Shutdown(int? exitCode = default) => Application.Current.Shutdown(exitCode.GetValueOrDefault());
+        public void Shutdown(int? exitCode = default) => Application.Current?.Shutdown(exitCode.GetValueOrDefault());
     }
 }

@@ -1,5 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace WpfDevKit.Logging
 {
@@ -37,5 +39,13 @@ namespace WpfDevKit.Logging
                  Type type = default,
                  [CallerFilePath] string fileName = default,
                  [CallerMemberName] string memberName = default);
+
+        /// <summary>
+        /// Waits until the log queue is empty or until the timeout expires.
+        /// </summary>
+        /// <param name="timeout">The maximum time to wait for the queue to flush.</param>
+        /// <param name="cancellationToken">Optional token to cancel early.</param>
+        /// <returns><c>true</c> if the queue was flushed; otherwise, <c>false</c>.</returns>
+        Task<bool> FlushAsync(TimeSpan timeout, CancellationToken cancellationToken = default);
     }
 }

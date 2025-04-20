@@ -13,6 +13,9 @@ namespace WpfDevKit.UI.CollectionSynchronization
         /// </summary>
         /// <param name="collection">The collection to synchronize.</param>
         /// <param name="lockObject">The lock object used for synchronization.</param>
+        /// <remarks>
+        /// Enables WPF data binding synchronization for the specified collection using the given lock object.
+        /// </remarks>
         void EnableCollectionSynchronization(IEnumerable collection, object lockObject);
 
         /// <summary>
