@@ -63,10 +63,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -77,6 +73,7 @@
     <Compile Include="Behaviors\DataGridBehaviors.cs" />
     <Compile Include="Behaviors\ItemsControlBehaviors.cs" />
     <Compile Include="Behaviors\TextBoxBehaviors.cs" />
+    <Compile Include="ServiceCollectionExtensions.cs" />
     <Compile Include="Collection Sync\CollectionSynchronizationExtensions.cs" />
     <Compile Include="Collection View\CollectionViewExtensions.cs" />
     <Compile Include="Collection View\CollectionViewService.cs" />
@@ -116,10 +113,6 @@
     </Compile>
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\CommandFactory.cs" />
-    <Compile Include="MainViewModel.cs" />
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
