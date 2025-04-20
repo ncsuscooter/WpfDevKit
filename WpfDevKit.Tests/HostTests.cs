@@ -146,7 +146,6 @@ namespace WpfDevKit.Tests.Hosting
             Assert.IsTrue(good.Started); // Confirm others still ran
         }
 
-
         [TestMethod]
         public async Task Host_PublicApi_StartStop()
         {

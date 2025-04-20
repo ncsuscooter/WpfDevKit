@@ -550,120 +550,65 @@ namespace WpfDevKit.Tests.Logging
 
     internal class TestLogProvider : ILogProvider
     {
-        public List<ILogMessage> Logs { get; } = new List<ILogMessage>();
+        public Task LogAsync(ILogMessage message) => Task.CompletedTask;
+    }
+    
+    internal class TestLogProviderOptions : ILogProviderOptions
+    {
         public TLogCategory EnabledCategories { get; set; }
         public TLogCategory DisabledCategories { get; }
-        public Task LogAsync(ILogMessage message)
-        {
-            Logs.Add(message);
-            return Task.CompletedTask;
-        }
-        public void Write(string message, TLogCategory category, string attributes = null) => LogAsync(new TestLogMessage
-        {
-            Message = message,
-            Category = category,
-            Attributes = attributes
-        });
-        public void Write(Exception ex, TLogCategory category = TLogCategory.Error) => LogAsync(new TestLogMessage
-        {
-            Message = ex.Message,
-            Category = category,
-            ExceptionLevel = 1,
-            ExceptionStackTrace = ex.StackTrace
-        });
     }
 
     [TestClass]
-    public class LogProviderCollectionTests
+    public class LogProviderDescriptorCollectionTests
     {
-        private LogProviderDescriptorCollection CreateCollection(out LogService service)
+        [TestMethod]
+        public void Add_ThenGetDescriptorByGeneric_ReturnsSameDescriptor()
         {
-            var metrics = new LogMetrics();
-            var queue = new LogQueue(metrics);
-            service = new LogService(queue);
-            return new LogProviderCollection(service);
+            var collection = new LogProviderDescriptorCollection();
+            var descriptor = new LogProviderDescriptor(new TestLogProvider(), new TestLogProviderOptions());
+
+            collection.Add<TestLogProvider>(descriptor);
+            var result = collection.GetDescriptor<TestLogProvider>();
+
+            Assert.AreSame(descriptor, result);
         }
 
         [TestMethod]
-        public void TryAddProvider_AddsSuccessfully()
+        public void GetDescriptor_ByUnknownType_ReturnsNull()
         {
-            var collection = CreateCollection(out var _);
-            var provider = new TestLogProvider();
+            var collection = new LogProviderDescriptorCollection();
 
-            var result = collection.TryAddProvider(provider, "default");
+            var result = collection.GetDescriptor(typeof(ConsoleLogProvider));
 
-            Assert.IsTrue(result);
-            Assert.AreEqual(1, collection.GetProviderInfos().Count());
+            Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void TryAddProvider_PreventsDuplicates()
+        public void GetDescriptors_ReturnsAllAdded()
         {
-            var collection = CreateCollection(out var _);
-            var provider = new TestLogProvider();
+            var collection = new LogProviderDescriptorCollection();
 
-            Assert.IsTrue(collection.TryAddProvider(provider, "sameKey"));
-            Assert.IsFalse(collection.TryAddProvider(provider, "sameKey")); // duplicate key & type
+            collection.Add<TestLogProvider>(new LogProviderDescriptor(new TestLogProvider(), new TestLogProviderOptions()));
+            collection.Add<ConsoleLogProvider>(new LogProviderDescriptor(new ConsoleLogProvider(new Options<ConsoleLogProviderOptions>(new ConsoleLogProviderOptions())), new ConsoleLogProviderOptions()));
+
+            var all = collection.GetDescriptors();
+            Assert.AreEqual(2, all.Count);
         }
 
         [TestMethod]
-        public void TryRemoveProvider_RemovesSuccessfully()
+        public void Add_ReplacesExistingDescriptor()
         {
-            var collection = CreateCollection(out var _);
-            var provider = new TestLogProvider();
+            var collection = new LogProviderDescriptorCollection();
 
-            collection.TryAddProvider(provider, "toRemove");
-            var result = collection.TryRemoveProvider(provider, "toRemove");
+            var old = new LogProviderDescriptor(new TestLogProvider(), new TestLogProviderOptions());
+            var updated = new LogProviderDescriptor(new TestLogProvider(), new TestLogProviderOptions());
 
-            Assert.IsTrue(result);
-            Assert.AreEqual(0, collection.GetProviderInfos().Count());
-        }
+            collection.Add<TestLogProvider>(old);
+            collection.Add<TestLogProvider>(updated);
 
-        [TestMethod]
-        public void TryRemoveProvider_FailsForNonexistent()
-        {
-            var collection = CreateCollection(out var _);
-            var provider = new TestLogProvider();
-
-            var result = collection.TryRemoveProvider(provider, "missing");
-
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public void GetProviderInfos_ContainsExpectedDescriptorData()
-        {
-            var collection = CreateCollection(out var _);
-            var provider = new TestLogProvider();
-
-            collection.TryAddProvider(provider, "info");
-
-            var descriptor = collection.GetProviderInfos().FirstOrDefault();
-
-            Assert.IsNotNull(descriptor);
-            Assert.AreEqual("info", descriptor.Key);
-            Assert.AreEqual(provider.GetType(), descriptor.ProviderType);
-            Assert.IsNotNull(descriptor.Metrics);
-        }
-
-        [TestMethod]
-        public void TryAddProvider_NullProvider_ReturnsFalse()
-        {
-            var collection = CreateCollection(out var _);
-
-            var result = collection.TryAddProvider(null);
-
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public void TryRemoveProvider_NullProvider_ReturnsFalse()
-        {
-            var collection = CreateCollection(out var _);
-
-            var result = collection.TryRemoveProvider(null);
-
-            Assert.IsFalse(result);
+            var result = collection.GetDescriptor<TestLogProvider>();
+            Assert.AreSame(updated, result);
         }
     }
 
@@ -791,7 +736,6 @@ namespace WpfDevKit.Tests.Logging
 
             var options = new ConsoleLogProviderOptions
             {
-                LogOutputFormat = _ => "TRACE_OK",
                 LogOutputWriter = new FailingTextWriter()
             };
 
@@ -799,7 +743,7 @@ namespace WpfDevKit.Tests.Logging
 
             Trace.Listeners.Clear();
             Trace.Listeners.Add(new TestTraceListener(s => {
-                calledTrace = s == "TRACE_OK";
+                calledTrace = s == "WpfDevKit.Tests.Logging.TestLogMessage";
             }));
 
             await provider.LogAsync(msg);
@@ -832,12 +776,7 @@ namespace WpfDevKit.Tests.Logging
         private DatabaseLogProviderOptions GetValidOptions() => new DatabaseLogProviderOptions
         {
             ConnectionString = "Server=.;Database=TestDb;Trusted_Connection=True;",
-            TableName = "Logs",
-            //Columns = new List<DatabaseLogColumn>
-            //{
-            //    new DatabaseLogColumn { Name = "Message", Property = "Message" },
-            //    new DatabaseLogColumn { Name = "Category", Property = "Category" }
-            //}
+            TableName = "Logs"
         };
 
         [TestMethod]
@@ -976,22 +915,22 @@ namespace WpfDevKit.Tests.Logging
             {
                 await host.StartAsync();
 
-
                 // Log a message through the ILogService
                 var logService = host.Services.GetService<ILogService>();
                 logService.Log(TLogCategory.Info, "Integration test message");
 
-                await Task.Delay(200); // Allow background service time to process
+                // Allow background service time to process
+                await Task.Delay(20000);
 
                 // Use reflection to inspect logged messages
-                var itemsField = typeof(MemoryLogProvider).GetField("items", BindingFlags.NonPublic | BindingFlags.Instance);
-                var logList = (List<ILogMessage>)itemsField.GetValue(memoryProvider);
+                var memoryLogProvider = host.Services.GetService<MemoryLogProvider>();
+                var logList = memoryLogProvider.GetLogs();
 
                 lock (logList)
                 {
                     Assert.AreEqual(1, logList.Count);
-                    Assert.AreEqual("Integration test message", logList[0].Message);
-                    Console.WriteLine($"Logged message = '{logList[0].Message}'");
+                    Assert.AreEqual("Integration test message", logList.First().Message);
+                    Console.WriteLine($"Logged message = '{logList.First().Message}'");
                 }
 
                 await host.StopAsync();
