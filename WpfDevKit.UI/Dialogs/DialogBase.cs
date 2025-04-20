@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using WpfDevKit.Busy;
 using WpfDevKit.Logging;
@@ -20,8 +17,6 @@ namespace WpfDevKit.UI.Dialogs
     public class DialogBase : CommandPageBase, IDialogContext
     {
         private static readonly FontWeightConverter fontWeightConverter = new FontWeightConverter();
-
-        private readonly ILogService logService;
 
         private double width = 800;
         private double height = 200;
@@ -46,7 +41,21 @@ namespace WpfDevKit.UI.Dialogs
         /// </summary>
         /// <param name="logService">The logging service used for dialog events.</param>
         /// <param name="busyService">The busy service used to indicate background activity.</param>
-        public DialogBase(ICommandFactory commandFactory, ILogService logService, IBusyService busyService) : base(busyService, commandFactory) => this.logService = logService;
+        public DialogBase(IBusyService busyService, ICommandFactory commandFactory, ILogService logService) : base(busyService, commandFactory, logService)
+        {
+            RegisterPropertyChangedAction(nameof(Message), () => IsMessageBarVisible = !string.IsNullOrWhiteSpace(Message));
+            RegisterPropertyChangedAction(nameof(Logs), () => IsMessageLogVisible = Logs.Count > 0);
+            RegisterPropertyChangedAction(nameof(DialogResult), () =>
+            {
+                if (DialogWindow != null)
+                    DialogWindow.DialogResult = true;
+            });
+            RegisterCommand(nameof(TDialogResult.Cancel), () => DialogResult = TDialogResult.Cancel);
+            RegisterCommand(nameof(TDialogResult.Close), () => DialogResult = TDialogResult.Close);
+            RegisterCommand(nameof(TDialogResult.No), () => DialogResult = TDialogResult.No);
+            RegisterCommand(nameof(TDialogResult.Ok), () => DialogResult = TDialogResult.Ok);
+            RegisterCommand(nameof(TDialogResult.Yes), () => DialogResult = TDialogResult.Yes);
+        }
 
         /// <summary>
         /// Gets or sets the height of the dialog window.
@@ -244,52 +253,5 @@ namespace WpfDevKit.UI.Dialogs
         /// Invalid values will default to <c>Default</c>.
         /// </summary>
         public string DialogImageAsString { set => DialogImage = value.ToEnum<TDialogImage>(); }
-
-        /// <summary>
-        /// Handles property change events and updates visibility of message bar, log display, or dialog result.
-        /// </summary>
-        /// <param name="propertyName">The name of the property that changed.</param>
-        public override void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            try
-            {
-                logService.LogTrace(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
-                if (propertyName == nameof(Message))
-                    IsMessageBarVisible = !string.IsNullOrWhiteSpace(Message);
-                else if (propertyName == nameof(Logs))
-                    IsMessageLogVisible = Logs.Count > 0;
-                else if (propertyName == nameof(DialogResult))
-                    if (DialogWindow != null)
-                        DialogWindow.DialogResult = true;
-            }
-            catch (Exception ex)
-            {
-                logService.LogError(ex, GetType());
-            }
-            base.OnPropertyChanged(propertyName);
-        }
-
-        /// <summary>
-        /// Executes dialog commands asynchronously and sets the dialog result.
-        /// </summary>
-        /// <param name="commandName">The name of the command to execute.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
-        protected override async Task DoPerformCommandAsync(string commandName, CancellationToken cancellationToken = default)
-        {
-            logService.LogTrace(null, $"{nameof(commandName)}='{commandName}'", GetType());
-            using (busyService.Busy())
-            {
-                await Task.Delay(50, cancellationToken);
-                switch (commandName)
-                {
-                    case nameof(TDialogResult.Cancel): DialogResult = TDialogResult.Cancel; break;
-                    case nameof(TDialogResult.Close): DialogResult = TDialogResult.Close; break;
-                    case nameof(TDialogResult.No): DialogResult = TDialogResult.No; break;
-                    case nameof(TDialogResult.Ok): DialogResult = TDialogResult.Ok; break;
-                    case nameof(TDialogResult.Yes): DialogResult = TDialogResult.Yes; break;
-                    default: logService.LogWarning(NO_ACTION_MESSAGE); break;
-                }
-            }
-        }
     }
 }

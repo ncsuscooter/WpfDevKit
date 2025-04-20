@@ -18,33 +18,11 @@ namespace WpfDevKit.UI.CollectionView
         public void Refresh() => collectionView.Refresh();
     }
 
-    public interface ICollectionViewService2
+    internal class CollectionViewService2 : ICollectionViewService2
     {
-        /// <summary>
-        /// Binds the given <see cref="ICollectionView"/> to the service.
-        /// </summary>
-        /// <param name="view">The collection view to control.</param>
-        void Bind(ICollectionView view);
-
-        /// <summary>
-        /// Refreshes the currently bound view.
-        /// </summary>
-        void Refresh();
-    }
-
-    public class CollectionViewService2 : ICollectionViewService2
-    {
-        private ICollectionView view;
-
-        public void Bind(ICollectionView view)
-        {
-            this.view = view;
-        }
-
-        public void Refresh()
-        {
-            view?.Refresh();
-        }
+        private ICollectionView collectionView;
+        public void Bind(ICollectionView collectionView) => this.collectionView = collectionView ?? throw new ArgumentNullException(nameof(collectionView));
+        public void Refresh() => collectionView?.Refresh();
     }
 }
    

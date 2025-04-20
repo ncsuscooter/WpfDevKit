@@ -15,6 +15,9 @@ namespace WpfDevKit.UI.Core
     [DebuggerStepThrough]
     public abstract class ObservableBase : IObservable
     {
+        private readonly Dictionary<string, Action> propertyChangingActions = new Dictionary<string, Action>();
+        private readonly Dictionary<string, Action> propertyChangedActions = new Dictionary<string, Action>();
+
         /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging;
 
@@ -24,6 +27,8 @@ namespace WpfDevKit.UI.Core
         /// <inheritdoc/>
         public virtual void OnPropertyChanging([CallerMemberName] string propertyName = null)
         {
+            if (propertyChangingActions.TryGetValue(propertyName, out var action))
+                action();
             if (!string.IsNullOrWhiteSpace(propertyName))
                 PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
         }
@@ -31,6 +36,8 @@ namespace WpfDevKit.UI.Core
         /// <inheritdoc/>
         public virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
+            if (propertyChangedActions.TryGetValue(propertyName, out var action))
+                action();
             if (!string.IsNullOrWhiteSpace(propertyName))
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -42,6 +49,32 @@ namespace WpfDevKit.UI.Core
         {
             foreach (var item in GetType().GetProperties().Where(x => x.CanRead && !x.CanWrite))
                 OnPropertyChanged(item.Name);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="action"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public void RegisterPropertyChangingAction(string propertyName, Action action)
+        {
+            if (string.IsNullOrWhiteSpace(propertyName))
+                throw new ArgumentNullException(nameof(propertyName));
+            propertyChangingActions[propertyName] = action ?? throw new ArgumentNullException(nameof(action));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="action"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public void RegisterPropertyChangedAction(string propertyName, Action action)
+        {
+            if (string.IsNullOrWhiteSpace(propertyName))
+                throw new ArgumentNullException(nameof(propertyName));
+            propertyChangedActions[propertyName] = action ?? throw new ArgumentNullException(nameof(action));
         }
 
         /// <summary>

@@ -12,8 +12,8 @@ namespace WpfDevKit.UI.CollectionSynchronization
         /// This ensures that all access to the collection is thread-safe.
         /// </summary>
         /// <param name="collection">The collection to synchronize.</param>
-        /// <param name="objectLock">The lock object used for synchronization.</param>
-        void EnableCollectionSynchronization(IEnumerable collection, object objectLock);
+        /// <param name="lockObject">The lock object used for synchronization.</param>
+        void EnableCollectionSynchronization(IEnumerable collection, object lockObject);
 
         /// <summary>
         /// Disables synchronization for the specified collection.

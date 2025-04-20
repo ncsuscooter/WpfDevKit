@@ -17,7 +17,7 @@ namespace WpfDevKit.UI.CollectionSynchronization
         /// to enable collection synchronization for the provided collection, ensuring that WPF's data binding engine
         /// can safely interact with the collection when accessed from multiple threads.
         /// </remarks>
-        public void EnableCollectionSynchronization(IEnumerable collection, object objectLock) => BindingOperations.EnableCollectionSynchronization(collection, objectLock);
+        public void EnableCollectionSynchronization(IEnumerable collection, object lockObject) => BindingOperations.EnableCollectionSynchronization(collection, lockObject);
 
         /// <inheritdoc/>
         /// <remarks>

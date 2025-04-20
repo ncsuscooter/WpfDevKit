@@ -14,10 +14,8 @@ namespace WpfDevKit.UI.CollectionSynchronization
         /// </summary>
         /// <param name="services">The IServiceCollection instance.</param>
         /// <returns>The current IServiceCollection instance for chaining.</returns>
-        public static IServiceCollection AddCollectionSynchronization(this IServiceCollection services)
-        {
-            services.AddSingleton<ICollectionSynchronizationService, CollectionSynchronizationService>();
-            return services;
-        }
+        public static IServiceCollection AddCollectionSynchronization(this IServiceCollection services) =>
+            services.AddSingleton<CollectionSynchronizationService>()
+                    .AddSingleton<ICollectionSynchronizationService>(p => p.GetRequiredService<CollectionSynchronizationService>());
     }
 }

@@ -18,7 +18,6 @@ namespace WpfDevKit.UI.Core
         protected readonly IDialogService dialogService;
 
         private IObservable selectedItem;
-        private bool isDisposed;
 
         /// <summary>
         /// The message to indicate that the base method should be overridden to prevent execution.
@@ -37,11 +36,11 @@ namespace WpfDevKit.UI.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="PageBase"/> class.
         /// </summary>
-        protected PageBase(IBusyService busyService, ICommandFactory commandFactory, IDialogService dialogService, ILogService logService) : base(busyService, commandFactory)
+        protected PageBase(IBusyService busyService, ICommandFactory commandFactory, IDialogService dialogService, ILogService logService)
+            : base(busyService, commandFactory, logService)
         {
             (this.dialogService, this.logService) = (dialogService, logService);
             logService.LogDebug(type: GetType());
-            busyService.IsBusyChanged += OnBusyServiceIsBusyChanged;
         }
 
         /// <summary>
@@ -93,7 +92,7 @@ namespace WpfDevKit.UI.Core
         /// <summary>
         /// Disposes the page and cleans up any resources.
         /// </summary>
-        public virtual void Dispose()
+        public override void Dispose()
         {
             if (isDisposed)
                 return;
@@ -104,12 +103,9 @@ namespace WpfDevKit.UI.Core
             }
             finally
             {
-                isDisposed = true;
-                busyService.IsBusyChanged -= OnBusyServiceIsBusyChanged;
+                base.Dispose();
             }
         }
-
-        private void OnBusyServiceIsBusyChanged() => OnPropertyChanged($"{nameof(busyService)}.{nameof(busyService.IsBusy)}");
 
         private void OnSelectedItemPropertyChanged(object sender, PropertyChangedEventArgs e) => OnPropertyChanged($"{nameof(SelectedItem)}.{e.PropertyName}");
     }

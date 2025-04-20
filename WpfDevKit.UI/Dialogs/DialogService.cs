@@ -18,7 +18,7 @@ namespace WpfDevKit.UI.Dialogs
         private readonly ICommandFactory commandFactory;
         private readonly ILogService logService;
         private readonly IBusyService busyService;
-        private readonly IUserLogProvider userLogProvider;
+        private readonly IGetLogs userLogProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DialogService"/> class.
@@ -26,7 +26,7 @@ namespace WpfDevKit.UI.Dialogs
         /// <param name="logService">The logging service used for dialog events.</param>
         /// <param name="busyService">The busy service used to indicate background activity.</param>
         /// <param name="userLogProvider">The user log provider used to fetch error log details.</param>
-        public DialogService(ICommandFactory commandFactory, ILogService logService, IBusyService busyService, IUserLogProvider userLogProvider) =>
+        public DialogService(ICommandFactory commandFactory, ILogService logService, IBusyService busyService, IGetLogs userLogProvider) =>
             (this.commandFactory, this.logService, this.busyService, this.userLogProvider) = (commandFactory, logService, busyService, userLogProvider);
 
         /// <inheritdoc/>
@@ -49,7 +49,7 @@ namespace WpfDevKit.UI.Dialogs
             // Sleep to allow background logging to process
             Thread.Sleep(500);
 
-            ShowDialog(new DialogBase(commandFactory, logService, busyService)
+            ShowDialog(new DialogBase(busyService, commandFactory, logService)
             {
                 Message = "An error was reported. Please see the error log below for more details.",
                 Title = "Error Log",
@@ -59,14 +59,14 @@ namespace WpfDevKit.UI.Dialogs
                 Height = 550,
                 MessageFontSize = 24,
                 MessageFontWeight = FontWeights.Bold,
-                Logs = userLogProvider?.GetLogMessages()
+                Logs = userLogProvider?.GetLogs()
             });
         }
 
         /// <inheritdoc/>
         public TDialogResult ShowDialog(string message, string title, TDialogImage image, TDialogButtons buttons)
         {
-            var dialog = new DialogBase(commandFactory, logService, busyService)
+            var dialog = new DialogBase(busyService, commandFactory, logService)
             {
                 Message = message,
                 Title = title,

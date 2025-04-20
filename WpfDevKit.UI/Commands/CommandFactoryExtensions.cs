@@ -15,11 +15,8 @@ namespace WpfDevKit.UI.Command
         /// </summary>
         /// <param name="services">The IServiceCollection instance.</param>
         /// <returns>The current IServiceCollection instance for chaining.</returns>
-        public static IServiceCollection AddCommandFactory(this IServiceCollection services)
-        {
-            services.AddBusyService();
-            services.AddSingleton<ICommandFactory, CommandFactory>();
-            return services;
-        }
+        public static IServiceCollection AddCommandFactory(this IServiceCollection services) =>
+            services.AddSingleton<CommandFactory>()
+                    .AddSingleton<ICommandFactory>(p => p.GetRequiredService<CommandFactory>());
     }
 }

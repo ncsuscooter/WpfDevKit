@@ -13,6 +13,7 @@ namespace WpfDevKit.UI.Dialogs
         /// <param name="services">The IServiceCollection instance.</param>
         /// <returns>The current IServiceCollection instance for chaining.</returns>
         public static IServiceCollection AddDialogService(this IServiceCollection services) => 
-            services.AddSingleton<IDialogService, DialogService>();
+            services.AddSingleton<DialogService>()
+                    .AddSingleton<IDialogService>(p => p.GetRequiredService<DialogService>());
     }
 }

@@ -1,8 +1,11 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using WpfDevKit.Busy;
+using WpfDevKit.Logging;
 using WpfDevKit.UI.Command;
 
 namespace WpfDevKit.UI.Core
@@ -12,10 +15,14 @@ namespace WpfDevKit.UI.Core
     /// Inherits from <see cref="ObservableBase"/> and exposes a <see cref="ICommand"/> for command execution.
     /// </summary>
     [DebuggerStepThrough]
-    public abstract class CommandPageBase : ObservableBase
+    public abstract class CommandPageBase : ObservableBase, IDisposable
     {
+        private readonly Dictionary<string, Func<CancellationToken, Task>> commandActions = new Dictionary<string, Func<CancellationToken, Task>>();
+        private readonly IBusyService busyService;
         private readonly ICommandFactory commandFactory;
-        protected readonly IBusyService busyService;
+        private readonly ILogService logService;
+        
+        protected bool isDisposed;
 
         /// <summary>
         /// The default message when no action is specified for the command.
@@ -23,19 +30,14 @@ namespace WpfDevKit.UI.Core
         public const string NO_ACTION_MESSAGE = "No action specified for the command provided";
 
         /// <summary>
-        /// Gets the command that executes <see cref="DoPerformCommandAsync"/> with a string parameter.
+        /// Gets the command that executes <see cref="DoCommandAsync"/> with a string parameter.
         /// </summary>
-        public ICommand Command => busyService is null ?
-            commandFactory.CreateCommand<string>(s => DoPerformCommandAsync(s)) :
-            commandFactory.CreateAsyncCommand<string>(async (commandName, token) => await DoPerformCommandAsync(commandName));
+        public ICommand Command => commandFactory.CreateAsyncCommand<string>(async (command, token) => await DoCommandAsync(command));
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommandPageBase"/> class with the specified command factory.
+        /// 
         /// </summary>
-        /// <param name="commandFactory">
-        /// The <see cref="ICommandFactory"/> used to create commands.
-        /// </param>
-        public CommandPageBase(ICommandFactory commandFactory) => this.commandFactory = commandFactory;
+        public bool IsBusy => busyService.IsBusy;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandPageBase"/> class with the specified command factory.
@@ -43,13 +45,71 @@ namespace WpfDevKit.UI.Core
         /// </summary>
         /// <param name="busyService">The <see cref="IBusyService"/> used to indicate background activity.</param>
         /// <param name="commandFactory">The <see cref="ICommandFactory"/> used to create commands.</param>
-        public CommandPageBase(IBusyService busyService, ICommandFactory commandFactory) => (this.busyService, this.commandFactory) = (busyService, commandFactory);
+        /// <param name="logService">The <see cref="ILogService"/> used to log messages and exceptions.</param>
+        public CommandPageBase(IBusyService busyService, ICommandFactory commandFactory, ILogService logService) => 
+            (this.busyService, this.commandFactory, this.logService) = (busyService, commandFactory, logService);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="action"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public void RegisterCommand(string command, Func<CancellationToken, Task> action)
+        {
+            if (string.IsNullOrWhiteSpace(command))
+                throw new ArgumentNullException(nameof(command));
+            commandActions[command] = action ?? throw new ArgumentNullException(nameof(action));
+        }
+
+        public void RegisterCommand(string command, Action action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+            RegisterCommand(command, _ =>
+            {
+                action();
+                return Task.CompletedTask;
+            });
+        }
+
+        /// <summary>
+        /// Disposes the command page and cleans up any resources.
+        /// </summary>
+        public virtual void Dispose()
+        {
+            if (isDisposed)
+                return;
+            logService.LogDebug(type: GetType());
+            try
+            {
+                busyService.IsBusyChanged -= OnBusyServiceIsBusyChanged;
+            }
+            finally
+            {
+                isDisposed = true;
+            }
+        }
 
         /// <summary>
         /// Abstract method that should be implemented to perform the asynchronous command action.
         /// </summary>
         /// <param name="commandName">The name of the command to be executed.</param>
+        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        protected abstract Task DoPerformCommandAsync(string commandName, CancellationToken token = default);
+        private async Task DoCommandAsync(string commandName, CancellationToken cancellationToken = default)
+        {
+            logService.LogTrace(null, $"{nameof(commandName)}='{commandName}'", GetType());
+            using (busyService.Busy())
+            {
+                await Task.Delay(50);
+                if (commandActions.TryGetValue(commandName, out var action))
+                    await action.Invoke(cancellationToken);
+                else
+                    logService.LogWarning(NO_ACTION_MESSAGE);
+            }
+        }
+
+        private void OnBusyServiceIsBusyChanged() => OnPropertyChanged(nameof(IsBusy));
     }
 }
