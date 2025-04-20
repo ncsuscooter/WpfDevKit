@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace WpfDevKit.Logging
     [DebuggerStepThrough]
     internal class LogBackgroundService : HostedService
     {
-        private readonly LogProviderDescriptorCollection logProviderDescriptorCollection;
+        private readonly IEnumerable<LogProviderDescriptor> logProviderDescriptors;
         private readonly LogService logService;
         private readonly LogQueue logQueue;
 
@@ -23,9 +24,9 @@ namespace WpfDevKit.Logging
         /// <param name="logService">The service used to log messages or exceptions while processing messages.</param>
         /// <param name="logQueue">The queue that holds the log messages to be processed.</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the object's required arguments are null</exception>
-        public LogBackgroundService(LogProviderDescriptorCollection logProviderDescriptorCollection, LogService logService, LogQueue logQueue)
+        public LogBackgroundService(IEnumerable<LogProviderDescriptor> logProviderDescriptors, LogService logService, LogQueue logQueue)
         {
-            this.logProviderDescriptorCollection = logProviderDescriptorCollection ?? throw new ArgumentNullException(nameof(logProviderDescriptorCollection));
+            this.logProviderDescriptors = logProviderDescriptors ?? throw new ArgumentNullException(nameof(logProviderDescriptors));
             this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
             this.logQueue = logQueue ?? throw new ArgumentNullException(nameof(logQueue));
         }
@@ -44,7 +45,7 @@ namespace WpfDevKit.Logging
                     while (logQueue.TryRead(out var message))
                     {
                         // Iterate over all available logging providers and log the message if appropriate
-                        foreach (var descriptor in logProviderDescriptorCollection.GetDescriptors())
+                        foreach (var descriptor in logProviderDescriptors)
                         {
                             using (descriptor.Metrics.StartStop(message))
                             {

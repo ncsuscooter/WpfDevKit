@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using WpfDevKit.DependencyInjection;
 using WpfDevKit.Hosting;
@@ -10,7 +11,7 @@ namespace WpfDevKit.Logging
     /// Provides extension methods for the <see cref="ILogService"/> interface to facilitate logging at different levels and task lifecycle management.
     /// Provides extension methods for registering WpfDevKit core services.
     /// </summary>
-    //[DebuggerStepThrough]
+    [DebuggerStepThrough]
     public static class LogServiceExtensions
     {
         /// <summary>
@@ -23,12 +24,11 @@ namespace WpfDevKit.Logging
                     .AddSingleton<LogQueue>()
                     .AddSingleton<LogService>()
                     .AddSingleton<LogBackgroundService>()
-                    .AddSingleton<LogProviderDescriptorCollection>()
                     .AddLogProvider<MemoryLogProvider, MemoryLogProviderOptions>()
                     .AddLogProvider<ConsoleLogProvider, ConsoleLogProviderOptions>()
                     .AddLogProvider<DatabaseLogProvider, DatabaseLogProviderOptions>()
                     .AddLogProvider<UserLogProvider, UserLogProviderOptions>()
-                    .AddSingleton<IGetLogs>(p => p.GetRequiredService<UserLogProvider>())
+                    .AddSingleton<IGetLogs>(p => p.GetRequiredService<UserLogProvider>()) // TODO: Need to resolve this potential issue.
                     .AddSingleton<IGetLogs>(p => p.GetRequiredService<MemoryLogProvider>())
                     .AddSingleton<IHostedService>(p => p.GetRequiredService<LogBackgroundService>())
                     .AddSingleton<ILogService>(p => p.GetRequiredService<LogService>())
@@ -57,15 +57,29 @@ namespace WpfDevKit.Logging
             where TProvider : class, ILogProvider
             where TOptions : class, ILogProviderOptions, new() => services.AddSingleton<TProvider>()
                                                                           .AddSingleton<ILogProvider>(p => p.GetRequiredService<TProvider>())
-                                                                          .AddSingleton<ILogProviderDescriptor>(p =>
+                                                                          .AddSingleton<LogProviderDescriptor>(p =>
                                                                           {
                                                                               var provider = p.GetRequiredService<TProvider>();
                                                                               var options = p.GetRequiredService<IOptions<TOptions>>().Value;
-                                                                              var descriptor = new LogProviderDescriptor(provider, options);
-                                                                              p.GetRequiredService<LogProviderDescriptorCollection>().Add<TProvider>(descriptor);
-                                                                              return descriptor;
+                                                                              return new LogProviderDescriptor(provider, options);
                                                                           })
                                                                           .AddOptions(configure);
+
+        /// <summary>
+        /// Retrieves the descriptor associated with the specified provider type.
+        /// </summary>
+        /// <param name="type">The type of the provider for which to retrieve the descriptor.</param>
+        /// <returns>The corresponding <see cref="LogProviderDescriptor"/> instance, or <c>null</c> if not found.</returns>
+        public static ILogProviderDescriptor GetLogProviderDescriptor(this IServiceProvider provider, Type type) =>
+            provider.GetServices<LogProviderDescriptor>().FirstOrDefault(d => d.ProviderType == type);
+
+        /// <summary>
+        /// Retrieves the descriptor associated with the specified provider type.
+        /// </summary>
+        /// <typeparam name="TProvider">The generic type of the log provider.</typeparam>
+        /// <returns>The corresponding <see cref="LogProviderDescriptor"/> instance, or <c>null</c> if not found.</returns>
+        public static ILogProviderDescriptor GetLogProviderDescriptor<TProvider>(this IServiceProvider provider) where TProvider : ILogProvider =>
+            provider.GetLogProviderDescriptor(typeof(TProvider));
 
         /// <summary>
         /// Logs a message at the Trace log level.

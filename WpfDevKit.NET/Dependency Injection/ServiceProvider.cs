@@ -94,7 +94,16 @@ namespace WpfDevKit.DependencyInjection
             });
 
         /// <inheritdoc/>
-        bool IObjectResolver.CanResolve(Type type) => descriptors.Any(d => d.ServiceType == type);
+        bool IObjectResolver.CanResolve(Type type)
+        {
+            // Handle IEnumerable<T>
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                var elementType = type.GetGenericArguments()[0];
+                return descriptors.Any(d => d.ServiceType == elementType);
+            }
+            return descriptors.Any(d => d.ServiceType == type);
+        }
 
         /// <inheritdoc/>
         object IObjectResolver.Resolve(Type type, HashSet<Type> stack) => GetService(type, stack);

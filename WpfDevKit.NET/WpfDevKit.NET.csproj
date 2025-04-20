@@ -50,9 +50,8 @@
     <Compile Include="Factory\ObjectFactoryExtensions.cs" />
     <Compile Include="Hosting\Host\IHost.cs" />
     <Compile Include="Logging\Log Metrics\ILogMetricsWriter.cs" />
-    <Compile Include="Logging\Log Provider Descriptor\ILogProviderDescriptor.cs" />
-    <Compile Include="Logging\Log Provider Descriptor\LogProviderDescriptor.cs" />
-    <Compile Include="Logging\Log Provider Descriptor\LogProviderDescriptorCollection.cs" />
+    <Compile Include="Logging\Log Providers\ILogProviderDescriptor.cs" />
+    <Compile Include="Logging\Log Providers\LogProviderDescriptor.cs" />
     <Compile Include="Logging\Log Providers\Database\DatabaseLogColumn.cs" />
     <Compile Include="Logging\Log Providers\Database\DatabaseLogProvider.cs" />
     <Compile Include="Logging\Log Providers\Database\DatabaseLogProviderOptions.cs" />

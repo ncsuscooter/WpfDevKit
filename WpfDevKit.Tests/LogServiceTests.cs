@@ -548,69 +548,69 @@ namespace WpfDevKit.Tests.Logging
         }
     }
 
-    internal class TestLogProvider : ILogProvider
-    {
-        public Task LogAsync(ILogMessage message) => Task.CompletedTask;
-    }
+    //internal class TestLogProvider : ILogProvider
+    //{
+    //    public Task LogAsync(ILogMessage message) => Task.CompletedTask;
+    //}
     
-    internal class TestLogProviderOptions : ILogProviderOptions
-    {
-        public TLogCategory EnabledCategories { get; set; }
-        public TLogCategory DisabledCategories { get; }
-    }
+    //internal class TestLogProviderOptions : ILogProviderOptions
+    //{
+    //    public TLogCategory EnabledCategories { get; set; }
+    //    public TLogCategory DisabledCategories { get; }
+    //}
 
-    [TestClass]
-    public class LogProviderDescriptorCollectionTests
-    {
-        [TestMethod]
-        public void Add_ThenGetDescriptorByGeneric_ReturnsSameDescriptor()
-        {
-            var collection = new LogProviderDescriptorCollection();
-            var descriptor = new LogProviderDescriptor(new TestLogProvider(), new TestLogProviderOptions());
+    //[TestClass]
+    //public class LogProviderDescriptorCollectionTests
+    //{
+    //    [TestMethod]
+    //    public void Add_ThenGetDescriptorByGeneric_ReturnsSameDescriptor()
+    //    {
+    //        var collection = new LogProviderDescriptorCollection();
+    //        var descriptor = new LogProviderDescriptor(new TestLogProvider(), new TestLogProviderOptions());
 
-            collection.Add<TestLogProvider>(descriptor);
-            var result = collection.GetDescriptor<TestLogProvider>();
+    //        collection.Add<TestLogProvider>(descriptor);
+    //        var result = collection.GetDescriptor<TestLogProvider>();
 
-            Assert.AreSame(descriptor, result);
-        }
+    //        Assert.AreSame(descriptor, result);
+    //    }
 
-        [TestMethod]
-        public void GetDescriptor_ByUnknownType_ReturnsNull()
-        {
-            var collection = new LogProviderDescriptorCollection();
+    //    [TestMethod]
+    //    public void GetDescriptor_ByUnknownType_ReturnsNull()
+    //    {
+    //        var collection = new LogProviderDescriptorCollection();
 
-            var result = collection.GetDescriptor(typeof(ConsoleLogProvider));
+    //        var result = collection.GetDescriptor(typeof(ConsoleLogProvider));
 
-            Assert.IsNull(result);
-        }
+    //        Assert.IsNull(result);
+    //    }
 
-        [TestMethod]
-        public void GetDescriptors_ReturnsAllAdded()
-        {
-            var collection = new LogProviderDescriptorCollection();
+    //    [TestMethod]
+    //    public void GetDescriptors_ReturnsAllAdded()
+    //    {
+    //        var collection = new LogProviderDescriptorCollection();
 
-            collection.Add<TestLogProvider>(new LogProviderDescriptor(new TestLogProvider(), new TestLogProviderOptions()));
-            collection.Add<ConsoleLogProvider>(new LogProviderDescriptor(new ConsoleLogProvider(new Options<ConsoleLogProviderOptions>(new ConsoleLogProviderOptions())), new ConsoleLogProviderOptions()));
+    //        collection.Add<TestLogProvider>(new LogProviderDescriptor(new TestLogProvider(), new TestLogProviderOptions()));
+    //        collection.Add<ConsoleLogProvider>(new LogProviderDescriptor(new ConsoleLogProvider(new Options<ConsoleLogProviderOptions>(new ConsoleLogProviderOptions())), new ConsoleLogProviderOptions()));
 
-            var all = collection.GetDescriptors();
-            Assert.AreEqual(2, all.Count);
-        }
+    //        var all = collection.GetDescriptors();
+    //        Assert.AreEqual(2, all.Count);
+    //    }
 
-        [TestMethod]
-        public void Add_ReplacesExistingDescriptor()
-        {
-            var collection = new LogProviderDescriptorCollection();
+    //    [TestMethod]
+    //    public void Add_ReplacesExistingDescriptor()
+    //    {
+    //        var collection = new LogProviderDescriptorCollection();
 
-            var old = new LogProviderDescriptor(new TestLogProvider(), new TestLogProviderOptions());
-            var updated = new LogProviderDescriptor(new TestLogProvider(), new TestLogProviderOptions());
+    //        var old = new LogProviderDescriptor(new TestLogProvider(), new TestLogProviderOptions());
+    //        var updated = new LogProviderDescriptor(new TestLogProvider(), new TestLogProviderOptions());
 
-            collection.Add<TestLogProvider>(old);
-            collection.Add<TestLogProvider>(updated);
+    //        collection.Add<TestLogProvider>(old);
+    //        collection.Add<TestLogProvider>(updated);
 
-            var result = collection.GetDescriptor<TestLogProvider>();
-            Assert.AreSame(updated, result);
-        }
-    }
+    //        var result = collection.GetDescriptor<TestLogProvider>();
+    //        Assert.AreSame(updated, result);
+    //    }
+    //}
 
     [TestClass]
     public class MemoryLogProviderTests
@@ -920,7 +920,7 @@ namespace WpfDevKit.Tests.Logging
                 logService.Log(TLogCategory.Info, "Integration test message");
 
                 // Allow background service time to process
-                await Task.Delay(20000);
+                await Task.Delay(200);
 
                 // Use reflection to inspect logged messages
                 var memoryLogProvider = host.Services.GetService<MemoryLogProvider>();
@@ -936,6 +936,5 @@ namespace WpfDevKit.Tests.Logging
                 await host.StopAsync();
             }
         }
-
     }
 }
