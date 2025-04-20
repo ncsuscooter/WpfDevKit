@@ -14,6 +14,11 @@ namespace WpfDevKit.DependencyInjection
         private readonly List<ServiceDescriptor> descriptors = new List<ServiceDescriptor>();
         private readonly Dictionary<ServiceDescriptor, List<Delegate>> configurators = new Dictionary<ServiceDescriptor, List<Delegate>>();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceCollection"/> class.
+        /// </summary>
+        public ServiceCollection() => AddSingleton<IServiceProvider>(p => p);
+
         /// <inheritdoc/>
         public bool IsBuilt { get; private set; }
 
@@ -144,6 +149,8 @@ namespace WpfDevKit.DependencyInjection
         public IServiceCollection Configure<TOptions>(Action<TOptions> configure) where TOptions : class
         {
             EnsureNotBuilt();
+            if (configure == null)
+                return this;
             var collection = descriptors.Where(d => d.ServiceType == typeof(IOptions<TOptions>)).ToList();
             if (collection == null || collection.Count == 0)
                 throw new InvalidOperationException($"Cannot configure options for '{typeof(TOptions).Name}' because it is not registered as a service.");

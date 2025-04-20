@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace WpfDevKit.Logging
 {
@@ -6,6 +7,7 @@ namespace WpfDevKit.Logging
     /// Represents an internal implementation of <see cref="ILogProviderDescriptor"/> that associates a logging provider
     /// with a unique key and its corresponding metrics.
     /// </summary>
+    [DebuggerStepThrough]
     internal class LogProviderDescriptor : ILogProviderDescriptor, IEquatable<ILogProviderDescriptor>
     {
         /// <inheritdoc/>

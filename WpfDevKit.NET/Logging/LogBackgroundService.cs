@@ -23,7 +23,7 @@ namespace WpfDevKit.Logging
         /// <param name="logService">The service used to log messages or exceptions while processing messages.</param>
         /// <param name="logQueue">The queue that holds the log messages to be processed.</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the object's required arguments are null</exception>
-        public LogBackgroundService(IServiceProvider provider, LogProviderDescriptorCollection logProviderDescriptorCollection, LogService logService, LogQueue logQueue)
+        public LogBackgroundService(LogProviderDescriptorCollection logProviderDescriptorCollection, LogService logService, LogQueue logQueue)
         {
             this.logProviderDescriptorCollection = logProviderDescriptorCollection ?? throw new ArgumentNullException(nameof(logProviderDescriptorCollection));
             this.logService = logService ?? throw new ArgumentNullException(nameof(logService));

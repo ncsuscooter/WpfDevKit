@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using WpfDevKit.DependencyInjection;
+using WpfDevKit.Hosting;
 
 namespace WpfDevKit.Logging
 {
@@ -9,7 +10,7 @@ namespace WpfDevKit.Logging
     /// Provides extension methods for the <see cref="ILogService"/> interface to facilitate logging at different levels and task lifecycle management.
     /// Provides extension methods for registering WpfDevKit core services.
     /// </summary>
-    [DebuggerStepThrough]
+    //[DebuggerStepThrough]
     public static class LogServiceExtensions
     {
         /// <summary>
@@ -29,6 +30,7 @@ namespace WpfDevKit.Logging
                     .AddLogProvider<UserLogProvider, UserLogProviderOptions>()
                     .AddSingleton<IGetLogs>(p => p.GetRequiredService<UserLogProvider>())
                     .AddSingleton<IGetLogs>(p => p.GetRequiredService<MemoryLogProvider>())
+                    .AddSingleton<IHostedService>(p => p.GetRequiredService<LogBackgroundService>())
                     .AddSingleton<ILogService>(p => p.GetRequiredService<LogService>())
                     .AddSingleton<ILogMetricsReader>(p => p.GetRequiredService<LogMetrics>());
 

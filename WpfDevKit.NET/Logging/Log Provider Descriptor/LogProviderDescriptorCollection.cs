@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace WpfDevKit.Logging
 {
@@ -7,6 +8,7 @@ namespace WpfDevKit.Logging
     /// Provides a registry for mapping <see cref="ILogProvider"/> types to their corresponding <see cref="LogProviderDescriptor"/>.
     /// This registry allows fast, type-safe retrieval of descriptors at runtime without requiring enumeration or reflection.
     /// </summary>
+    [DebuggerStepThrough]
     internal class LogProviderDescriptorCollection
     {
         private readonly Dictionary<Type, LogProviderDescriptor> descriptors =
