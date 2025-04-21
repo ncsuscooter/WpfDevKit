@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using WpfDevKit.DependencyInjection;
 using WpfDevKit.Hosting;
 
 namespace WpfDevKit.Connectivity
@@ -41,9 +42,9 @@ namespace WpfDevKit.Connectivity
         /// Initializes a new instance of the <see cref="ConnectivityService"/> class.
         /// </summary>
         /// <param name="options">The options used to configure the connectivity service.</param>
-        public ConnectivityService(ConnectivityServiceOptions options)
+        public ConnectivityService(IOptions<ConnectivityServiceOptions> options)
         {
-            this.options = options ?? throw new ArgumentNullException(nameof(options));
+            this.options = (options ?? throw new ArgumentNullException(nameof(options))).Value;
             this.options.Validate();
         }
 

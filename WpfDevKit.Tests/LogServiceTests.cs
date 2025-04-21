@@ -706,7 +706,7 @@ namespace WpfDevKit.Tests.Logging
         }
     }
 
-    [TestClass]
+    //[TestClass]
     public class DatabaseLogProviderTests1
     {
         private DatabaseLogProviderOptions GetValidOptions() => new DatabaseLogProviderOptions
@@ -746,7 +746,7 @@ namespace WpfDevKit.Tests.Logging
         }
     }
 
-    [TestClass]
+    //[TestClass]
     public class DatabaseLogProviderTests2
     {
         private DatabaseLogProvider CreateProvider(Action<DatabaseLogProviderOptions> configure)

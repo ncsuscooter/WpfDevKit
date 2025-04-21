@@ -71,7 +71,6 @@
     <Compile Include="ServiceProviderExtensions.cs" />
     <Compile Include="Factory\ResolvableAttribute.cs" />
     <Compile Include="EnumExtensions.cs" />
-    <Compile Include="TaskExtensions.cs" />
     <Compile Include="TimeSpanExtensions.cs" />
     <Compile Include="Logging\TLogCategory.cs" />
     <Compile Include="Logging\TLogElement.cs" />
@@ -117,5 +116,6 @@
     <None Include="packages.config" />
     <None Include="Project_Improvement_Checklist.md" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

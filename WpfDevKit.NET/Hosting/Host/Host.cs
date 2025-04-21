@@ -9,7 +9,7 @@ namespace WpfDevKit.Hosting
     /// <summary>
     /// Provides an application host for managing and running services.
     /// </summary>
-    [DebuggerStepThrough]
+    //[DebuggerStepThrough]
     internal class Host : IHost
     {
         private bool disposed;

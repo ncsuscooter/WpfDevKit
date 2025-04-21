@@ -78,6 +78,6 @@ namespace WpfDevKit.Logging
         /// This is useful for scenarios like flushing the log queue, where external components 
         /// need to wait until the queue becomes empty or is modified.
         /// </remarks>
-        public Task WaitAsync(CancellationToken token = default) => reset.WaitAsync(token);
+        public Task WaitAsync(CancellationToken cancellationToken = default) => reset.WaitAsync(cancellationToken);
     }
 }

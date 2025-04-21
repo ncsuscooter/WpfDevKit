@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,27 +14,23 @@ using System.Threading.Tasks;
 [DebuggerStepThrough]
 public class AsyncAutoResetEvent
 {
-    private readonly object sync = new object();
-    private TaskCompletionSource<bool> taskCompletionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly ConcurrentQueue<TaskCompletionSource<bool>> queue = new ConcurrentQueue<TaskCompletionSource<bool>>();
     private bool signaled;
 
     /// <summary>
     /// Asynchronously waits for the signal to be set. Returns immediately if already signaled.
     /// </summary>
-    public Task WaitAsync(CancellationToken cancellationToken = default)
+    public async Task WaitAsync(CancellationToken cancellationToken = default)
     {
-        lock (sync)
+        if (signaled)
         {
-            if (signaled)
-            {
-                signaled = false;
-                return Task.FromResult(true);
-            }
-            else
-            {
-                return taskCompletionSource.Task.WithCancellation(cancellationToken);
-            }
+            signaled = false;
+            return;
         }
+        var tcs = new TaskCompletionSource<bool>();
+        queue.Enqueue(tcs);
+        using (cancellationToken.Register(() => tcs.TrySetCanceled()))
+            await tcs.Task;
     }
 
     /// <summary>
@@ -41,14 +38,17 @@ public class AsyncAutoResetEvent
     /// </summary>
     public void Signal()
     {
-        lock (sync)
+        TaskCompletionSource<bool> toRelease = null;
+        while (!queue.IsEmpty)
         {
-            if (taskCompletionSource.Task.IsCompleted)
-                taskCompletionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            if (!taskCompletionSource.Task.IsCompleted)
-                taskCompletionSource.SetResult(true);
-            else
-                signaled = true;
+            if (queue.TryDequeue(out var tcs) && !tcs.Task.IsCanceled && !tcs.Task.IsCompleted)
+            {
+                toRelease = tcs;
+                break;
+            }
         }
+        if (!signaled && toRelease == null)
+            signaled = true;
+        toRelease?.SetResult(true);
     }
 }

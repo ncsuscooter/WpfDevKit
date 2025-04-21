@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WpfDevKit.Connectivity;
+using WpfDevKit.DependencyInjection;
 
 namespace WpfDevKit.Tests.Connectivity
 {
@@ -34,7 +35,7 @@ namespace WpfDevKit.Tests.Connectivity
         [TestMethod]
         public async Task ConnectivityService_SuccessfulConnection_ImmediatelyConnected()
         {
-            var options = new TestOptions(attempt => true);
+            var options = new Options<ConnectivityServiceOptions>(new TestOptions(attempt => true));
             var service = new ConnectivityService(options);
 
             using (var cts = new CancellationTokenSource(250))
@@ -56,10 +57,10 @@ namespace WpfDevKit.Tests.Connectivity
         [TestMethod]
         public async Task ConnectivityService_AlwaysFails_RetriesIncrement()
         {
-            var options = new TestOptions(attempt => false)
+            var options = new Options<ConnectivityServiceOptions>(new TestOptions(attempt => false)
             {
                 ExecutionIntervalMilliseconds = 100
-            };
+            });
             var service = new ConnectivityService(options);
 
             using (var cts = new CancellationTokenSource(250))
@@ -82,11 +83,11 @@ namespace WpfDevKit.Tests.Connectivity
         public async Task ConnectivityService_ManualTrigger_OverridesDelay()
         {
             var callCount = 0;
-            var options = new TestOptions(_ =>
+            var options = new Options<ConnectivityServiceOptions>(new TestOptions(_ =>
             {
                 callCount++;
                 return false;
-            });
+            }));
 
             var service = new ConnectivityService(options);
 
@@ -107,7 +108,7 @@ namespace WpfDevKit.Tests.Connectivity
         [TestMethod]
         public async Task ConnectivityService_StatusChanged_EventFires()
         {
-            var options = new TestOptions(attempt => attempt == 2);
+            var options = new Options<ConnectivityServiceOptions>(new TestOptions(attempt => attempt == 2));
             var service = new ConnectivityService(options);
 
             int changeCount = 0;
