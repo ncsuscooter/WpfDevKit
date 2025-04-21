@@ -76,7 +76,7 @@ namespace WpfDevKit.Hosting
             if (disposed)
                 return;
             disposed = true;
-            StopAsync(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token).GetAwaiter().GetResult();
+            Task.Run(() => StopAsync(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token)).GetAwaiter().GetResult();
             var backgroundServices = Services.GetServices<IHostedService>();
             foreach (var service in backgroundServices)
             {

@@ -36,8 +36,8 @@ namespace WpfDevKit.Logging
         /// </summary>
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        protected override async Task ExecuteAsync(CancellationToken cancellationToken) => 
-            await Task.Run(async () =>
+        protected override Task ExecuteAsync(CancellationToken cancellationToken) => 
+            Task.Run(async () =>
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
