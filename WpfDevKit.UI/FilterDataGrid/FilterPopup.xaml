@@ -3,9 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:fdg="clr-namespace:WpfDevKit.UI.FilterDataGrid"
-             MinWidth="{StaticResource PopupWidth}" Width="{StaticResource PopupWidth}"
-             MinHeight="{StaticResource PopupHeight}" Height="{StaticResource PopupHeight}"
-             Loaded="OnLoaded" Background="White">
+             Loaded="OnLoaded">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -13,6 +11,15 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
+    <UserControl.Style>
+        <Style TargetType="UserControl">
+            <Setter Property="MinWidth"   Value="{StaticResource PopupWidth}" />
+            <Setter Property="Width"      Value="{StaticResource PopupWidth}" />
+            <Setter Property="MinHeight"  Value="{StaticResource PopupHeight}" />
+            <Setter Property="Height"     Value="{StaticResource PopupHeight}" />
+            <Setter Property="Background" Value="White" />
+        </Style>
+    </UserControl.Style>
     <Grid>
         <Border BorderThickness="1" BorderBrush="{Binding ElementName=This, Path=Foreground}" Background="{Binding ElementName=This, Path=Background}">
             <Grid Grid.IsSharedSizeScope="True">

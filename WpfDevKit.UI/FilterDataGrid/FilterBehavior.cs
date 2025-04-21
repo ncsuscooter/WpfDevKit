@@ -14,7 +14,7 @@ namespace WpfDevKit.UI.FilterDataGrid
     {
         private static readonly ResourceDictionary filterResourceDictionary = new ResourceDictionary
         {
-            Source = new Uri("pack://application:,,,/WpfDevKit.UI.FilterDataGrid;component/FilterDataGrid/FilterStyle.xaml")
+            Source = new Uri("pack://application:,,,/WpfDevKit.UI;component/FilterDataGrid/FilterStyle.xaml")
         };
 
         #region FilterPopups
