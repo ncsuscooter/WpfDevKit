@@ -6,6 +6,13 @@
              MinWidth="{StaticResource PopupWidth}" Width="{StaticResource PopupWidth}"
              MinHeight="{StaticResource PopupHeight}" Height="{StaticResource PopupHeight}"
              Loaded="OnLoaded" Background="White">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/WpfDevKit.UI;component/FilterDataGrid/FilterStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <Border BorderThickness="1" BorderBrush="{Binding ElementName=This, Path=Foreground}" Background="{Binding ElementName=This, Path=Background}">
             <Grid Grid.IsSharedSizeScope="True">

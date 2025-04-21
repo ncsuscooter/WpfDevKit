@@ -60,8 +60,12 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="FilterDataGrid\FilterPopup.xaml">
-      <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="FilterDataGrid\FilterStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -73,6 +77,14 @@
     <Compile Include="Behaviors\DataGridBehaviors.cs" />
     <Compile Include="Behaviors\ItemsControlBehaviors.cs" />
     <Compile Include="Behaviors\TextBoxBehaviors.cs" />
+    <Compile Include="FilterDataGrid\BindingEvaluator.cs" />
+    <Compile Include="FilterDataGrid\FilterBehavior.cs" />
+    <Compile Include="FilterDataGrid\FilterExtensions.cs" />
+    <Compile Include="FilterDataGrid\FilterItem.cs" />
+    <Compile Include="FilterDataGrid\FilterPopup.cs" />
+    <Compile Include="FilterDataGrid\FilterPopup.xaml.cs">
+      <DependentUpon>FilterPopup.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ServiceCollectionExtensions.cs" />
     <Compile Include="Collection Sync\CollectionSynchronizationExtensions.cs" />
     <Compile Include="Collection View\CollectionViewExtensions.cs" />
@@ -103,14 +115,6 @@
     </Compile>
     <Compile Include="Dialogs\DialogServiceExtensions.cs" />
     <Compile Include="DependencyObjectExtensions.cs" />
-    <Compile Include="FilterDataGrid\BindingEvaluator.cs" />
-    <Compile Include="FilterDataGrid\FilterBehavior.cs" />
-    <Compile Include="FilterDataGrid\FilterExtensions.cs" />
-    <Compile Include="FilterDataGrid\FilterItem.cs" />
-    <Compile Include="FilterDataGrid\FilterPopup.cs" />
-    <Compile Include="FilterDataGrid\FilterPopup.xaml.cs">
-      <DependentUpon>FilterPopup.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Commands\Command.cs" />
     <Compile Include="Commands\CommandFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

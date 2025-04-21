@@ -12,6 +12,11 @@ namespace WpfDevKit.UI.FilterDataGrid
     [DebuggerStepThrough]
     public static class FilterBehavior
     {
+        private static readonly ResourceDictionary FilterStyle = new ResourceDictionary
+        {
+            Source = new Uri("pack://application:,,,/WpfDevKit.UI.FilterDataGrid;component/FilterDataGrid/FilterStyle.xaml")
+        };
+
         #region FilterPopups
 
         /// <summary>
@@ -101,6 +106,7 @@ namespace WpfDevKit.UI.FilterDataGrid
         /// </summary>
         /// <param name="column">The target DataGridTextColumn.</param>
         /// <returns><c>true</c> if filtering is enabled; otherwise, <c>false</c>.</returns>
+        [AttachedPropertyBrowsableForType(typeof(DataGridTextColumn))]
         public static bool GetIsEnabled(DataGridTextColumn column) => (bool)column.GetValue(IsEnabledProperty);
 
         /// <summary>
@@ -108,6 +114,7 @@ namespace WpfDevKit.UI.FilterDataGrid
         /// </summary>
         /// <param name="column">The target DataGridTextColumn.</param>
         /// <param name="value"><c>true</c> to enable filtering; otherwise, <c>false</c>.</param>
+        [AttachedPropertyBrowsableForType(typeof(DataGridTextColumn))]
         public static void SetIsEnabled(DataGridTextColumn column, bool value) => column.SetValue(IsEnabledProperty, value);
 
         /// <summary>
@@ -119,11 +126,7 @@ namespace WpfDevKit.UI.FilterDataGrid
         private static void IsEnabledPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is DataGridTextColumn column && GetIsEnabled(column) && column.HeaderTemplate == null)
-            {
-                var resourceUri = new Uri("pack://application:,,,/WpfDevKit.Controls;component/FilterDataGrid/FilterTheme.xaml");
-                var resourceDict = new ResourceDictionary { Source = resourceUri };
-                column.HeaderStyle = resourceDict["FilterDataGridColumnHeader"] as Style;
-            }
+                column.HeaderStyle = FilterStyle["FilterDataGridColumnHeader"] as Style;
         }
 
         #endregion
