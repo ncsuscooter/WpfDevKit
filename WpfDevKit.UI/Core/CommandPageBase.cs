@@ -21,7 +21,6 @@ namespace WpfDevKit.UI.Core
         private readonly IBusyService busyService;
         private readonly ICommandFactory commandFactory;
         private readonly ILogService logService;
-        
         protected bool isDisposed;
 
         /// <summary>
@@ -41,8 +40,13 @@ namespace WpfDevKit.UI.Core
         /// <param name="busyService">The <see cref="IBusyService"/> used to indicate background activity.</param>
         /// <param name="commandFactory">The <see cref="ICommandFactory"/> used to create commands.</param>
         /// <param name="logService">The <see cref="ILogService"/> used to log messages and exceptions.</param>
-        public CommandPageBase(IBusyService busyService, ICommandFactory commandFactory, ILogService logService) => 
-            (this.busyService, this.commandFactory, this.logService) = (busyService, commandFactory, logService);
+        public CommandPageBase(IBusyService busyService, ICommandFactory commandFactory, ILogService logService)
+        {
+            this.busyService = busyService ?? throw new ArgumentNullException(nameof(busyService));
+            this.commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
+            this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
+            this.busyService.IsBusyChanged += OnBusyServiceIsBusyChanged;
+        }
 
         /// <summary>
         /// 

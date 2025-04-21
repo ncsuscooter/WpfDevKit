@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using WpfDevKit.Busy;
 using WpfDevKit.Logging;
 using WpfDevKit.UI.Command;
@@ -14,15 +13,16 @@ namespace WpfDevKit.UI.Core
     /// </summary>
     public abstract class PageBase : CommandPageBase, IDisposable
     {
-        private readonly ILogService logService;
-        private readonly IDialogService dialogService;
-
-        private IObservable selectedItem;
-
         /// <summary>
         /// The message to indicate that the base method should be overridden to prevent execution.
         /// </summary>
         protected const string OVERRIDE_MESSAGE = "Override the base method to prevent execution";
+
+        private readonly IBusyService busyService;
+        private readonly ICommandFactory commandFactory;
+        private readonly IDialogService dialogService;
+        private readonly ILogService logService;
+        private IObservable selectedItem;
 
         /// <summary>
         /// Gets or sets the currently selected item.
@@ -39,54 +39,47 @@ namespace WpfDevKit.UI.Core
         protected PageBase(IBusyService busyService, ICommandFactory commandFactory, IDialogService dialogService, ILogService logService)
             : base(busyService, commandFactory, logService)
         {
-            (this.dialogService, this.logService) = (dialogService, logService);
-            logService.LogDebug(type: GetType());
+            this.busyService = busyService ?? throw new ArgumentNullException(nameof(busyService));
+            this.commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
+            this.dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
+            this.logService.LogDebug(type: GetType());
+            RegisterPropertyChangingAction(nameof(SelectedItem), SelectedItemChanging);
+            RegisterPropertyChangedAction(nameof(SelectedItem), SelectedItemChanged);
         }
 
         /// <summary>
-        /// Raises the <see cref="PropertyChanging"/> event for the specified property.
+        /// 
         /// </summary>
-        /// <param name="propertyName">The name of the property that is changing.</param>
-        public override void OnPropertyChanging([CallerMemberName] string propertyName = null)
+        private void SelectedItemChanging()
         {
             try
             {
-                if (propertyName.Equals(nameof(SelectedItem)))
-                {
-                    logService.LogDebug(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
-                    if (SelectedItem is IDisposable disposable)
-                        disposable.Dispose();
-                    if (SelectedItem != null)
-                        SelectedItem.PropertyChanged -= OnSelectedItemPropertyChanged;
-                }
+                if (SelectedItem is IDisposable disposable)
+                    disposable.Dispose();
+                if (SelectedItem != null)
+                    SelectedItem.PropertyChanged -= OnSelectedItemPropertyChanged;
             }
             catch (Exception ex)
             {
                 dialogService.ShowDialog(ex, GetType());
             }
-            base.OnPropertyChanging(propertyName);
         }
 
         /// <summary>
-        /// Raises the <see cref="PropertyChanged"/> event for the specified property.
+        /// 
         /// </summary>
-        /// <param name="propertyName">The name of the property that has changed.</param>
-        public override void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void SelectedItemChanged()
         {
             try
             {
-                if (propertyName.Equals(nameof(SelectedItem)))
-                {
-                    logService.LogDebug(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
-                    if (SelectedItem != null)
-                        SelectedItem.PropertyChanged += OnSelectedItemPropertyChanged;
-                }
+                if (SelectedItem != null)
+                    SelectedItem.PropertyChanged += OnSelectedItemPropertyChanged;
             }
             catch (Exception ex)
             {
                 dialogService.ShowDialog(ex, GetType());
             }
-            base.OnPropertyChanged(propertyName);
         }
 
         /// <summary>

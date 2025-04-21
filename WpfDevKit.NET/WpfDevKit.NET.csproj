@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncAutoResetEvent.cs" />
+    <Compile Include="ServiceCollectionExtensions.cs" />
     <Compile Include="Connectivity\TConnectivityState.cs" />
     <Compile Include="Factory\IObjectResolver.cs" />
     <Compile Include="Factory\IObjectFactory.cs" />

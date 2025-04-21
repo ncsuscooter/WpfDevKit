@@ -1,9 +1,5 @@
 ﻿using System.Diagnostics;
-using WpfDevKit.Busy;
 using WpfDevKit.DependencyInjection;
-using WpfDevKit.Factory;
-using WpfDevKit.Logging;
-using WpfDevKit.RemoteFileAccess;
 
 namespace WpfDevKit.Hosting
 {
@@ -19,15 +15,7 @@ namespace WpfDevKit.Hosting
         /// Creates and returns a new instance of the <see cref="HostBuilder"/> class.
         /// </summary>
         /// <returns>A configured <see cref="HostBuilder"/> instance.</returns>
-        public static HostBuilder CreateHostBuilder()
-        {
-            var builder = new HostBuilder();
-            builder.Services.AddObjectFactory()
-                            .AddBusyService()
-                            .AddLoggingService()
-                            .AddRemoteFileConnectionFactory();
-            return builder;
-        }
+        public static HostBuilder CreateHostBuilder() => new HostBuilder();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HostBuilder"/> class.

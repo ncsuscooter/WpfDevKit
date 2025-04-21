@@ -15,8 +15,8 @@ namespace WpfDevKit.UI.Core
     [DebuggerStepThrough]
     public abstract class ObservableBase : IObservable
     {
-        private readonly Dictionary<string, Action> propertyChangingActions = new Dictionary<string, Action>();
-        private readonly Dictionary<string, Action> propertyChangedActions = new Dictionary<string, Action>();
+        private readonly Dictionary<string, List<Action>> propertyChangingActions = new Dictionary<string, List<Action>>();
+        private readonly Dictionary<string, List<Action>> propertyChangedActions = new Dictionary<string, List<Action>>();
 
         /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging;
@@ -25,19 +25,23 @@ namespace WpfDevKit.UI.Core
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <inheritdoc/>
-        public virtual void OnPropertyChanging([CallerMemberName] string propertyName = null)
+        public void OnPropertyChanging([CallerMemberName] string propertyName = null)
         {
-            if (propertyChangingActions.TryGetValue(propertyName, out var action))
-                action();
+            if (propertyChangingActions.TryGetValue(propertyName, out var collection))
+                if (collection != null && collection.Count > 0)
+                    foreach (var action in collection)
+                        action();
             if (!string.IsNullOrWhiteSpace(propertyName))
                 PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
         }
 
         /// <inheritdoc/>
-        public virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        public void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (propertyChangedActions.TryGetValue(propertyName, out var action))
-                action();
+            if (propertyChangedActions.TryGetValue(propertyName, out var collection))
+                if (collection != null && collection.Count > 0)
+                    foreach (var action in collection)
+                        action();
             if (!string.IsNullOrWhiteSpace(propertyName))
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -45,7 +49,7 @@ namespace WpfDevKit.UI.Core
         /// <summary>
         /// Notifies that all read-only properties of the object have changed.
         /// </summary>
-        public virtual void NotifyReadOnlyPropertiesChanged()
+        public void Notify()
         {
             foreach (var item in GetType().GetProperties().Where(x => x.CanRead && !x.CanWrite))
                 OnPropertyChanged(item.Name);
@@ -57,11 +61,13 @@ namespace WpfDevKit.UI.Core
         /// <param name="propertyName"></param>
         /// <param name="action"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public void RegisterPropertyChangingAction(string propertyName, Action action)
+        protected void RegisterPropertyChangingAction(string propertyName, Action action)
         {
-            if (string.IsNullOrWhiteSpace(propertyName))
-                throw new ArgumentNullException(nameof(propertyName));
-            propertyChangingActions[propertyName] = action ?? throw new ArgumentNullException(nameof(action));
+            if (string.IsNullOrWhiteSpace(propertyName)) throw new ArgumentNullException(nameof(propertyName));
+            if (action == null) throw new ArgumentNullException(nameof(action));
+            if (!propertyChangingActions.TryGetValue(propertyName, out var collection))
+                collection = new List<Action>();
+            collection.Add(action);
         }
 
         /// <summary>
@@ -70,11 +76,13 @@ namespace WpfDevKit.UI.Core
         /// <param name="propertyName"></param>
         /// <param name="action"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public void RegisterPropertyChangedAction(string propertyName, Action action)
+        protected void RegisterPropertyChangedAction(string propertyName, Action action)
         {
-            if (string.IsNullOrWhiteSpace(propertyName))
-                throw new ArgumentNullException(nameof(propertyName));
-            propertyChangedActions[propertyName] = action ?? throw new ArgumentNullException(nameof(action));
+            if (string.IsNullOrWhiteSpace(propertyName)) throw new ArgumentNullException(nameof(propertyName));
+            if (action == null) throw new ArgumentNullException(nameof(action));
+            if (!propertyChangedActions.TryGetValue(propertyName, out var collection))
+                collection = new List<Action>();
+            collection.Add(action);
         }
 
         /// <summary>
