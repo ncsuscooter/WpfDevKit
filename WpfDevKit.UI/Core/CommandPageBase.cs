@@ -110,10 +110,6 @@ namespace WpfDevKit.UI.Core
             }
         }
 
-        private void OnBusyServiceIsBusyChanged()
-        {
-            logService.LogTrace($"{nameof(IsBusy)}: {IsBusy}");
-            OnPropertyChanged(nameof(IsBusy));
-        }
+        private void OnBusyServiceIsBusyChanged() => OnPropertyChanged(nameof(IsBusy));
     }
 }
