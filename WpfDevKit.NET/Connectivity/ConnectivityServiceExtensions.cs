@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using WpfDevKit.DependencyInjection;
+using WpfDevKit.Hosting;
 
 namespace WpfDevKit.Connectivity
 {
@@ -18,6 +19,7 @@ namespace WpfDevKit.Connectivity
         public static IServiceCollection AddConnectivityService(this IServiceCollection services, Action<ConnectivityServiceOptions> configure) =>
             services.AddSingleton<ConnectivityService>()
                     .AddSingleton<IConnectivityService>(p => p.GetRequiredService<ConnectivityService>())
+                    .AddSingleton<IHostedService>(p => p.GetRequiredService<ConnectivityService>())
                     .AddOptions(configure);
     }
 }
