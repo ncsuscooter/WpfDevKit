@@ -12,7 +12,7 @@ namespace WpfDevKit.UI.FilterDataGrid
     [DebuggerStepThrough]
     public static class FilterBehavior
     {
-        private static readonly ResourceDictionary FilterStyle = new ResourceDictionary
+        private static readonly ResourceDictionary filterResourceDictionary = new ResourceDictionary
         {
             Source = new Uri("pack://application:,,,/WpfDevKit.UI.FilterDataGrid;component/FilterDataGrid/FilterStyle.xaml")
         };
@@ -126,7 +126,7 @@ namespace WpfDevKit.UI.FilterDataGrid
         private static void IsEnabledPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is DataGridTextColumn column && GetIsEnabled(column) && column.HeaderTemplate == null)
-                column.HeaderStyle = FilterStyle["FilterDataGridColumnHeader"] as Style;
+                column.HeaderStyle = filterResourceDictionary["FilterDataGridColumnHeader"] as Style;
         }
 
         #endregion
