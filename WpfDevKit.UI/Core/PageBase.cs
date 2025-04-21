@@ -14,8 +14,8 @@ namespace WpfDevKit.UI.Core
     /// </summary>
     public abstract class PageBase : CommandPageBase, IDisposable
     {
-        protected readonly ILogService logService;
-        protected readonly IDialogService dialogService;
+        private readonly ILogService logService;
+        private readonly IDialogService dialogService;
 
         private IObservable selectedItem;
 
