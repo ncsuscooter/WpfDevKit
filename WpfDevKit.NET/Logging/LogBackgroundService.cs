@@ -41,7 +41,6 @@ namespace WpfDevKit.Logging
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    Console.WriteLine("Log Loop");
                     // Continuously attempt to read messages from the queue
                     while (logQueue.TryRead(out var message))
                     {
@@ -81,7 +80,7 @@ namespace WpfDevKit.Logging
                     }
                     catch (OperationCanceledException)
                     {
-                        // DO NOTHING
+                        // INTENTIONALLY LEFT EMPTY
                     }
                 }
             }, cancellationToken);
