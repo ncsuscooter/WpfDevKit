@@ -41,6 +41,7 @@ namespace WpfDevKit.UI.Core
         /// <param name="commandFactory">The <see cref="ICommandFactory"/> used to create commands.</param>
         /// <param name="logService">The <see cref="ILogService"/> used to log messages and exceptions.</param>
         public CommandPageBase(IBusyService busyService, ICommandFactory commandFactory, ILogService logService)
+            : base(logService)
         {
             this.busyService = busyService ?? throw new ArgumentNullException(nameof(busyService));
             this.commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
@@ -109,6 +110,10 @@ namespace WpfDevKit.UI.Core
             }
         }
 
-        private void OnBusyServiceIsBusyChanged() => OnPropertyChanged(nameof(IsBusy));
+        private void OnBusyServiceIsBusyChanged()
+        {
+            logService.LogTrace($"{nameof(IsBusy)}: {IsBusy}");
+            OnPropertyChanged(nameof(IsBusy));
+        }
     }
 }

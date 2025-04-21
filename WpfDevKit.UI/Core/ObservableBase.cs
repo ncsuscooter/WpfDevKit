@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using WpfDevKit.Logging;
 
 namespace WpfDevKit.UI.Core
 {
@@ -17,6 +18,7 @@ namespace WpfDevKit.UI.Core
     {
         private readonly Dictionary<string, List<Action>> propertyChangingActions = new Dictionary<string, List<Action>>();
         private readonly Dictionary<string, List<Action>> propertyChangedActions = new Dictionary<string, List<Action>>();
+        private readonly ILogService logService;
 
         /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging;
@@ -24,13 +26,17 @@ namespace WpfDevKit.UI.Core
         /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        protected ObservableBase(ILogService logService) => this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
+
         /// <inheritdoc/>
         public void OnPropertyChanging([CallerMemberName] string propertyName = null)
         {
-            if (propertyChangingActions.TryGetValue(propertyName, out var collection))
-                if (collection != null && collection.Count > 0)
-                    foreach (var action in collection)
-                        action();
+            if (propertyChangingActions.TryGetValue(propertyName, out var collection) && collection != null && collection.Count > 0)
+            {
+                logService.LogTrace(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
+                foreach (var action in collection)
+                    action();
+            }
             if (!string.IsNullOrWhiteSpace(propertyName))
                 PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
         }
@@ -38,10 +44,12 @@ namespace WpfDevKit.UI.Core
         /// <inheritdoc/>
         public void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (propertyChangedActions.TryGetValue(propertyName, out var collection))
-                if (collection != null && collection.Count > 0)
-                    foreach (var action in collection)
-                        action();
+            if (propertyChangedActions.TryGetValue(propertyName, out var collection) && collection != null && collection.Count > 0)
+            {
+                logService.LogTrace(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
+                foreach (var action in collection)
+                    action();
+            }
             if (!string.IsNullOrWhiteSpace(propertyName))
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -68,6 +76,7 @@ namespace WpfDevKit.UI.Core
             if (!propertyChangingActions.TryGetValue(propertyName, out var collection))
                 collection = new List<Action>();
             collection.Add(action);
+            logService.LogTrace("Property changing registered", $"{nameof(propertyName)}='{propertyName}'", GetType());
         }
 
         /// <summary>
@@ -83,6 +92,7 @@ namespace WpfDevKit.UI.Core
             if (!propertyChangedActions.TryGetValue(propertyName, out var collection))
                 collection = new List<Action>();
             collection.Add(action);
+            logService.LogTrace(" Property changed  registered", $"{nameof(propertyName)}='{propertyName}'", GetType());
         }
 
         /// <summary>
