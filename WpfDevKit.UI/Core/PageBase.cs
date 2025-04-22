@@ -23,6 +23,7 @@ namespace WpfDevKit.UI.Core
         private readonly IDialogService dialogService;
         private readonly ILogService logService;
         private IObservable selectedItem;
+        private bool isDisposed;
 
         /// <summary>
         /// Gets or sets the currently selected item.
@@ -89,6 +90,7 @@ namespace WpfDevKit.UI.Core
         {
             if (isDisposed)
                 return;
+            isDisposed = true;
             logService.LogDebug(type: GetType());
             try
             {

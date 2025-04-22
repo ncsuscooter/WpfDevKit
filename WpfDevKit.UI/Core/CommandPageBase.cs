@@ -21,7 +21,7 @@ namespace WpfDevKit.UI.Core
         private readonly IBusyService busyService;
         private readonly ICommandFactory commandFactory;
         private readonly ILogService logService;
-        protected bool isDisposed;
+        private bool isDisposed;
 
         /// <summary>
         /// Gets the command that executes <see cref="DoCommandAsync"/> with a string parameter.
@@ -76,18 +76,20 @@ namespace WpfDevKit.UI.Core
         /// <summary>
         /// Disposes the command page and cleans up any resources.
         /// </summary>
-        public virtual void Dispose()
+        public override void Dispose()
         {
             if (isDisposed)
                 return;
+            isDisposed = true;
             logService.LogDebug(type: GetType());
             try
             {
                 busyService.IsBusyChanged -= OnBusyServiceIsBusyChanged;
+                commandActions.Clear();
             }
             finally
             {
-                isDisposed = true;
+                base.Dispose();
             }
         }
 

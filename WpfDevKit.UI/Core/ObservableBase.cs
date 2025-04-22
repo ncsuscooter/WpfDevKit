@@ -14,11 +14,13 @@ namespace WpfDevKit.UI.Core
     /// Provides an abstract base class for observable objects, implementing IObservable.
     /// </summary>
     [DebuggerStepThrough]
-    public abstract class ObservableBase : IObservable
+    public abstract class ObservableBase : IObservable, IDisposable
     {
         private readonly Dictionary<string, List<Action>> propertyChangingActions = new Dictionary<string, List<Action>>();
         private readonly Dictionary<string, List<Action>> propertyChangedActions = new Dictionary<string, List<Action>>();
         private readonly ILogService logService;
+
+        private bool isDisposed;
 
         /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging;
@@ -73,9 +75,9 @@ namespace WpfDevKit.UI.Core
         {
             if (string.IsNullOrWhiteSpace(propertyName)) throw new ArgumentNullException(nameof(propertyName));
             if (action == null) throw new ArgumentNullException(nameof(action));
-            if (!propertyChangingActions.TryGetValue(propertyName, out var collection))
-                collection = new List<Action>();
-            collection.Add(action);
+            if (!propertyChangingActions.ContainsKey(propertyName))
+                propertyChangingActions[propertyName] = new List<Action>();
+            propertyChangingActions[propertyName].Add(action);
             logService.LogTrace("Property changing registered", $"{nameof(propertyName)}='{propertyName}'", GetType());
         }
 
@@ -89,9 +91,9 @@ namespace WpfDevKit.UI.Core
         {
             if (string.IsNullOrWhiteSpace(propertyName)) throw new ArgumentNullException(nameof(propertyName));
             if (action == null) throw new ArgumentNullException(nameof(action));
-            if (!propertyChangedActions.TryGetValue(propertyName, out var collection))
-                collection = new List<Action>();
-            collection.Add(action);
+            if (!propertyChangedActions.ContainsKey(propertyName))
+                propertyChangedActions[propertyName] = new List<Action>();
+            propertyChangedActions[propertyName].Add(action);
             logService.LogTrace(" Property changed  registered", $"{nameof(propertyName)}='{propertyName}'", GetType());
         }
 
@@ -168,6 +170,16 @@ namespace WpfDevKit.UI.Core
                     foreach (var item in notifyCollection)
                         OnPropertyChanged(item);
             }
+        }
+
+        public virtual void Dispose()
+        {
+            if (isDisposed)
+                return;
+            isDisposed = true;
+            logService.LogDebug(type: GetType());
+            propertyChangingActions.Clear();
+            propertyChangedActions.Clear();
         }
     }
 }
