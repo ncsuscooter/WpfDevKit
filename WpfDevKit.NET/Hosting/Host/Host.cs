@@ -23,11 +23,6 @@ namespace WpfDevKit.Hosting
         /// <param name="provider">The service provider.</param>
         public Host(IServiceProvider provider) => Services = provider;
 
-        /// <summary>
-        /// Starts all registered background services synchronously.
-        /// </summary>
-        public void Start() => StartAsync().Wait();
-
         /// <inheritdoc/>
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
@@ -69,6 +64,12 @@ namespace WpfDevKit.Hosting
                 }
             }
         }
+
+        /// <inheritdoc/>
+        public void Start() => StartAsync().GetAwaiter().GetResult();
+
+        /// <inheritdoc/>
+        public void Stop() => StopAsync().GetAwaiter().GetResult();
 
         /// <inheritdoc/>
         public void Dispose()

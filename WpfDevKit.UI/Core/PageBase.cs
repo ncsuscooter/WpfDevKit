@@ -49,9 +49,6 @@ namespace WpfDevKit.UI.Core
             RegisterPropertyChangedAction(nameof(SelectedItem), SelectedItemChanged);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         private void SelectedItemChanging()
         {
             try
@@ -67,9 +64,6 @@ namespace WpfDevKit.UI.Core
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         private void SelectedItemChanged()
         {
             try

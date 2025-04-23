@@ -15,7 +15,7 @@ namespace WpfDevKit.UI.Core
     /// Inherits from <see cref="ObservableBase"/> and exposes a <see cref="ICommand"/> for command execution.
     /// </summary>
     [DebuggerStepThrough]
-    public abstract class CommandPageBase : ObservableBase, IDisposable
+    public class CommandPageBase : ObservableBase, IDisposable
     {
         private readonly Dictionary<string, Func<CancellationToken, Task>> commandActions = new Dictionary<string, Func<CancellationToken, Task>>();
         private readonly IBusyService busyService;
@@ -28,9 +28,6 @@ namespace WpfDevKit.UI.Core
         /// </summary>
         public ICommand Command => commandFactory.CreateAsyncCommand<string>(async (command, token) => await DoCommandAsync(command));
 
-        /// <summary>
-        /// 
-        /// </summary>
         public bool IsBusy => busyService.IsBusy;
 
         /// <summary>
@@ -49,20 +46,14 @@ namespace WpfDevKit.UI.Core
             this.busyService.IsBusyChanged += OnBusyServiceIsBusyChanged;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="command"></param>
-        /// <param name="action"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public void RegisterCommand(string command, Func<CancellationToken, Task> action)
+        protected void RegisterCommand(string command, Func<CancellationToken, Task> action)
         {
             if (string.IsNullOrWhiteSpace(command))
                 throw new ArgumentNullException(nameof(command));
             commandActions[command] = action ?? throw new ArgumentNullException(nameof(action));
         }
 
-        public void RegisterCommand(string command, Action action)
+        protected void RegisterCommand(string command, Action action)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
@@ -73,24 +64,29 @@ namespace WpfDevKit.UI.Core
             });
         }
 
+        protected void UnregisterCommand(string command)
+        {
+            if (string.IsNullOrWhiteSpace(command))
+                throw new ArgumentNullException(nameof(command));
+            if (commandActions.ContainsKey(command))
+                commandActions.Remove(command);
+        }
+
+        protected void UnregisterCommands() => commandActions.Clear();
+
         /// <summary>
         /// Disposes the command page and cleans up any resources.
         /// </summary>
-        public override void Dispose()
+        public virtual void Dispose()
         {
             if (isDisposed)
                 return;
             isDisposed = true;
             logService.LogDebug(type: GetType());
-            try
-            {
-                busyService.IsBusyChanged -= OnBusyServiceIsBusyChanged;
-                commandActions.Clear();
-            }
-            finally
-            {
-                base.Dispose();
-            }
+            busyService.IsBusyChanged -= OnBusyServiceIsBusyChanged;
+            UnregisterCommands();
+            UnregisterPropertyChangingActions();
+            UnregisterPropertyChangedActions();
         }
 
         /// <summary>

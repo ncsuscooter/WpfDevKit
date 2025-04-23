@@ -28,5 +28,15 @@ namespace WpfDevKit.Hosting
         /// <param name="cancellationToken">Used to indicate when stop should no longer be graceful.</param>
         /// <returns>A <see cref="Task"/> that will be completed when the <see cref="IHost"/> stops.</returns>
         Task StopAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Starts all registered background services synchronously.
+        /// </summary>
+        void Start();
+
+        /// <summary>
+        /// Stops all registered background services synchronously.
+        /// </summary>
+        void Stop();
     }
 }

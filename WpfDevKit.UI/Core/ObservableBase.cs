@@ -11,16 +11,14 @@ using WpfDevKit.Logging;
 namespace WpfDevKit.UI.Core
 {
     /// <summary>
-    /// Provides an abstract base class for observable objects, implementing IObservable.
+    /// Provides a base class for observable objects, implementing IObservable.
     /// </summary>
     [DebuggerStepThrough]
-    public abstract class ObservableBase : IObservable, IDisposable
+    public class ObservableBase : IObservable
     {
         private readonly Dictionary<string, List<Action>> propertyChangingActions = new Dictionary<string, List<Action>>();
         private readonly Dictionary<string, List<Action>> propertyChangedActions = new Dictionary<string, List<Action>>();
         private readonly ILogService logService;
-
-        private bool isDisposed;
 
         /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging;
@@ -65,12 +63,6 @@ namespace WpfDevKit.UI.Core
                 OnPropertyChanged(item.Name);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <param name="action"></param>
-        /// <exception cref="ArgumentNullException"></exception>
         protected void RegisterPropertyChangingAction(string propertyName, Action action)
         {
             if (string.IsNullOrWhiteSpace(propertyName)) throw new ArgumentNullException(nameof(propertyName));
@@ -78,15 +70,8 @@ namespace WpfDevKit.UI.Core
             if (!propertyChangingActions.ContainsKey(propertyName))
                 propertyChangingActions[propertyName] = new List<Action>();
             propertyChangingActions[propertyName].Add(action);
-            logService.LogTrace("Property changing registered", $"{nameof(propertyName)}='{propertyName}'", GetType());
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <param name="action"></param>
-        /// <exception cref="ArgumentNullException"></exception>
         protected void RegisterPropertyChangedAction(string propertyName, Action action)
         {
             if (string.IsNullOrWhiteSpace(propertyName)) throw new ArgumentNullException(nameof(propertyName));
@@ -94,7 +79,33 @@ namespace WpfDevKit.UI.Core
             if (!propertyChangedActions.ContainsKey(propertyName))
                 propertyChangedActions[propertyName] = new List<Action>();
             propertyChangedActions[propertyName].Add(action);
-            logService.LogTrace(" Property changed  registered", $"{nameof(propertyName)}='{propertyName}'", GetType());
+        }
+
+        protected void UnregisterPropertyChangingActions(string propertyName)
+        {
+            if (string.IsNullOrWhiteSpace(propertyName)) throw new ArgumentNullException(nameof(propertyName));
+            if (!propertyChangingActions.ContainsKey(propertyName))
+                return;
+            propertyChangingActions[propertyName].Clear();
+        }
+        protected void UnregisterPropertyChangingActions()
+        {
+            foreach (var item in propertyChangingActions)
+                item.Value.Clear();
+            propertyChangingActions.Clear();
+        }
+        protected void UnregisterPropertyChangedActions(string propertyName)
+        {
+            if (string.IsNullOrWhiteSpace(propertyName)) throw new ArgumentNullException(nameof(propertyName));
+            if (!propertyChangedActions.ContainsKey(propertyName))
+                return;
+            propertyChangedActions[propertyName].Clear();
+        }
+        protected void UnregisterPropertyChangedActions()
+        {
+            foreach (var item in propertyChangedActions)
+                item.Value.Clear();
+            propertyChangedActions.Clear();
         }
 
         /// <summary>
@@ -170,16 +181,6 @@ namespace WpfDevKit.UI.Core
                     foreach (var item in notifyCollection)
                         OnPropertyChanged(item);
             }
-        }
-
-        public virtual void Dispose()
-        {
-            if (isDisposed)
-                return;
-            isDisposed = true;
-            logService.LogDebug(type: GetType());
-            propertyChangingActions.Clear();
-            propertyChangedActions.Clear();
         }
     }
 }
