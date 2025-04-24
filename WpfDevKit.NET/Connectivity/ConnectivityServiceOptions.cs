@@ -63,7 +63,7 @@ namespace WpfDevKit.Connectivity
         public Func<IConnectivityService, string> GetStatus { get; set; } = 
             x => x.State == TConnectivityState.Connecting ? "connecting" :
             x.State == TConnectivityState.Connected ? "connected" :
-            $"retrying in {DateTime.Now.Subtract(x.NextAttempt).ToReadableTime()} after [{x.Attempts}] failed attempts";
+            $"retrying in {x.NextAttempt.Subtract(DateTime.UtcNow).ToReadableTime()} after [{x.Attempts}] failed attempts";
 
         /// <summary>
         /// Validates the current configuration and throws an exception if any required properties are missing or invalid.
