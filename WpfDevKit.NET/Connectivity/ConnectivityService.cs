@@ -55,6 +55,9 @@ namespace WpfDevKit.Connectivity
         public string GetStatus() => options.GetStatus(this);
 
         /// <inheritdoc/>
+        public string GetHost() => options.Host;
+
+        /// <inheritdoc/>
         /// <remarks>
         /// Monitors the connectivity status asynchronously, with the option to cancel the operation.
         /// This method allows ongoing monitoring of the system's connection status.

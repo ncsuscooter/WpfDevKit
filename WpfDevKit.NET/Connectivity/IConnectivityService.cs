@@ -43,6 +43,12 @@ namespace WpfDevKit.Connectivity
         TimeSpan? Uptime { get; }
 
         /// <summary>
+        /// Gets the name or IP address of the host.
+        /// </summary>
+        /// <returns>A string describing the host.</returns>
+        string GetHost();
+
+        /// <summary>
         /// Returns a user-friendly status message representing the current connection state.
         /// </summary>
         /// <returns>A string describing the current status.</returns>
