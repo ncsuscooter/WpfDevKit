@@ -4,8 +4,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:beh="clr-namespace:WpfDevKit.UI.Behaviors"
+        xmlns:conv="clr-namespace:WpfDevKit.UI.Converters"
         xmlns:local="clr-namespace:WpfDevKit.UI.Dialogs"
-        mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=local:DialogBase}"
+        mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=local:DialogBase, IsDesignTimeCreatable=False}"
         FontSize="16"
         ShowInTaskbar="False"
         SourceInitialized="WindowSourceInitialized"
@@ -13,7 +14,36 @@
         Title="{Binding  Path=Title,  Mode=TwoWay}"
         Height="{Binding Path=Height, Mode=TwoWay}"
         Width="{Binding  Path=Width,  Mode=TwoWay}">
+    <Window.Resources>
+        <!--  BITMAPS  -->
+        <BitmapImage x:Key="AlertImage"   UriSource="/Images/Alert.png" />
+        <BitmapImage x:Key="DefaultImage" UriSource="/Images/Default.png" />
+        <BitmapImage x:Key="ErrorImage"   UriSource="/Images/Error.png" />
+        <BitmapImage x:Key="HelpImage"    UriSource="/Images/Help.png" />
+        <BitmapImage x:Key="InfoImage"    UriSource="/Images/Info.png" />
+        <BitmapImage x:Key="LogoImage"    UriSource="/Images/Logo.jpg" />
+        <BitmapImage x:Key="OKImage"      UriSource="/Images/OK.png" />
+        <!--  LOG CATEGORY TO COLOR MAP  -->
+        <ResourceDictionary x:Key="LogCategoryBrushes">
+            <SolidColorBrush x:Key="StartStop" Color="Blue" />
+            <SolidColorBrush x:Key="Trace"     Color="Violet" />
+            <SolidColorBrush x:Key="Debug"     Color="Green" />
+            <SolidColorBrush x:Key="Info"      Color="Black" />
+            <SolidColorBrush x:Key="Warning"   Color="Orange" />
+            <SolidColorBrush x:Key="Error"     Color="Red" />
+            <SolidColorBrush x:Key="Fatal"     Color="DarkRed" />
+        </ResourceDictionary>
+    </Window.Resources>
     <Grid>
+        <Grid.Resources>
+            <!--  CONVERTERS  -->
+            <BooleanToVisibilityConverter
+                x:Key="BooleanToVisibility" />
+            <conv:StringToBrushConverter
+                x:Key="LogCategoryToBrush"
+                BrushMap="{StaticResource LogCategoryBrushes}"
+                DefaultBrush="Black" />
+        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
@@ -39,7 +69,7 @@
                      VerticalScrollBarVisibility="Auto"
                      Text="{Binding Path=Message, FallbackValue='Message'}" 
                      FontSize="{Binding Path=MessageFontSize, FallbackValue=48}"
-                     FontWeight="{Binding Path=MessageFontWeight, FallbackValue='Bold', Converter={StaticResource StringToFontWeight}}" />
+                     FontWeight="{Binding Path=MessageFontWeight, FallbackValue='Bold'}" />
         </Grid>
         <ContentControl Grid.Row="1" Content="{Binding}" />
         <local:LogViewer Grid.Row="1" Visibility="{Binding Path=IsMessageLogVisible, Converter={StaticResource BooleanToVisibility}}" />

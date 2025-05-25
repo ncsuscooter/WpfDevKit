@@ -28,10 +28,46 @@
             <CheckBox Margin="5" Name="Attributes"  Content="Attributes"  IsChecked="True"  />
             <CheckBox Margin="5" Name="Level"       Content="Level"       IsChecked="False" />
         </StackPanel>
-        <DataGrid Grid.Row="1" Margin="5 0 5 5" EnableRowVirtualization="False" ItemsSource="{Binding Path=Logs}" Style="{StaticResource CategorialDataGrid}" beh:ItemsControlBehaviors.IsAutoScroll="True">
+        <DataGrid 
+            Grid.Row="1"
+            Margin="5 0 5 5"
+            EnableRowVirtualization="False"
+            ItemsSource="{Binding Path=Logs}"
+            beh:ItemsControlBehaviors.IsAutoScroll="True"
+            AutoGenerateColumns="False"
+            CanUserAddRows="False"
+            CanUserDeleteRows="False"
+            HeadersVisibility="Column"
+            SelectionMode="Single"
+            IsSynchronizedWithCurrentItem="False"
+            IsReadOnly="True">
             <DataGrid.Resources>
-                <conv:StringToBrushConverter x:Key="CategoryToBrush" />
+                <BooleanToVisibilityConverter
+                    x:Key="BooleanToVisibility" />
+                <conv:StringToBrushConverter
+                    x:Key="CategoryToBrush" />
+                <SolidColorBrush
+                    x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" 
+                    Color="{x:Static SystemColors.HighlightColor}" />
+                <Style
+                    x:Key="WrapTextBlock"
+                    TargetType="TextBlock">
+                    <Setter Property="TextWrapping" Value="Wrap" />
+                    <Setter Property="Padding"      Value="3 1" />
+                </Style>
             </DataGrid.Resources>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="Gainsboro" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="False">
+                            <Setter Property="Background" Value="White" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
                     <Setter Property="Template">

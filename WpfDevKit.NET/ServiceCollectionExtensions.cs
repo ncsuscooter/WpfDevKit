@@ -5,12 +5,15 @@ using WpfDevKit.Factory;
 using WpfDevKit.Logging;
 using WpfDevKit.RemoteFileAccess;
 
-[DebuggerStepThrough]
-public static class ServiceCollectionExtensions
+namespace WpfDevKit
 {
-    public static IServiceCollection AddCoreServices(this IServiceCollection services) =>
-        services.AddObjectFactory()
-                .AddBusyService()
-                .AddLoggingService()
-                .AddRemoteFileConnectionFactory();
+    [DebuggerStepThrough]
+    public static class ServiceCollectionExtensions
+    {
+        public static IServiceCollection AddCoreServices(this IServiceCollection services) =>
+            services.AddObjectFactory()
+                    .AddBusyService()
+                    .AddLoggingService()
+                    .AddRemoteFileConnectionFactory();
+    }
 }
