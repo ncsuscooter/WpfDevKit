@@ -12,6 +12,7 @@ namespace WpfDevKit
     {
         private readonly Stopwatch stopwatch;
         private readonly Action<long> action;
+        private bool isDisposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StartStopRegistration"/> class, starts a stopwatch, and optionally invokes a start action.
@@ -30,6 +31,8 @@ namespace WpfDevKit
         /// </summary>
         public void Dispose()
         {
+            if (isDisposed)
+                return;
             stopwatch.Stop();
             action?.Invoke(stopwatch.ElapsedMilliseconds);
         }
