@@ -33,6 +33,7 @@ namespace WpfDevKit
         {
             if (isDisposed)
                 return;
+            isDisposed = true;
             stopwatch.Stop();
             action?.Invoke(stopwatch.ElapsedMilliseconds);
         }
