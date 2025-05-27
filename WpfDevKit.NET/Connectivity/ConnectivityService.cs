@@ -104,7 +104,15 @@ namespace WpfDevKit.Connectivity
                     RaiseStatusChanged();
                     try
                     {
-                        await Task.WhenAny(Task.Delay(delay, cancellationToken), reset.WaitAsync(cancellationToken));
+                        using (var cts = new CancellationTokenSource())
+                        using (cancellationToken.Register(() => cts.Cancel()))
+                        {
+                            var d = Task.Delay(delay, cancellationToken);
+                            var r = reset.WaitAsync(cts.Token);
+                            await Task.WhenAny(d, r);
+                            if (!r.IsCompleted && !r.IsCanceled)
+                                cts.Cancel();
+                        }
                     }
                     catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                     {
