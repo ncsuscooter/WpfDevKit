@@ -26,6 +26,7 @@ namespace WpfDevKit.UI.Core
         /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        protected ObservableBase() { }
         protected ObservableBase(ILogService logService) => this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
 
         /// <inheritdoc/>
@@ -33,7 +34,7 @@ namespace WpfDevKit.UI.Core
         {
             if (propertyChangingActions.TryGetValue(propertyName, out var collection) && collection != null && collection.Count > 0)
             {
-                logService.LogTrace(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
+                logService?.LogTrace(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
                 foreach (var action in collection)
                     action();
             }
@@ -46,7 +47,7 @@ namespace WpfDevKit.UI.Core
         {
             if (propertyChangedActions.TryGetValue(propertyName, out var collection) && collection != null && collection.Count > 0)
             {
-                logService.LogTrace(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
+                logService?.LogTrace(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
                 foreach (var action in collection)
                     action();
             }

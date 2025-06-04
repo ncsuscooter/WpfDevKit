@@ -1,4 +1,6 @@
 using System;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace WpfDevKit.UI.ContextSynchronization
 {
@@ -13,6 +15,12 @@ namespace WpfDevKit.UI.ContextSynchronization
         /// </summary>
         /// <value><c>true</c> if the context is synchronized; otherwise, <c>false</c>.</value>
         bool IsSynchronized { get; }
+
+        /// <summary>
+        /// Executes the specified action synchronously in the current context.
+        /// </summary>
+        /// <param name="actionAsync">The action to execute.</param>
+        void Invoke(Func<Task> actionAsync, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Executes the specified action synchronously in the current context.
