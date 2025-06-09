@@ -82,7 +82,7 @@
       <DependentUpon>FilterPopup.xaml</DependentUpon>
     </Compile>
     <Compile Include="ServiceCollectionExtensions.cs" />
-    <Compile Include="Collection Sync\CollectionSynchronizationExtensions.cs" />
+    <Compile Include="Synchronization\Collections\CollectionSynchronizationExtensions.cs" />
     <Compile Include="Collection View\CollectionViewExtensions.cs" />
     <Compile Include="Collection View\CollectionViewService.cs" />
     <Compile Include="Collection View\ICollectionViewService.cs" />
@@ -91,7 +91,7 @@
     <Compile Include="Commands\CommandExtensions.cs" />
     <Compile Include="Commands\CommandFactoryExtensions.cs" />
     <Compile Include="Commands\IAsyncCommand.cs" />
-    <Compile Include="Context Sync\ContextSynchronizationExtensions.cs" />
+    <Compile Include="Synchronization\Context\ContextSynchronizationExtensions.cs" />
     <Compile Include="Converters\BrushForExtension.cs" />
     <Compile Include="Converters\StringToBrushConverter.cs" />
     <Compile Include="Core\IOpenDialogHandler.cs" />
@@ -116,8 +116,8 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Collection Sync\CollectionSynchronizationService.cs" />
-    <Compile Include="Context Sync\ContextSynchronizationService.cs" />
+    <Compile Include="Synchronization\Collections\CollectionSynchronizationService.cs" />
+    <Compile Include="Synchronization\Context\ContextSynchronizationService.cs" />
     <Compile Include="Core\CommandPageBase.cs" />
     <Compile Include="Core\IObservable.cs" />
     <Compile Include="Core\ObservableBase.cs" />
@@ -128,9 +128,9 @@
     <Compile Include="Dialogs\TDialogButtons.cs" />
     <Compile Include="Dialogs\TDialogImage.cs" />
     <Compile Include="Dialogs\TDialogResult.cs" />
-    <Compile Include="Collection Sync\ICollectionSynchronizationService.cs" />
+    <Compile Include="Synchronization\Collections\ICollectionSynchronizationService.cs" />
     <Compile Include="Commands\ICommandFactory.cs" />
-    <Compile Include="Context Sync\IContextSynchronizationService.cs" />
+    <Compile Include="Synchronization\Context\IContextSynchronizationService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Alert.png" />

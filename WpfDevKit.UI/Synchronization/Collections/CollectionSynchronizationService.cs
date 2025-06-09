@@ -2,7 +2,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Windows.Data;
 
-namespace WpfDevKit.UI.CollectionSynchronization
+namespace WpfDevKit.UI.Synchronization.Collections
 {
     /// <summary>
     /// Provides services to enable or disable collection synchronization for collections bound to the UI in WPF.

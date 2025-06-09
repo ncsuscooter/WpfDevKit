@@ -1,8 +1,8 @@
 ﻿using WpfDevKit.DependencyInjection;
-using WpfDevKit.UI.CollectionSynchronization;
 using WpfDevKit.UI.Command;
-using WpfDevKit.UI.ContextSynchronization;
 using WpfDevKit.UI.Dialogs;
+using WpfDevKit.UI.Synchronization.Collections;
+using WpfDevKit.UI.Synchronization.Context;
 
 namespace WpfDevKit.UI
 {

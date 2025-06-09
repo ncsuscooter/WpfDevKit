@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace WpfDevKit.UI.ContextSynchronization
+namespace WpfDevKit.UI.Synchronization.Context
 {
     /// <summary>
     /// Provides methods to interact with the context in which actions are executed,

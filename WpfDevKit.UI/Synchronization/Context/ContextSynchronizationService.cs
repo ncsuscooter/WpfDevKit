@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
-namespace WpfDevKit.UI.ContextSynchronization
+namespace WpfDevKit.UI.Synchronization.Context
 {
     /// <summary>
     /// Provides services for executing actions on the UI thread in WPF applications.

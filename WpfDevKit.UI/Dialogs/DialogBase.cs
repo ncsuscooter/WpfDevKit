@@ -5,8 +5,8 @@ using System.Windows;
 using WpfDevKit.Busy;
 using WpfDevKit.Logging;
 using WpfDevKit.UI.Command;
-using WpfDevKit.UI.ContextSynchronization;
 using WpfDevKit.UI.Core;
+using WpfDevKit.UI.Synchronization.Context;
 
 namespace WpfDevKit.UI.Dialogs
 {

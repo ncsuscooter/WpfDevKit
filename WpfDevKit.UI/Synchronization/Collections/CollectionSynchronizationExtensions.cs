@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using WpfDevKit.DependencyInjection;
 
-namespace WpfDevKit.UI.CollectionSynchronization
+namespace WpfDevKit.UI.Synchronization.Collections
 {
     /// <summary>
     /// Provides extension methods for registering WpfDevKit UI services.
