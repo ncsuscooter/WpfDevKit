@@ -72,7 +72,7 @@
 ## 🔁 Utility / Base Classes
 
 - [ ] Add BusyCount to IBusyService
-- [ ] Fire IsBusyChanged on UI thread
+- [x] Fire IsBusyChanged on UI thread
 - [ ] Improve EnumExtensions via caching
 - [ ] ToReadableTime() precision overload
 - [ ] Add unit tests for:

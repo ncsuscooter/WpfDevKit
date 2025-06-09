@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Windows;
 using WpfDevKit.Busy;
 using WpfDevKit.Logging;
 using WpfDevKit.UI.Command;
+using WpfDevKit.UI.ContextSynchronization;
 
 namespace WpfDevKit.UI.Dialogs
 {
@@ -15,19 +15,32 @@ namespace WpfDevKit.UI.Dialogs
     [DebuggerStepThrough]
     internal class DialogService : IDialogService
     {
-        private readonly ICommandFactory commandFactory;
-        private readonly ILogService logService;
         private readonly IBusyService busyService;
+        private readonly ICommandFactory commandFactory;
+        private readonly IContextSynchronizationService contextService;
+        private readonly ILogService logService;
         private readonly IGetLogs userLogProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DialogService"/> class.
         /// </summary>
-        /// <param name="logService">The logging service used for dialog events.</param>
         /// <param name="busyService">The busy service used to indicate background activity.</param>
+        /// <param name="commandFactory">The command factory used to create objects that implment the ICommand interface.</param>
+        /// <param name="contextService">The context synchronization service used to synchronize background activity to the UI thread.</param>
+        /// <param name="logService">The logging service used for dialog events.</param>
         /// <param name="userLogProvider">The user log provider used to fetch error log details.</param>
-        public DialogService(ICommandFactory commandFactory, ILogService logService, IBusyService busyService, IGetLogs userLogProvider) =>
-            (this.commandFactory, this.logService, this.busyService, this.userLogProvider) = (commandFactory, logService, busyService, userLogProvider);
+        public DialogService(IBusyService busyService,
+                             ICommandFactory commandFactory,
+                             IContextSynchronizationService contextService,
+                             ILogService logService,
+                             IGetLogs userLogProvider)
+        {
+            this.busyService = busyService ?? throw new ArgumentNullException(nameof(busyService));
+            this.commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
+            this.contextService = contextService ?? throw new ArgumentNullException(nameof(contextService));
+            this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
+            this.userLogProvider = userLogProvider ?? throw new ArgumentNullException(nameof(userLogProvider));
+        }
 
         /// <inheritdoc/>
         public void ShowDialog(IDialogContext dialogContext)
@@ -45,7 +58,7 @@ namespace WpfDevKit.UI.Dialogs
         {
             logService.LogError(exception, type, fileName, memberName);
             logService.FlushAsync(TimeSpan.FromMilliseconds(500)).Wait();
-            ShowDialog(new DialogBase(busyService, commandFactory, logService)
+            ShowDialog(new DialogBase(busyService, commandFactory, contextService, logService)
             {
                 Message = "An error was reported. Please see the error log below for more details.",
                 Title = "Error Log",
@@ -62,7 +75,7 @@ namespace WpfDevKit.UI.Dialogs
         /// <inheritdoc/>
         public TDialogResult ShowDialog(string message, string title, TDialogImage image, TDialogButtons buttons)
         {
-            var dialog = new DialogBase(busyService, commandFactory, logService)
+            var dialog = new DialogBase(busyService, commandFactory, contextService, logService)
             {
                 Message = message,
                 Title = title,

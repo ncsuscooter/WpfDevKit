@@ -5,6 +5,7 @@ using System.Windows;
 using WpfDevKit.Busy;
 using WpfDevKit.Logging;
 using WpfDevKit.UI.Command;
+using WpfDevKit.UI.ContextSynchronization;
 using WpfDevKit.UI.Core;
 
 namespace WpfDevKit.UI.Dialogs
@@ -39,9 +40,14 @@ namespace WpfDevKit.UI.Dialogs
         /// <summary>
         /// Initializes a new instance of the <see cref="DialogBase"/> class.
         /// </summary>
-        /// <param name="logService">The logging service used for dialog events.</param>
         /// <param name="busyService">The busy service used to indicate background activity.</param>
-        public DialogBase(IBusyService busyService, ICommandFactory commandFactory, ILogService logService) : base(busyService, commandFactory, logService)
+        /// <param name="commandFactory">The command factory used to create objects that implment the ICommand interface.</param>
+        /// <param name="contextService">The context synchronization service used to synchronize background activity to the UI thread.</param>
+        /// <param name="logService">The logging service used for dialog events.</param>
+        public DialogBase(IBusyService busyService,
+                          ICommandFactory commandFactory,
+                          IContextSynchronizationService contextService,
+                          ILogService logService) : base(busyService, commandFactory, contextService, logService)
         {
             RegisterPropertyChangedAction(nameof(Message), () => IsMessageBarVisible = !string.IsNullOrWhiteSpace(Message));
             RegisterPropertyChangedAction(nameof(Logs), () => IsMessageLogVisible = Logs.Count > 0);
