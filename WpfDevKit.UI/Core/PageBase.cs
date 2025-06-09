@@ -3,6 +3,7 @@ using System.ComponentModel;
 using WpfDevKit.Busy;
 using WpfDevKit.Logging;
 using WpfDevKit.UI.Command;
+using WpfDevKit.UI.ContextSynchronization;
 using WpfDevKit.UI.Dialogs;
 
 namespace WpfDevKit.UI.Core
@@ -20,6 +21,7 @@ namespace WpfDevKit.UI.Core
 
         private readonly IBusyService busyService;
         private readonly ICommandFactory commandFactory;
+        private readonly IContextSynchronizationService contextService;
         private readonly IDialogService dialogService;
         private readonly ILogService logService;
         private IObservable selectedItem;
@@ -37,11 +39,12 @@ namespace WpfDevKit.UI.Core
         /// <summary>
         /// Initializes a new instance of the <see cref="PageBase"/> class.
         /// </summary>
-        protected PageBase(IBusyService busyService, ICommandFactory commandFactory, IDialogService dialogService, ILogService logService)
-            : base(busyService, commandFactory, logService)
+        protected PageBase(IBusyService busyService, ICommandFactory commandFactory, IContextSynchronizationService contextService, IDialogService dialogService, ILogService logService)
+            : base(busyService, commandFactory, contextService, logService)
         {
             this.busyService = busyService ?? throw new ArgumentNullException(nameof(busyService));
             this.commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
+            this.contextService = contextService ?? throw new ArgumentNullException(nameof(contextService));
             this.dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
             this.logService.LogDebug(type: GetType());

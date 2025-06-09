@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,7 +34,15 @@ namespace WpfDevKit
             var tcs = new TaskCompletionSource<bool>();
             queue.Enqueue(tcs);
             using (cancellationToken.Register(() => tcs.TrySetCanceled()))
-                await tcs.Task;
+            {
+                try
+                {
+                    await tcs.Task;
+                }
+                catch (OperationCanceledException)
+                {
+                }
+            }
         }
 
         /// <summary>

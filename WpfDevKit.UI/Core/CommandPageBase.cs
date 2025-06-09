@@ -7,6 +7,7 @@ using System.Windows.Input;
 using WpfDevKit.Busy;
 using WpfDevKit.Logging;
 using WpfDevKit.UI.Command;
+using WpfDevKit.UI.ContextSynchronization;
 
 namespace WpfDevKit.UI.Core
 {
@@ -20,6 +21,7 @@ namespace WpfDevKit.UI.Core
         private readonly Dictionary<string, Func<CancellationToken, Task>> commandActions = new Dictionary<string, Func<CancellationToken, Task>>();
         private readonly IBusyService busyService;
         private readonly ICommandFactory commandFactory;
+        private readonly IContextSynchronizationService contextService;
         private readonly ILogService logService;
         private bool isDisposed;
 
@@ -37,13 +39,15 @@ namespace WpfDevKit.UI.Core
         /// <param name="busyService">The <see cref="IBusyService"/> used to indicate background activity.</param>
         /// <param name="commandFactory">The <see cref="ICommandFactory"/> used to create commands.</param>
         /// <param name="logService">The <see cref="ILogService"/> used to log messages and exceptions.</param>
-        public CommandPageBase(IBusyService busyService, ICommandFactory commandFactory, ILogService logService)
+        public CommandPageBase(IBusyService busyService, ICommandFactory commandFactory, IContextSynchronizationService contextService, ILogService logService)
             : base(logService)
         {
             this.busyService = busyService ?? throw new ArgumentNullException(nameof(busyService));
-            this.commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
-            this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
             this.busyService.IsBusyChanged += OnBusyServiceIsBusyChanged;
+            this.commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
+            this.contextService = contextService ?? throw new ArgumentNullException(nameof(contextService));
+            this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
+            this.logService.LogDebug(type: GetType());
         }
 
         protected void RegisterCommand(string command, Func<CancellationToken, Task> action)
@@ -108,6 +112,6 @@ namespace WpfDevKit.UI.Core
             }
         }
 
-        private void OnBusyServiceIsBusyChanged() => OnPropertyChanged(nameof(IsBusy));
+        private void OnBusyServiceIsBusyChanged() => contextService.BeginInvoke(() => OnPropertyChanged(nameof(IsBusy)));
     }
 }
