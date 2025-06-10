@@ -21,6 +21,8 @@ namespace WpfDevKit
         private readonly ConcurrentQueue<TaskCompletionSource<bool>> queue = new ConcurrentQueue<TaskCompletionSource<bool>>();
         private bool signaled;
 
+        public int Count => queue.Count;
+
         public async Task<bool> TryWaitAsync(CancellationToken cancellationToken = default)
         {
             try
