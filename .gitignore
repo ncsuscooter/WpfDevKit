@@ -366,3 +366,4 @@ FodyWeavers.xsd
 /WpfDevKit.nuspec
 /nuget pack.bat
 /nuget push.bat
+/nuget.bat
