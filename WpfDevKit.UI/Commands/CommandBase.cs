@@ -42,6 +42,11 @@ namespace WpfDevKit.UI.Command
         /// <param name="parameter">The command parameter.</param>
         public abstract void Execute(T parameter);
 
+        /// <summary>
+        /// Forces the <see cref="CommandManager"/> to raise the <see cref="CommandManager.RequerySuggested"/> event.
+        /// </summary>
+        public void RaiseCanExecuteChanged() => CommandManager.InvalidateRequerySuggested();
+
         // ICommand implementation
 
         /// <inheritdoc/>

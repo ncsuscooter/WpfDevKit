@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace WpfDevKit.UI.Command
 {
@@ -64,7 +63,7 @@ namespace WpfDevKit.UI.Command
                 return;
 
             IsExecuting = true;
-            CommandManager.InvalidateRequerySuggested();
+            RaiseCanExecuteChanged();
 
             using (cancellationTokenSource = new CancellationTokenSource())
             {
@@ -76,7 +75,7 @@ namespace WpfDevKit.UI.Command
                 {
                     IsExecuting = false;
                     cancellationTokenSource = null;
-                    CommandManager.InvalidateRequerySuggested();
+                    RaiseCanExecuteChanged();
                 }
             }
         }
