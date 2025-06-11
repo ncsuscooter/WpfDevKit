@@ -7,15 +7,15 @@ namespace WpfDevKit.UI.Behaviors
 {
     public static class CollectionViewSourceBehaviors
     {
-        #region IsRegisterService
+        #region RegisterService
 
-        public static readonly DependencyProperty RegisterWithProperty =
-            DependencyProperty.RegisterAttached("RegisterWith", typeof(ICollectionViewService), typeof(CollectionViewSourceBehaviors), new PropertyMetadata(OnRegisterWithChanged));
-        public static ICollectionViewService GetRegisterWith(CollectionViewSource source) => (ICollectionViewService)source.GetValue(RegisterWithProperty);
-        public static void SetRegisterWith(CollectionViewSource source, ICollectionViewService value) => source.SetValue(RegisterWithProperty, value);
-        private static void OnRegisterWithChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public static readonly DependencyProperty RegisterServiceProperty =
+            DependencyProperty.RegisterAttached("RegisterService", typeof(ICollectionViewService), typeof(CollectionViewSourceBehaviors), new PropertyMetadata(OnRegisterServiceChanged));
+        public static ICollectionViewService GetRegisterService(CollectionViewSource source) => (ICollectionViewService)source.GetValue(RegisterServiceProperty);
+        public static void SetRegisterService(CollectionViewSource source, ICollectionViewService value) => source.SetValue(RegisterServiceProperty, value);
+        private static void OnRegisterServiceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is CollectionViewSource cvs && e.NewValue is ICollectionViewService2 service)
+            if (d is CollectionViewSource cvs && e.NewValue is ICollectionViewService service)
             {
                 // CollectionViewSource.View is populated only after it's loaded
                 if (cvs.View != null)

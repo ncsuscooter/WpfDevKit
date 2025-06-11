@@ -21,33 +21,6 @@ namespace WpfDevKit
         private readonly ConcurrentQueue<TaskCompletionSource<bool>> queue = new ConcurrentQueue<TaskCompletionSource<bool>>();
         private bool signaled;
 
-        public int Count => queue.Count;
-
-        public async Task<bool> TryWaitAsync(CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                await WaitAsync(cancellationToken);
-                return true;
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                return false;
-            }
-        }
-
-        public async Task<bool> TryWaitAsync(TimeSpan timeout, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                return await WaitAsync(timeout, cancellationToken);
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                return false;
-            }
-        }
-
         /// <summary>
         /// Asynchronously waits for the signal to be set. Returns immediately if already signaled.
         /// </summary>
@@ -69,16 +42,15 @@ namespace WpfDevKit
         /// </summary>
         public async Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken = default)
         {
-            // Create a linked token so we can cancel the delay if the event fires first
             using (var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
             {
                 var d = Task.Delay(timeout, cts.Token);
                 var w = WaitAsync(cts.Token);
-                var task = await Task.WhenAny(w, d).ConfigureAwait(false);
-                if (task == w)
+                var t = await Task.WhenAny(w, d).ConfigureAwait(false);
+                cts.Cancel();
+                if (t == w)
                 {
-                    cts.Cancel();
-                    await w.ConfigureAwait(false); // propagate exceptions if any
+                    await w.ConfigureAwait(false);
                     return true;
                 }
                 return false;
@@ -93,7 +65,7 @@ namespace WpfDevKit
             TaskCompletionSource<bool> toRelease = null;
             while (!queue.IsEmpty)
             {
-                if (queue.TryDequeue(out var tcs) && !tcs.Task.IsCanceled && !tcs.Task.IsCompleted)
+                if (queue.TryDequeue(out var tcs) && !tcs.Task.IsCanceled && !tcs.Task.IsCompleted && !tcs.Task.IsFaulted)
                 {
                     toRelease = tcs;
                     break;

@@ -7,22 +7,27 @@ namespace WpfDevKit.UI.CollectionView
     [DebuggerStepThrough]
     internal class CollectionViewService : ICollectionViewService
     {
-        private readonly ICollectionView collectionView;
-        public CollectionViewService(ICollectionView collectionView) => this.collectionView = collectionView ?? throw new ArgumentNullException(nameof(collectionView));
+        private ICollectionView collectionView;
+        
+        /// <inheritdoc/>
         public Predicate<object> Filter
         {
-            get => collectionView.Filter;
-            set => collectionView.Filter = value;
+            get => collectionView?.Filter;
+            set
+            {
+                if (collectionView != null)
+                    collectionView.Filter = value;
+            }
         }
-        public IDisposable DeferRefresh() => collectionView.DeferRefresh();
-        public void Refresh() => collectionView.Refresh();
-    }
 
-    internal class CollectionViewService2 : ICollectionViewService2
-    {
-        private ICollectionView collectionView;
-        public void Bind(ICollectionView collectionView) => this.collectionView = collectionView ?? throw new ArgumentNullException(nameof(collectionView));
+        /// <inheritdoc/>
+        public IDisposable DeferRefresh() => collectionView?.DeferRefresh();
+
+        /// <inheritdoc/>
         public void Refresh() => collectionView?.Refresh();
+
+        /// <inheritdoc/>
+        public void Bind(ICollectionView collectionView) => this.collectionView = collectionView ?? throw new ArgumentNullException(nameof(collectionView));
     }
 }
    

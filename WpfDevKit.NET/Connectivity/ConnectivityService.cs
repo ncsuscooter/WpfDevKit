@@ -102,7 +102,14 @@ namespace WpfDevKit.Connectivity
                                 : TimeSpan.FromMilliseconds(options.ExecutionIntervalMilliseconds);
                     NextAttempt = DateTime.UtcNow.Add(delay);
                     RaiseStatusChanged();
-                    await reset.TryWaitAsync(delay, cancellationToken);
+                    try
+                    {
+                        await reset.WaitAsync(delay, cancellationToken);
+                    }
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
                 }
             }
             finally
