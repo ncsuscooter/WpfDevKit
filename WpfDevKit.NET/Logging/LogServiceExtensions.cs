@@ -85,6 +85,19 @@ namespace WpfDevKit.Logging
         /// Logs a message at the Trace log level.
         /// </summary>
         /// <param name="logService">The log service to log the message.</param>
+        /// <param name="type">The type from which the log originates. Default is <c>null</c>.</param>
+        /// <param name="fileName">The file path of the calling method. Default is <c>null</c>.</param>
+        /// <param name="memberName">The name of the calling method. Default is <c>null</c>.</param>
+        public static void LogTrace(this ILogService logService,
+                                    Type type = default,
+                                    [CallerFilePath] string fileName = default,
+                                    [CallerMemberName] string memberName = default) =>
+            logService.Log(TLogCategory.Trace, default, default, type, fileName, memberName);
+
+        /// <summary>
+        /// Logs a message at the Trace log level.
+        /// </summary>
+        /// <param name="logService">The log service to log the message.</param>
         /// <param name="exception">The exception to log.</param>
         /// <param name="type">The type from which the log originates. Default is <c>null</c>.</param>
         /// <param name="fileName">The file path of the calling method. Default is <c>null</c>.</param>
@@ -106,12 +119,27 @@ namespace WpfDevKit.Logging
         /// <param name="fileName">The file path of the calling method. Default is <c>null</c>.</param>
         /// <param name="memberName">The name of the calling method. Default is <c>null</c>.</param>
         public static void LogTrace(this ILogService logService,
-                                    string message,
+                                    string message = default,
                                     string attributes = default,
                                     Type type = default,
                                     [CallerFilePath] string fileName = default,
                                     [CallerMemberName] string memberName = default) =>
             logService.Log(TLogCategory.Trace, message, attributes, type, fileName, memberName);
+
+        /// <summary>
+        /// Logs a message at the Trace log level.
+        /// </summary>
+        /// <param name="logService">The log service to log the message.</param>
+        /// <param name="attributes">Optional attributes related to the message. Default is <c>null</c>.</param>
+        /// <param name="type">The type from which the log originates. Default is <c>null</c>.</param>
+        /// <param name="fileName">The file path of the calling method. Default is <c>null</c>.</param>
+        /// <param name="memberName">The name of the calling method. Default is <c>null</c>.</param>
+        public static void LogTrace(this ILogService logService,
+                                    string attributes,
+                                    Type type = default,
+                                    [CallerFilePath] string fileName = default,
+                                    [CallerMemberName] string memberName = default) =>
+            logService.Log(TLogCategory.Trace, default, attributes, type, fileName, memberName);
 
         /// <summary>
         /// Logs a message at the Debug log level.

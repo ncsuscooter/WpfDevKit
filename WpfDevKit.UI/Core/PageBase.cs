@@ -14,14 +14,6 @@ namespace WpfDevKit.UI.Core
     /// </summary>
     public abstract class PageBase : CommandPageBase, IDisposable
     {
-        /// <summary>
-        /// The message to indicate that the base method should be overridden to prevent execution.
-        /// </summary>
-        protected const string OVERRIDE_MESSAGE = "Override the base method to prevent execution";
-
-        private readonly IBusyService busyService;
-        private readonly ICommandFactory commandFactory;
-        private readonly IContextSynchronizationService contextService;
         private readonly IDialogService dialogService;
         private readonly ILogService logService;
         private IObservable selectedItem;
@@ -42,9 +34,6 @@ namespace WpfDevKit.UI.Core
         protected PageBase(IBusyService busyService, ICommandFactory commandFactory, IContextSynchronizationService contextService, IDialogService dialogService, ILogService logService)
             : base(busyService, commandFactory, contextService, logService)
         {
-            this.busyService = busyService ?? throw new ArgumentNullException(nameof(busyService));
-            this.commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
-            this.contextService = contextService ?? throw new ArgumentNullException(nameof(contextService));
             this.dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
             this.logService.LogDebug(type: GetType());

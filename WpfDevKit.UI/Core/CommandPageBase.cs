@@ -18,6 +18,11 @@ namespace WpfDevKit.UI.Core
     [DebuggerStepThrough]
     public class CommandPageBase : ObservableBase, IDisposable
     {
+        /// <summary>
+        /// The message to indicate that the base method should be overridden to prevent execution.
+        /// </summary>
+        protected const string OVERRIDE_MESSAGE = "Override the base method to prevent execution";
+
         private readonly Dictionary<string, Func<CancellationToken, Task>> commandActions = new Dictionary<string, Func<CancellationToken, Task>>();
         private readonly IBusyService busyService;
         private readonly ICommandFactory commandFactory;
@@ -28,7 +33,7 @@ namespace WpfDevKit.UI.Core
         /// <summary>
         /// Gets the command that executes <see cref="DoCommandAsync"/> with a string parameter.
         /// </summary>
-        public ICommand Command => commandFactory.CreateAsyncCommand<string>(async (command, token) => await DoCommandAsync(command));
+        public ICommand Command => commandFactory.CreateBusyAsyncCommand<string>((command, token) => DoCommandAsync(command));
 
         public bool IsBusy => busyService.IsBusy;
 
@@ -101,15 +106,12 @@ namespace WpfDevKit.UI.Core
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task DoCommandAsync(string commandName, CancellationToken cancellationToken = default)
         {
-            logService.LogTrace(null, $"{nameof(commandName)}='{commandName}'", GetType());
-            using (busyService.Busy())
-            {
-                await Task.Delay(50);
-                if (commandActions.TryGetValue(commandName, out var action))
-                    await action.Invoke(cancellationToken);
-                else
-                    logService.LogWarning("No action specified for the command provided");
-            }
+            logService.LogTrace($"{nameof(commandName)}='{commandName}'", GetType());
+            await Task.Delay(50);
+            if (commandActions.TryGetValue(commandName, out var action))
+                await action.Invoke(cancellationToken);
+            else
+                logService.LogWarning("No action specified for the command provided");
         }
 
         private void OnBusyServiceIsBusyChanged() => contextService.BeginInvoke(() => OnPropertyChanged(nameof(IsBusy)));

@@ -34,7 +34,7 @@ namespace WpfDevKit.UI.Core
         {
             if (propertyChangingActions.TryGetValue(propertyName, out var collection) && collection != null && collection.Count > 0)
             {
-                logService?.LogTrace(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
+                logService?.LogTrace($"{nameof(propertyName)}='{propertyName}'", GetType());
                 foreach (var action in collection)
                     action();
             }
@@ -47,7 +47,7 @@ namespace WpfDevKit.UI.Core
         {
             if (propertyChangedActions.TryGetValue(propertyName, out var collection) && collection != null && collection.Count > 0)
             {
-                logService?.LogTrace(null, $"{nameof(propertyName)}='{propertyName}'", GetType());
+                logService?.LogTrace($"{nameof(propertyName)}='{propertyName}'", GetType());
                 foreach (var action in collection)
                     action();
             }
