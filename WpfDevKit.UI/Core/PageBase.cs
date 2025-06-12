@@ -36,7 +36,7 @@ namespace WpfDevKit.UI.Core
         {
             this.dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
-            this.logService.LogDebug(type: GetType());
+            this.logService.LogTrace(GetType());
             RegisterPropertyChangingAction(nameof(SelectedItem), SelectedItemChanging);
             RegisterPropertyChangedAction(nameof(SelectedItem), SelectedItemChanged);
         }
@@ -77,7 +77,7 @@ namespace WpfDevKit.UI.Core
             if (isDisposed)
                 return;
             isDisposed = true;
-            logService.LogDebug(type: GetType());
+            logService.LogTrace(GetType());
             try
             {
                 SelectedItem = null;

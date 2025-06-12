@@ -52,7 +52,7 @@ namespace WpfDevKit.UI.Core
             this.commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
             this.contextService = contextService ?? throw new ArgumentNullException(nameof(contextService));
             this.logService = logService ?? throw new ArgumentNullException(nameof(logService));
-            this.logService.LogDebug(type: GetType());
+            this.logService.LogTrace(GetType());
         }
 
         protected void RegisterCommand(string command, Func<CancellationToken, Task> action)
@@ -91,7 +91,7 @@ namespace WpfDevKit.UI.Core
             if (isDisposed)
                 return;
             isDisposed = true;
-            logService.LogDebug(type: GetType());
+            logService.LogTrace(GetType());
             busyService.IsBusyChanged -= OnBusyServiceIsBusyChanged;
             UnregisterCommands();
             UnregisterPropertyChangingActions();
