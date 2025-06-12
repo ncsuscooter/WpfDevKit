@@ -15,7 +15,7 @@ namespace WpfDevKit.UI.CollectionView
         /// <param name="services">The IServiceCollection instance.</param>
         /// <returns>The current IServiceCollection instance for chaining.</returns>
         public static IServiceCollection AddCollectionViewService(this IServiceCollection services) =>
-            services.AddSingleton<CollectionViewService>()
-                    .AddSingleton<ICollectionViewService>(p => p.GetRequiredService<CollectionViewService>());
+            services.AddTransient<CollectionViewService>()
+                    .AddTransient<ICollectionViewService>(p => p.GetRequiredService<CollectionViewService>());
     }
 }
