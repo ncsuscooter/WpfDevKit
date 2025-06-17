@@ -3,7 +3,6 @@ using System.Windows.Input;
 
 namespace WpfDevKit.UI.Command
 {
-
     /// <summary>
     /// Provides additional helpers for cancellable async commands.
     /// </summary>
@@ -29,5 +28,4 @@ namespace WpfDevKit.UI.Command
         /// <param name="command">The command on which to raise the event</param>
         public static void RaiseCanExecuteChanged(this ICommand command) => (command as Command)?.RaiseCanExecuteChanged();
     }
-
 }

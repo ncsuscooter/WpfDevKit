@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using WpfDevKit.UI.Synchronization.Context;
 
 namespace WpfDevKit.UI.Command
 {
@@ -13,9 +14,10 @@ namespace WpfDevKit.UI.Command
         /// <summary>
         /// Initializes a new instance of the <see cref="Command"/> class.
         /// </summary>
+        /// <param name="contextService">A service that provides the application's UI context.</param>
         /// <param name="execute">The action to invoke when the command is executed.</param>
         /// <param name="canExecute">An optional predicate to determine if the command can execute.</param>
-        public Command(Action<object> execute, Predicate<object> canExecute = null) : base(execute, canExecute) { }
+        public Command(IContextSynchronizationService contextService, Action<object> execute, Predicate<object> canExecute = null) : base(contextService, execute, canExecute) { }
     }
 
     /// <summary>
@@ -30,9 +32,10 @@ namespace WpfDevKit.UI.Command
         /// <summary>
         /// Initializes a new instance of the <see cref="Command{T}"/> class.
         /// </summary>
+        /// <param name="contextService">A service that provides the application's UI context.</param>
         /// <param name="execute">The action to invoke when the command is executed.</param>
         /// <param name="canExecute">An optional predicate to determine if the command can execute.</param>
-        public Command(Action<T> execute, Predicate<T> canExecute = default) : base(canExecute) => this.execute = execute;
+        public Command(IContextSynchronizationService contextService, Action<T> execute, Predicate<T> canExecute = default) : base(contextService, canExecute) => this.execute = execute;
 
         /// <summary>
         /// Executes the command using the specified parameter.

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows.Input;
+using WpfDevKit.UI.Synchronization.Context;
 
 namespace WpfDevKit.UI.Command
 {
@@ -12,22 +13,24 @@ namespace WpfDevKit.UI.Command
     [DebuggerStepThrough]
     internal abstract class CommandBase<T> : ICommand
     {
+        private readonly IContextSynchronizationService contextService;
         private readonly Predicate<T> canExecute;
 
         /// <summary>
         /// Occurs when changes occur that affect whether the command should execute.
         /// </summary>
-        public event EventHandler CanExecuteChanged
-        {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
-        }
+        public event EventHandler CanExecuteChanged;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandBase{T}"/> class.
         /// </summary>
+        /// <param name="contextService">A service that provides the application's UI context.</param>
         /// <param name="canExecute">An optional predicate that determines whether the command can execute.</param>
-        protected CommandBase(Predicate<T> canExecute = null) => this.canExecute = canExecute;
+        protected CommandBase(IContextSynchronizationService contextService, Predicate<T> canExecute = null)
+        {
+            this.contextService = contextService ?? throw new ArgumentNullException(nameof(contextService));
+            this.canExecute = canExecute;
+        }
 
         /// <summary>
         /// Determines whether the command can execute with the specified parameter.
@@ -43,14 +46,38 @@ namespace WpfDevKit.UI.Command
         public abstract void Execute(T parameter);
 
         /// <summary>
-        /// Forces the <see cref="CommandManager"/> to raise the <see cref="CommandManager.RequerySuggested"/> event.
+        /// Notifies WPF that the result of <see cref="ICommand.CanExecute(object)"/>
+        /// may have changed, so any bound controls should re-query and update their enabled state.
         /// </summary>
-        public void RaiseCanExecuteChanged() => CommandManager.InvalidateRequerySuggested();
+        public void RaiseCanExecuteChanged()
+        {
+            // make sure we’re on the UI thread
+            if (!contextService.IsSynchronized)
+                contextService.Invoke(() => CanExecuteChanged?.Invoke(this, EventArgs.Empty));
+            else
+                CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        }
 
         // ICommand implementation
 
         /// <inheritdoc/>
-        bool ICommand.CanExecute(object parameter) => !(parameter is T t) || canExecute is null || canExecute(t);
+        bool ICommand.CanExecute(object parameter)
+        {
+            // no predicate? always executable
+            if (canExecute == null)
+                return true;
+
+            // if it’s the right type, run it
+            if (parameter is T t)
+                return canExecute(t);
+
+            // handle the “null parameter, T is a ref-type” case
+            if (parameter == null && default(T) == null)
+                return canExecute(default);
+
+            // otherwise, refuse
+            return false;
+        }
 
         /// <inheritdoc/>
         void ICommand.Execute(object parameter)

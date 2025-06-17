@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using WpfDevKit.UI.Synchronization.Context;
 
 namespace WpfDevKit.UI.Command
 {
@@ -15,9 +16,10 @@ namespace WpfDevKit.UI.Command
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncCommand"/> class.
         /// </summary>
-        /// <param name="execute">The asynchronous operation to execute.</param>
+        /// <param name="contextService">A service that provides the application's UI context.</param>
+        /// <param name="asyncExecute">The asynchronous operation to execute.</param>
         /// <param name="canExecute">An optional predicate to determine if the command can execute.</param>
-        public AsyncCommand(Func<object, CancellationToken, Task> execute, Predicate<object> canExecute = null) : base(execute, canExecute) { }
+        public AsyncCommand(IContextSynchronizationService contextService, Func<object, CancellationToken, Task> asyncExecute, Predicate<object> canExecute = null) : base(contextService, asyncExecute, canExecute) { }
     }
 
     /// <summary>
@@ -39,9 +41,10 @@ namespace WpfDevKit.UI.Command
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncCommand{T}"/> class.
         /// </summary>
+        /// <param name="contextService">A service that provides the application's UI context.</param>
         /// <param name="asyncExecute">The asynchronous action to execute with cancellation support.</param>
         /// <param name="canExecute">Optional predicate to determine if the command can execute.</param>
-        public AsyncCommand(Func<T, CancellationToken, Task> asyncExecute, Predicate<T> canExecute = null) : base(null, canExecute) =>
+        public AsyncCommand(IContextSynchronizationService contextService, Func<T, CancellationToken, Task> asyncExecute, Predicate<T> canExecute = null) : base(contextService, null, canExecute) =>
             this.asyncExecute = asyncExecute ?? throw new ArgumentNullException(nameof(asyncExecute));
 
         /// <summary>
@@ -74,10 +77,10 @@ namespace WpfDevKit.UI.Command
                 finally
                 {
                     IsExecuting = false;
-                    cancellationTokenSource = null;
                     RaiseCanExecuteChanged();
                 }
             }
+            cancellationTokenSource = null;
         }
 
         /// <inheritdoc/>

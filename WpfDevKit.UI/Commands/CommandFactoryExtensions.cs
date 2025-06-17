@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using WpfDevKit.Busy;
 using WpfDevKit.DependencyInjection;
+using WpfDevKit.UI.Synchronization.Context;
 
 namespace WpfDevKit.UI.Command
 {
@@ -16,7 +17,8 @@ namespace WpfDevKit.UI.Command
         /// <param name="services">The IServiceCollection instance.</param>
         /// <returns>The current IServiceCollection instance for chaining.</returns>
         public static IServiceCollection AddCommandFactory(this IServiceCollection services) =>
-            services.AddSingleton<CommandFactory>()
+            services.AddContextSynchronization()
+                    .AddSingleton<CommandFactory>()
                     .AddSingleton<ICommandFactory>(p => p.GetRequiredService<CommandFactory>());
     }
 }
