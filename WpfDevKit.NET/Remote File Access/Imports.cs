@@ -1,10 +1,12 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace WpfDevKit.RemoteFileAccess
 {
     /// <summary>
     /// Defines native methods for accessing remote share connections.
     /// </summary>
+    [DebuggerStepThrough]
     internal static class Imports
     {
         [DllImport("netapi32", CharSet = CharSet.Unicode)]

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,6 +13,7 @@ namespace WpfDevKit.Hosting
     {
         private Task task;
         private CancellationTokenSource cancellationTokenSource;
+        private bool disposed;
 
         /// <inheritdoc/>
         public virtual Task StartAsync(CancellationToken cancellationToken)
@@ -41,7 +43,11 @@ namespace WpfDevKit.Hosting
         }
 
         /// <inheritdoc/>
-        public virtual void Dispose() => cancellationTokenSource?.Cancel();
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
 
         /// <summary>
         /// Executes the logic of the background service.
@@ -50,5 +56,19 @@ namespace WpfDevKit.Hosting
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="Task"/> representing the background operation.</returns>
         protected abstract Task ExecuteAsync(CancellationToken cancellationToken);
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed || !disposing)
+                return;
+            try
+            {
+                cancellationTokenSource?.Cancel();
+            }
+            finally
+            {
+                disposed = true;
+            }
+        }
     }
 }

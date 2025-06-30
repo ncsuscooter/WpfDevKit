@@ -9,7 +9,7 @@ namespace WpfDevKit.Hosting
     /// <summary>
     /// Provides an application host for managing and running services.
     /// </summary>
-    //[DebuggerStepThrough]
+    [DebuggerStepThrough]
     internal class Host : IHost
     {
         private bool disposed;
@@ -74,28 +74,40 @@ namespace WpfDevKit.Hosting
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (disposed)
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed || !disposing)
                 return;
-            disposed = true;
-            Task.Run(() => StopAsync(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token)).GetAwaiter().GetResult();
-            var backgroundServices = Services.GetServices<IHostedService>();
-            foreach (var service in backgroundServices)
+            try
             {
-                try
+                Task.Run(() => StopAsync(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token)).GetAwaiter().GetResult();
+                var backgroundServices = Services.GetServices<IHostedService>();
+                foreach (var service in backgroundServices)
                 {
-                    Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' disposing.");
-                    service.Dispose();
-                    Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' disposed.");
+                    try
+                    {
+                        Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' disposing.");
+                        service.Dispose();
+                        Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' disposed.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' failed to dispose.");
+                        Services.GetService<ILogService>()?.LogTrace($"[Host] Dispose failed", default, GetType());
+                        Services.GetService<ILogService>()?.LogTrace(ex, GetType());
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"[HOST] HostedService '{service.GetType().FullName}' failed to dispose.");
-                    Services.GetService<ILogService>()?.LogTrace($"[Host] Dispose failed", default, GetType());
-                    Services.GetService<ILogService>()?.LogTrace(ex, GetType());
-                }
+                if (Services is IDisposable disposable)
+                    disposable.Dispose();
             }
-            if (Services is IDisposable disposable)
-                disposable.Dispose();
+            finally
+            {
+                disposed = true;
+            }
         }
     }
 }
