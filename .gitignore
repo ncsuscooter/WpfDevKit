@@ -363,7 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 /nuget.config
 /nuget.exe
-/WpfDevKit.nuspec
-/nuget pack.bat
-/nuget push.bat
+/WpfDevKit.NET.nuspec
+/WpfDevKit.UI.nuspec
 /nuget.bat
