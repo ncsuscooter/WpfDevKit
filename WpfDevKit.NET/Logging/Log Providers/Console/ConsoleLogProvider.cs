@@ -17,8 +17,12 @@ namespace WpfDevKit.Logging
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsoleLogProvider"/> class.
         /// </summary>
-        /// <param name="options">The options for configuring the console log provider.</param>
-        public ConsoleLogProvider(IOptions<ConsoleLogProviderOptions> options) => (this.options, sync) = (options.Value, new object());
+        /// <param name="optionsAccessor">The options for configuring the console log provider.</param>
+        public ConsoleLogProvider(IOptions<ConsoleLogProviderOptions> optionsAccessor)
+        {
+            options = optionsAccessor.Value;
+            sync = new object();
+        }
 
         /// <inheritdoc/>
         public Task LogAsync(ILogMessage message)

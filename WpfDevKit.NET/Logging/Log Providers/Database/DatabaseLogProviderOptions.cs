@@ -102,7 +102,7 @@ namespace WpfDevKit.Logging
                                bool isNullable,
                                int? maxLength = null)
         {
-            if (elements.TryAdd(element, (dataFactory, columnName, isNullable, maxLength)))
+            if (elements.TryAdd(element, new DatabaseLogColumn(dataFactory, columnName, isNullable, maxLength)))
                 BuildCommandText();
         }
 

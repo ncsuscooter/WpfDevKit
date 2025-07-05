@@ -23,9 +23,13 @@ namespace WpfDevKit.DependencyInjection
         /// <summary>
         /// Initializes a new instance of the <see cref="ServiceProvider"/> class using the specified descriptors.
         /// </summary>
-        /// <param name="descriptors">The collection of registered services to use for resolution.</param>
-        public ServiceProvider(List<ServiceDescriptor> descriptors) =>
-            (this.descriptors, factory, cache) = (descriptors, new ObjectFactory(this), new ConcurrentDictionary<ServiceDescriptor, object>());
+        /// <param name="serviceDescriptors">The collection of registered services to use for resolution.</param>
+        public ServiceProvider(List<ServiceDescriptor> serviceDescriptors)
+        {
+            descriptors = serviceDescriptors;
+            factory = new ObjectFactory(this);
+            cache = new ConcurrentDictionary<ServiceDescriptor, object>();
+        }
 
         /// <inheritdoc/>
         /// <exception cref="InvalidOperationException">

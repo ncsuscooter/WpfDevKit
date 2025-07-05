@@ -35,8 +35,12 @@ namespace WpfDevKit.DependencyInjection
         /// <param name="serviceType">The type of the service.</param>
         /// <param name="implementationType">The type implementing the service.</param>
         /// <param name="lifetime">The lifetime of the service.</param>
-        public ServiceDescriptor(Type serviceType, Type implementationType, TServiceLifetime lifetime) =>
-            (ServiceType, ImplementationType, Lifetime, Factory) = (serviceType, implementationType, lifetime, null);
+        public ServiceDescriptor(Type serviceType, Type implementationType, TServiceLifetime lifetime)
+        {
+            ServiceType  = serviceType;
+            ImplementationType = implementationType;
+            Lifetime = lifetime;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServiceDescriptor"/> class with a factory method.
@@ -44,7 +48,11 @@ namespace WpfDevKit.DependencyInjection
         /// <param name="serviceType">The type of the service.</param>
         /// <param name="factory">The factory method used to create the service instance.</param>
         /// <param name="lifetime">The lifetime of the service.</param>
-        public ServiceDescriptor(Type serviceType, Func<IServiceProvider, object> factory, TServiceLifetime lifetime) =>
-            (ServiceType, ImplementationType, Factory, Lifetime) = (serviceType, null, factory, lifetime);
+        public ServiceDescriptor(Type serviceType, Func<IServiceProvider, object> factory, TServiceLifetime lifetime)
+        {
+            ServiceType = serviceType;
+            Factory = factory;
+            Lifetime= lifetime;
+        }
     }
 }

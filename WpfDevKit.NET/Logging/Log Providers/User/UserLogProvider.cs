@@ -19,9 +19,13 @@ namespace WpfDevKit.Logging
         /// <summary>
         /// Initializes a new instance of the <see cref="UserLogProvider"/> class.
         /// </summary>
-        /// <param name="options">The options for configuring the user log provider.</param>
-        public UserLogProvider(IOptions<UserLogProviderOptions> options) =>
-            (this.options, items, sync) = (options.Value, new List<ILogMessage>(), new object());
+        /// <param name="optionsAccessor">The options for configuring the user log provider.</param>
+        public UserLogProvider(IOptions<UserLogProviderOptions> optionsAccessor)
+        {
+            options = optionsAccessor.Value;
+            items = new List<ILogMessage>();
+            sync = new object();
+        }
 
         /// <inheritdoc/>
         public Task LogAsync(ILogMessage message)

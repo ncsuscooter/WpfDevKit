@@ -104,7 +104,8 @@ namespace WpfDevKit.Factory
                             arg != null && param.ParameterType.IsInstanceOfType(arg))
                         {
                             usedArgs.Add(i);
-                            (arguments[i], resolved) = (arg, true);
+                            arguments[i] = arg;
+                            resolved = true;
                         }
                     }
 
@@ -118,7 +119,8 @@ namespace WpfDevKit.Factory
                                 arg != null && param.ParameterType.IsInstanceOfType(arg))
                             {
                                 usedArgs.Add(j);
-                                (arguments[i], resolved) = (arg, true);
+                                arguments[j] = arg;
+                                resolved = true;
                                 break;
                             }
                         }
@@ -126,9 +128,15 @@ namespace WpfDevKit.Factory
                 }
 
                 if (!resolved && resolver.CanResolve(param.ParameterType))
-                    (arguments[i], resolved) = (resolver.Resolve(param.ParameterType, stack), true);
+                {
+                    arguments[i] = resolver.Resolve(param.ParameterType, stack);
+                    resolved = true;
+                }
                 if (!resolved && param.HasDefaultValue)
-                    (arguments[i], resolved) = (param.DefaultValue, true);
+                {
+                    arguments[i] = param.DefaultValue;
+                    resolved = true;
+                }
                 if (!resolved)
                     throw new InvalidOperationException($"Cannot resolve parameter '{param.Name}' of type '{param.ParameterType.Name}'.");
             }
@@ -174,16 +182,23 @@ namespace WpfDevKit.Factory
                         if (arg == null && !param.ParameterType.IsValueType ||
                             arg != null && param.ParameterType.IsInstanceOfType(arg))
                         {
-                            (score, matched) = (score + 5, true);
+                            score += 5;
+                            matched = true;
                             usedArgs.Add(i);
                             break;
                         }
                     }
                 }
                 if (!matched && resolver.CanResolve(param.ParameterType))
-                    (score, matched) = (score + 3, true);
+                {
+                    score += 3;
+                    matched = true;
+                }
                 if (!matched && param.HasDefaultValue)
-                    (score, matched) = (score + 1, true);
+                {
+                    score += 1;
+                    matched = true;
+                }
                 if (!matched)
                     return -1;
             }

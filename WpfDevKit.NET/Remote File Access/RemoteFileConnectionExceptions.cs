@@ -16,7 +16,11 @@ namespace WpfDevKit.RemoteFileAccess
         /// <param name="path">The path associated with the connection.</param>
         /// <param name="code">The native error code returned by the API.</param>
         protected RemoteConnectionException(string message, string path, uint code)
-            : base(message) => (Data["Path"], Data["Error"]) = (path, code);
+            : base(message)
+        {
+            Data["Path"] = path;
+            Data["Error"] = code;
+        }
     }
 
     /// <summary>
@@ -29,7 +33,11 @@ namespace WpfDevKit.RemoteFileAccess
         /// Initializes a new instance of the <see cref="OpenRemoteConnectionException"/> class.
         /// </summary>
         public OpenRemoteConnectionException(string path, string user, uint code, uint index)
-            : base("Failed to open connection to remote file share", path, code) => (Data["User"], Data["Index"]) = (user, index);
+            : base("Failed to open connection to remote file share", path, code)
+        {
+            Data["User"] = user;
+            Data["Index"] = index;
+        }
     }
 
     /// <summary>

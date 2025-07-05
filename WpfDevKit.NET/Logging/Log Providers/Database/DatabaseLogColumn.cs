@@ -41,8 +41,13 @@ namespace WpfDevKit.Logging
         /// <param name="columnName">The name of the column in the database.</param>
         /// <param name="isNullable">Whether the column allows null values.</param>
         /// <param name="maxLength">An optional maximum character length.</param>
-        public DatabaseLogColumn(Func<ILogMessage, object> dataFactory, string columnName, bool isNullable, int? maxLength) =>
-            (DataFactory, ColumnName, IsNullable, MaxLength) = (dataFactory, columnName, isNullable, maxLength);
+        public DatabaseLogColumn(Func<ILogMessage, object> dataFactory, string columnName, bool isNullable, int? maxLength)
+        {
+            DataFactory = dataFactory;
+            ColumnName = columnName;
+            IsNullable = isNullable;
+            MaxLength = maxLength;
+        }
 
         /// <summary>
         /// Determines whether the specified object is equal to the current instance.
@@ -71,22 +76,27 @@ namespace WpfDevKit.Logging
         /// Deconstructs the column definition into its component parts.
         /// </summary>
         /// <param name="dataFactory">The value extraction delegate.</param>
-        /// <param name="name">The column name.</param>
+        /// <param name="columnName">The column name.</param>
         /// <param name="isNullable">Whether the column is nullable.</param>
         /// <param name="maxLength">The optional maximum string length.</param>
-        public void Deconstruct(out Func<ILogMessage, object> dataFactory, out string name, out bool isNullable, out int? maxLength) =>
-            (dataFactory, name, isNullable, maxLength) = (DataFactory, ColumnName, IsNullable, MaxLength);
+        public void Deconstruct(out Func<ILogMessage, object> dataFactory, out string columnName, out bool isNullable, out int? maxLength)
+        {
+            dataFactory = DataFactory;
+            columnName = ColumnName;
+            isNullable = IsNullable;
+            maxLength = MaxLength;
+        }
 
-        /// <summary>
-        /// Converts a <see cref="DatabaseLogColumn"/> to its tuple representation.
-        /// </summary>
-        public static implicit operator (Func<ILogMessage, object> dataFactory, string name, bool isNullable, int? maxLength)(DatabaseLogColumn value) =>
-            (value.DataFactory, value.ColumnName, value.IsNullable, value.MaxLength);
+        ///// <summary>
+        ///// Converts a <see cref="DatabaseLogColumn"/> to its tuple representation.
+        ///// </summary>
+        //public static implicit operator (Func<ILogMessage, object> dataFactory, string name, bool isNullable, int? maxLength)(DatabaseLogColumn value) =>
+        //    (value.DataFactory, value.ColumnName, value.IsNullable, value.MaxLength);
 
-        /// <summary>
-        /// Converts a tuple into a <see cref="DatabaseLogColumn"/> instance.
-        /// </summary>
-        public static implicit operator DatabaseLogColumn((Func<ILogMessage, object> dataFactory, string name, bool isNullable, int? maxLength) value) =>
-            new DatabaseLogColumn(value.dataFactory, value.name, value.isNullable, value.maxLength);
+        ///// <summary>
+        ///// Converts a tuple into a <see cref="DatabaseLogColumn"/> instance.
+        ///// </summary>
+        //public static implicit operator DatabaseLogColumn((Func<ILogMessage, object> dataFactory, string name, bool isNullable, int? maxLength) value) =>
+        //    new DatabaseLogColumn(value.dataFactory, value.name, value.isNullable, value.maxLength);
     }
 }

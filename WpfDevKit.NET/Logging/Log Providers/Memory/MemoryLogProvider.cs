@@ -19,9 +19,13 @@ namespace WpfDevKit.Logging
         /// <summary>
         /// Initializes a new instance of the <see cref="MemoryLogProvider"/> class.
         /// </summary>
-        /// <param name="options">The options for configuring the memory log provider.</param>
-        public MemoryLogProvider(IOptions<MemoryLogProviderOptions> options) =>
-            (this.options, items, sync) = (options.Value, new List<ILogMessage>(), new object());
+        /// <param name="optionsAccessor">The options for configuring the memory log provider.</param>
+        public MemoryLogProvider(IOptions<MemoryLogProviderOptions> optionsAccessor)
+        {
+            options = optionsAccessor.Value;
+            items = new List<ILogMessage>();
+            sync = new object();
+        }
 
         /// <inheritdoc/>
         public Task LogAsync(ILogMessage message)
