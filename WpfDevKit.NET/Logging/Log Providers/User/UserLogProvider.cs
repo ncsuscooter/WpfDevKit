@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using WpfDevKit.DependencyInjection;
@@ -41,7 +42,7 @@ namespace WpfDevKit.Logging
             lock (sync)
             {
                 // Create a read-only copy of the stored log messages
-                var result = new List<ILogMessage>(items).AsReadOnly();
+                var result = new ReadOnlyCollection<ILogMessage>(items);
 
                 // Optionally clear the logs after retrieval based on the user's option
                 if (options.IsClearLogsOnGet)
