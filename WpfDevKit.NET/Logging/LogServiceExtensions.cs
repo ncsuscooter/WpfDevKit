@@ -28,8 +28,8 @@ namespace WpfDevKit.Logging
                     .AddLogProvider<ConsoleLogProvider, ConsoleLogProviderOptions>()
                     .AddLogProvider<DatabaseLogProvider, DatabaseLogProviderOptions>()
                     .AddLogProvider<UserLogProvider, UserLogProviderOptions>()
-                    .AddSingleton<IGetLogs>(p => p.GetRequiredService<UserLogProvider>()) // TODO: Need to resolve this potential issue.
-                    .AddSingleton<IGetLogs>(p => p.GetRequiredService<MemoryLogProvider>())
+                    .AddSingleton<ILogSnapshot>(p => p.GetRequiredService<UserLogProvider>()) // TODO: Need to resolve this potential issue.
+                    .AddSingleton<ILogSnapshot>(p => p.GetRequiredService<MemoryLogProvider>())
                     .AddSingleton<IHostedService>(p => p.GetRequiredService<LogBackgroundService>())
                     .AddSingleton<ILogService>(p => p.GetRequiredService<LogService>())
                     .AddSingleton<ILogMetricsReader>(p => p.GetRequiredService<LogMetrics>());

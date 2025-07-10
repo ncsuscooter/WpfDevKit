@@ -860,7 +860,7 @@ namespace WpfDevKit.Tests.Logging
 
                 // Use reflection to inspect logged messages
                 var memoryLogProvider = host.Services.GetService<MemoryLogProvider>();
-                var logList = memoryLogProvider.GetLogs();
+                var logList = memoryLogProvider.GetSnapshot();
 
                 lock (logList)
                 {

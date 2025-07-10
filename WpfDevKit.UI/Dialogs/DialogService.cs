@@ -19,7 +19,7 @@ namespace WpfDevKit.UI.Dialogs
         private readonly ICommandFactory commandFactory;
         private readonly IContextSynchronizationService contextService;
         private readonly ILogService logService;
-        private readonly IGetLogs userLogProvider;
+        private readonly ILogSnapshot userLogProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DialogService"/> class.
@@ -33,7 +33,7 @@ namespace WpfDevKit.UI.Dialogs
                              ICommandFactory commandFactory,
                              IContextSynchronizationService contextService,
                              ILogService logService,
-                             IGetLogs userLogProvider)
+                             ILogSnapshot userLogProvider)
         {
             this.busyService = busyService ?? throw new ArgumentNullException(nameof(busyService));
             this.commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
@@ -68,7 +68,7 @@ namespace WpfDevKit.UI.Dialogs
                 Height = 550,
                 MessageFontSize = 24,
                 MessageFontWeight = FontWeights.Bold,
-                Logs = userLogProvider?.GetLogs()
+                Logs = userLogProvider?.GetSnapshot()
             });
         }
 

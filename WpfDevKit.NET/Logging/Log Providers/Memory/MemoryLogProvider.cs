@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using WpfDevKit.DependencyInjection;
@@ -10,7 +11,7 @@ namespace WpfDevKit.Logging
     /// A log provider that stores log messages in memory.
     /// </summary>
     [DebuggerStepThrough]
-    internal class MemoryLogProvider : ILogProvider, IGetLogs
+    internal class MemoryLogProvider : ILogProvider, ILogSnapshot
     {
         private readonly MemoryLogProviderOptions options;
         private readonly List<ILogMessage> items;
@@ -45,12 +46,12 @@ namespace WpfDevKit.Logging
         }
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<ILogMessage> GetLogs()
+        public IReadOnlyCollection<ILogMessage> GetSnapshot()
         {
             lock (sync)
             {
                 // Create a read-only copy of the stored log messages
-                return new List<ILogMessage>(items).AsReadOnly();
+                return new ReadOnlyCollection<ILogMessage>(items);
             }
         }
     }

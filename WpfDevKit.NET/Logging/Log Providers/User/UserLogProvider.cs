@@ -10,7 +10,7 @@ namespace WpfDevKit.Logging
     /// It manages a collection of log messages with custom behavior for enabled/disabled categories and optional log clearing.
     /// </summary>
     [DebuggerStepThrough]
-    internal class UserLogProvider : ILogProvider, IGetLogs
+    internal class UserLogProvider : ILogProvider, ILogSnapshot
     {
         private readonly UserLogProviderOptions options;
         private readonly List<ILogMessage> items;
@@ -36,7 +36,7 @@ namespace WpfDevKit.Logging
         }
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<ILogMessage> GetLogs()
+        public IReadOnlyCollection<ILogMessage> GetSnapshot()
         {
             lock (sync)
             {

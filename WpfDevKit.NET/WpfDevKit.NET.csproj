@@ -59,7 +59,7 @@
     <Compile Include="Hosting\HostBuilder.cs" />
     <Compile Include="Logging\Log Message\ILogMessage.cs" />
     <Compile Include="Logging\Log Providers\ILogProviderOptions.cs" />
-    <Compile Include="Logging\Log Providers\IGetLogs.cs" />
+    <Compile Include="Logging\Log Providers\ILogSnapshot.cs" />
     <Compile Include="Dependency Injection\Service Collection\IServiceCollection.cs" />
     <Compile Include="Dependency Injection\Options\Options.cs" />
     <Compile Include="Dependency Injection\ServiceProvider.cs" />
